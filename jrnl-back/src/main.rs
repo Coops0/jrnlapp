@@ -14,6 +14,7 @@ pub struct AppState {
     pub pool: sqlx::PgPool,
     pub supabase_url: String,
     pub supabase_anon_key: String,
+    pub supabase_key: String,
 }
 
 #[tokio::main]
@@ -36,6 +37,7 @@ async fn main() -> anyhow::Result<()> {
         pool: pool.clone(),
         supabase_url: env::var("SUPABASE_URL")?,
         supabase_anon_key: env::var("SUPABASE_ANON_KEY")?,
+        supabase_key: env::var("SUPABASE_KEY")?,
     };
 
     let app = Router::new()

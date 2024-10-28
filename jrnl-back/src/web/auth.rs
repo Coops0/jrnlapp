@@ -31,8 +31,9 @@ impl FromRequestParts<AppState> for User {
         let client = reqwest::Client::new();
         let user_response = client
             .get(format!("{}/auth/v1/user", state.supabase_url))
-            .header("Authorization", format!("Bearer {}", auth_header))
-            .header("apikey", &state.supabase_anon_key)
+            .header("Authorization", format!("Bearer {auth_header}"))
+            // .header("apikey", &state.supabase_key)
+            .header("apikey", auth_header)
             .send()
             .await
             .map_err(|e| (
@@ -41,16 +42,13 @@ impl FromRequestParts<AppState> for User {
             ))?;
 
         if !user_response.status().is_success() {
-            return Err((StatusCode::UNAUTHORIZED, String::from("Invalid token")));
+            return Err((StatusCode::UNAUTHORIZED, String::from("invalid token")));
         }
 
-        match user_response.json::<User>().await {
-            Ok(user) => Ok(user),
-            Err(e) => Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to parse user data: {}", e),
-            ))
-        }
+        user_response.json::<Self>().await.map_or_else(
+            |e| Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to parse user data: {e}"))),
+            Ok,
+        )
     }
 }
 
@@ -61,15 +59,16 @@ impl FromRequestParts<AppState> for Profile {
     async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
         let user = parts.extract_with_state::<User, AppState>(state).await?;
 
-        let profile = sqlx::query_as::<_, Profile>("SELECT * FROM public.profiles WHERE id = $1")
+        let profile = sqlx::query_as::<_, Self>("SELECT * FROM public.profiles WHERE id = $1")
             .bind(user.id)
             .fetch_optional(&state.pool)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-        
-        match profile {
-            Some(profile) => Ok(profile),
-            None => Err((StatusCode::NOT_FOUND, String::from("Profile not found"))),
-        }
+
+        profile.map_or_else(
+            // this shouldn't happen hopefully
+            || Err((StatusCode::NOT_FOUND, String::from("Profile not found"))),
+            Ok,
+        )
     }
 }
