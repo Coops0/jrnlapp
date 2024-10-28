@@ -31,7 +31,8 @@ async fn main() -> anyhow::Result<()> {
         .pretty()
         .init();
 
-    let pool = PgPoolOptions::new().connect_lazy_with(env::var("DATABASE_URL")?.parse::<PgConnectOptions>()?);
+    let pool = PgPoolOptions::new()
+        .connect_lazy_with(env::var("DATABASE_URL")?.parse::<PgConnectOptions>()?);
 
     let state = AppState {
         pool,

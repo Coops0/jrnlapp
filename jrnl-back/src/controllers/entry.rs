@@ -17,7 +17,7 @@ pub fn entries_controller() -> Router<AppState> {
         .route("/", get(get_entries_full))
         .route("/ratings", get(get_ratings))
         .route("/average", get(get_overall_average))
-        .route("/today", get(get_today_entry).post(update_today_entry))
+        .route("/today", get(get_today_entry).put(update_today_entry))
 }
 
 async fn get_entries_full(
@@ -25,13 +25,14 @@ async fn get_entries_full(
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<Json<Vec<Entry>>> {
     sqlx::query_as::<_, Entry>(
-        "SELECT * FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 50",
+        // language=postgresql
+        "SELECT * FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 500",
     )
-    .bind(user.id)
-    .fetch_all(&pool)
-    .await
-    .map(Json)
-    .map_err(Into::into)
+        .bind(user.id)
+        .fetch_all(&pool)
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }
 
 #[derive(FromRow, Serialize)]
@@ -46,7 +47,9 @@ async fn get_ratings(
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<Json<Vec<Rating>>> {
     sqlx::query_as::<_, Rating>(
-        "SELECT id, date, emotion_scale FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 100")
+        // language=postgresql
+        "SELECT id, date, emotion_scale FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 500"
+    )
         .bind(user.id)
         .fetch_all(&pool)
         .await
@@ -105,7 +108,13 @@ async fn update_today_entry(
     Json(payload): Json<UpdateEntryPayload>,
 ) -> Result<Json<Entry>, Response> {
     let entry = sqlx::query_as::<_, Entry>(
-        "INSERT INTO entries (author, date, emotion_scale, text) VALUES ($1, $2, $3, $4) ON CONFLICT (author, date) DO UPDATE SET emotion_scale = $3, text = $4 RETURNING *"
+        // language=postgresql
+        "
+            INSERT INTO entries (author, date, emotion_scale, text) VALUES ($1, $2, $3, $4) 
+            ON CONFLICT (author, date) 
+            DO UPDATE SET emotion_scale = $3, text = $4 
+            RETURNING *
+        "
     )
         .bind(profile.id)
         .bind(profile.current_date_by_timezone())

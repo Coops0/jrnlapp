@@ -171,7 +171,7 @@ async fn leave_group(
         DELETE FROM group_memberships
         WHERE group_id = (SELECT id FROM groups WHERE code = $1)
         AND user_id = $2
-    "
+    ",
     )
     .bind(code)
     .bind(user.id)
