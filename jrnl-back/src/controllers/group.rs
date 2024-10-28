@@ -2,13 +2,15 @@ use crate::schemas::group::Group;
 use crate::web::auth::User;
 use crate::web::result::InternalResult;
 use crate::AppState;
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
 use rand::seq::SliceRandom;
 use rand::Rng;
 use reqwest::StatusCode;
+use serde::ser::SerializeSeq;
 use serde::{Deserialize, Deserializer, Serialize};
+use sqlx::types::Decimal;
 use sqlx::FromRow;
 use std::cell::LazyCell;
 use uuid::Uuid;
@@ -119,7 +121,9 @@ async fn get_group_members(
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<Json<Vec<TrimmedUser>>> {
-    sqlx::query_as::<_, TrimmedUser>("
+    sqlx::query_as::<_, TrimmedUser>(
+        // language=postgresql
+        "
         SELECT p.id, p.first_name, p.last_name 
         FROM profiles p
         JOIN group_memberships gm ON p.id = gm.user_id
@@ -132,7 +136,8 @@ async fn get_group_members(
             WHERE g2.code = $1 
             AND gm2.user_id = $2
         )
-    ")
+    "
+    )
         .bind(code)
         .bind(user.id)
         .fetch_all(&pool)
@@ -146,11 +151,14 @@ async fn leave_group(
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<StatusCode> {
-    sqlx::query("
+    sqlx::query(
+        // language=postgresql
+        "
         DELETE FROM group_memberships
         WHERE group_id = (SELECT id FROM groups WHERE code = $1)
         AND user_id = $2
-    ")
+    "
+    )
         .bind(code)
         .bind(user.id)
         .execute(&pool)
@@ -164,11 +172,14 @@ async fn kick_member(
     Path((code, target_user_id)): Path<(String, Uuid)>,
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<StatusCode> {
-    sqlx::query("
+    sqlx::query(
+        // language=postgresql
+        "
         DELETE FROM group_memberships
         WHERE group_id = (SELECT id FROM groups WHERE code = $1 AND owner_id = $2)
         AND user_id = $3
-    ")
+    "
+    )
         .bind(code)
         .bind(user.id)
         .bind(target_user_id)
@@ -181,31 +192,76 @@ async fn kick_member(
 
 #[derive(Serialize, FromRow)]
 struct WeekData {
-    
+    #[serde(serialize_with = "serialize_2d_decimal_array")]
+    days: Vec<Vec<Option<Decimal>>>,
+    total_weeks: i64,
+}
+
+fn serialize_2d_decimal_array<S: serde::Serializer>(days: &Vec<Vec<Option<Decimal>>>, serializer: S) -> Result<S::Ok, S::Error> {
+    let mut seq = serializer.serialize_seq(Some(days.len()))?;
+    for day in days {
+        seq.serialize_element(
+            &day.iter()
+                .map(|d| d.map(|d| d.to_string()))
+                .collect::<Vec<Option<String>>>()
+        )?;
+    }
+
+    seq.end()
+}
+
+#[derive(Deserialize)]
+struct WeekDataQuery {
+    skip: Option<i32>,
 }
 
 async fn get_week_data(
     user: User,
+    Query(query): Query<WeekDataQuery>,
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<Json<WeekData>> {
-    sqlx::query_as::<_, WeekData>("
-      
-    ")
-        .bind(code)
-        .fetch_all(&pool)
-        .await
-        .map(|data| {
-            let data = data.into_iter()
-                .map(|row| {
-                    let week: chrono::NaiveDateTime = row.get(0);
-                    let average: f64 = row.get(1);
-                    (week.timestamp_millis(), average)
-                })
-                .collect::<Vec<_>>();
+    let skip = query.skip.unwrap_or_default();
 
-            serde_json::json!({ "data": data })
-        })
+    sqlx::query_as::<_, WeekData>(
+        // language=postgresql
+        "
+        WITH week_entries AS (
+            SELECT e.date, e.emotion_scale
+            FROM entries e
+            JOIN group_memberships gm ON e.author = gm.user_id
+            JOIN groups g ON gm.group_id = g.id
+            WHERE g.code = $1
+                AND EXISTS (
+                    SELECT 1 
+                    FROM group_memberships 
+                    WHERE group_id = g.id AND user_id = $2
+                )
+                AND e.date BETWEEN 
+                    date_trunc('week', CURRENT_DATE - ($3 || ' weeks')::interval)
+                    AND date_trunc('week', CURRENT_DATE - ($3 || ' weeks')::interval) + '6 days'::interval
+        )
+        SELECT 
+            array_agg(ratings ORDER BY day) as days,
+            (
+                SELECT COUNT(DISTINCT date_trunc('week', date)) 
+                FROM week_entries
+            ) as total_weeks
+        FROM (
+            SELECT 
+                date as day,
+                array_agg(emotion_scale ORDER BY emotion_scale) as ratings
+            FROM week_entries
+            GROUP BY date
+            ORDER BY date
+        ) daily_ratings
+        "
+    )
+        .bind(code)
+        .bind(user.id)
+        .bind(skip)
+        .fetch_one(&pool)
+        .await
         .map(Json)
         .map_err(Into::into)
 }
