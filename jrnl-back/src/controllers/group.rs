@@ -8,9 +8,7 @@ use axum::{Json, Router};
 use rand::seq::SliceRandom;
 use rand::Rng;
 use reqwest::StatusCode;
-use serde::ser::SerializeSeq;
-use serde::{Deserialize, Deserializer, Serialize};
-use sqlx::types::Decimal;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::cell::LazyCell;
 use uuid::Uuid;
@@ -22,7 +20,10 @@ const WORDS_ARRAY: LazyCell<Vec<&str>> = LazyCell::new(|| WORDS_STRING_LIST.line
 pub fn groups_controller() -> Router<AppState> {
     Router::new()
         .route("/", post(create_group))
-        .route("/:group", get(get_group).post(join_group).delete(leave_group))
+        .route(
+            "/:group",
+            get(get_group).post(join_group).delete(leave_group),
+        )
         .route("/:group/:user", delete(kick_member))
         .route("/:group/members", get(get_group_members))
         .route("/:group/week", get(get_week_data))
@@ -32,12 +33,15 @@ fn generate_code() -> String {
     let mut rng = rand::thread_rng();
 
     #[allow(clippy::borrow_interior_mutable_const)]
-    let words = WORDS_ARRAY.choose_multiple(&mut rng, 2)
+    let words = WORDS_ARRAY
+        .choose_multiple(&mut rng, 2)
         .map(ToString::to_string)
         .collect::<Vec<String>>();
 
     let num = rng.gen_range(0..=9);
-    let [first_word, second_word] = &words[..] else { unreachable!(); };
+    let [first_word, second_word] = &words[..] else {
+        unreachable!();
+    };
 
     format!("{first_word}{num}{second_word}")
 }
@@ -54,15 +58,15 @@ async fn create_group(
 ) -> InternalResult<Json<Group>> {
     let code = generate_code();
     sqlx::query_as::<_, Group>(
-        "INSERT INTO groups (name, code, owner_id) VALUES ($1, $2, $3) RETURNING *"
+        "INSERT INTO groups (name, code, owner_id) VALUES ($1, $2, $3) RETURNING *",
     )
-        .bind(name)
-        .bind(code)
-        .bind(user.id)
-        .fetch_one(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(name)
+    .bind(code)
+    .bind(user.id)
+    .fetch_one(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
 #[derive(Serialize, FromRow)]
@@ -76,18 +80,21 @@ async fn get_group(
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<Json<Option<GetGroupBody>>> {
-    sqlx::query_as::<_, GetGroupBody>("
+    sqlx::query_as::<_, GetGroupBody>(
+        // language=postgresql
+        "
     SELECT g.id, g.name, COUNT(gm.user_id) as members
        FROM groups g
            LEFT JOIN group_memberships gm ON g.id = gm.group_id
      WHERE g.code = $1
      GROUP BY g.id
-")
-        .bind(code)
-        .fetch_optional(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+",
+    )
+    .bind(code)
+    .fetch_optional(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
 async fn join_group(
@@ -95,18 +102,25 @@ async fn join_group(
     user: User,
     State(AppState { pool, .. }): State<AppState>,
 ) -> Result<StatusCode, (StatusCode, &'static str)> {
-    sqlx::query("
+    sqlx::query(
+        "
         INSERT INTO group_memberships (group_id, user_id) VALUES (
                 (SELECT id FROM groups WHERE code = $1),
                 $2
             )
-        ")
-        .bind(code)
-        .bind(user.id)
-        .execute(&pool)
-        .await
-        .map(|_| StatusCode::OK)
-        .map_err(|_| (StatusCode::BAD_REQUEST, "you are already a member of this group"))
+        ",
+    )
+    .bind(code)
+    .bind(user.id)
+    .execute(&pool)
+    .await
+    .map(|_| StatusCode::OK)
+    .map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            "you are already a member of this group",
+        )
+    })
 }
 
 #[derive(FromRow, Serialize)]
@@ -136,14 +150,14 @@ async fn get_group_members(
             WHERE g2.code = $1 
             AND gm2.user_id = $2
         )
-    "
+    ",
     )
-        .bind(code)
-        .bind(user.id)
-        .fetch_all(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(code)
+    .bind(user.id)
+    .fetch_all(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
 async fn leave_group(
@@ -159,12 +173,12 @@ async fn leave_group(
         AND user_id = $2
     "
     )
-        .bind(code)
-        .bind(user.id)
-        .execute(&pool)
-        .await
-        .map(|_| StatusCode::OK)
-        .map_err(Into::into)
+    .bind(code)
+    .bind(user.id)
+    .execute(&pool)
+    .await
+    .map(|_| StatusCode::OK)
+    .map_err(Into::into)
 }
 
 async fn kick_member(
@@ -178,36 +192,27 @@ async fn kick_member(
         DELETE FROM group_memberships
         WHERE group_id = (SELECT id FROM groups WHERE code = $1 AND owner_id = $2)
         AND user_id = $3
-    "
+    ",
     )
-        .bind(code)
-        .bind(user.id)
-        .bind(target_user_id)
-        .execute(&pool)
-        .await
-        .map(|_| StatusCode::OK)
-        .map_err(Into::into)
+    .bind(code)
+    .bind(user.id)
+    .bind(target_user_id)
+    .execute(&pool)
+    .await
+    .map(|_| StatusCode::OK)
+    .map_err(Into::into)
 }
-
 
 #[derive(Serialize, FromRow)]
 struct WeekData {
-    #[serde(serialize_with = "serialize_2d_decimal_array")]
-    days: Vec<Vec<Option<Decimal>>>,
+    days: Vec<DayData>,
     total_weeks: i64,
 }
 
-fn serialize_2d_decimal_array<S: serde::Serializer>(days: &Vec<Vec<Option<Decimal>>>, serializer: S) -> Result<S::Ok, S::Error> {
-    let mut seq = serializer.serialize_seq(Some(days.len()))?;
-    for day in days {
-        seq.serialize_element(
-            &day.iter()
-                .map(|d| d.map(|d| d.to_string()))
-                .collect::<Vec<Option<String>>>()
-        )?;
-    }
-
-    seq.end()
+#[derive(Serialize, FromRow)]
+struct DayData {
+    day: chrono::NaiveDate,
+    ratings: Vec<f32>,
 }
 
 #[derive(Deserialize)]
@@ -223,45 +228,66 @@ async fn get_week_data(
 ) -> InternalResult<Json<WeekData>> {
     let skip = query.skip.unwrap_or_default();
 
-    sqlx::query_as::<_, WeekData>(
+    let group_member_ids = sqlx::query_as::<_, (Uuid,)>(
+        // language=postgresql
+        "
+        WITH found_group AS (
+            SELECT g.id FROM groups g 
+            JOIN group_memberships gm ON g.id = gm.group_id AND gm.user_id = $1
+            WHERE g.code = $2
+        )
+        SELECT gm.user_id 
+        FROM group_memberships gm
+        WHERE gm.group_id IN (SELECT id FROM found_group)
+        ",
+    )
+    .bind(user.id)
+    .bind(&code)
+    .fetch_all(&pool)
+    .await?
+    .into_iter()
+    .map(|(id,)| id)
+    .collect::<Vec<Uuid>>();
+
+    let days = sqlx::query_as::<_, DayData>(
         // language=postgresql
         "
         WITH week_entries AS (
-            SELECT e.date, e.emotion_scale
-            FROM entries e
-            JOIN group_memberships gm ON e.author = gm.user_id
-            JOIN groups g ON gm.group_id = g.id
-            WHERE g.code = $1
-                AND EXISTS (
-                    SELECT 1 
-                    FROM group_memberships 
-                    WHERE group_id = g.id AND user_id = $2
-                )
-                AND e.date BETWEEN 
-                    date_trunc('week', CURRENT_DATE - ($3 || ' weeks')::interval)
-                    AND date_trunc('week', CURRENT_DATE - ($3 || ' weeks')::interval) + '6 days'::interval
+            SELECT date, emotion_scale
+            FROM entries
+            WHERE author = ANY($1)
+            AND date > NOW() - INTERVAL '7 days'
         )
         SELECT 
-            array_agg(ratings ORDER BY day) as days,
-            (
-                SELECT COUNT(DISTINCT date_trunc('week', date)) 
-                FROM week_entries
-            ) as total_weeks
-        FROM (
-            SELECT 
-                date as day,
-                array_agg(emotion_scale ORDER BY emotion_scale) as ratings
-            FROM week_entries
-            GROUP BY date
-            ORDER BY date
-        ) daily_ratings
-        "
+            date as day,
+            array_agg(emotion_scale ORDER BY emotion_scale) as ratings
+        FROM week_entries
+        GROUP BY date
+        ORDER BY date
+        OFFSET $2
+        ",
     )
-        .bind(code)
-        .bind(user.id)
-        .bind(skip)
-        .fetch_one(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(&group_member_ids)
+    .bind(skip)
+    .fetch_all(&pool)
+    .await?;
+
+    let total_weeks = sqlx::query_scalar::<_, i64>(
+        // language=postgresql
+        "
+        WITH week_entries AS (
+            SELECT date
+            FROM entries
+            WHERE author = ANY($1)
+            AND date > NOW() - INTERVAL '7 days'
+        )
+        SELECT COUNT(DISTINCT date_trunc('week', date))
+        FROM week_entries
+        ",
+    )
+    .bind(&group_member_ids)
+    .fetch_one(&pool)
+    .await?;
+
+    Ok(Json(WeekData { days, total_weeks }))
 }

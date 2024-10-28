@@ -15,8 +15,6 @@ pub struct Profile {
 impl Profile {
     pub fn current_date_by_timezone(&self) -> NaiveDate {
         let tz = self.timezone.parse().unwrap_or(chrono_tz::UTC);
-        Utc::now()
-            .with_timezone(&tz)
-            .date_naive()
+        Utc::now().with_timezone(&tz).date_naive()
     }
 }

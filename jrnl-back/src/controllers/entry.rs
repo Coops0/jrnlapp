@@ -20,13 +20,18 @@ pub fn entries_controller() -> Router<AppState> {
         .route("/today", get(get_today_entry).post(update_today_entry))
 }
 
-async fn get_entries_full(user: User, State(AppState { pool, .. }): State<AppState>) -> InternalResult<Json<Vec<Entry>>> {
-    sqlx::query_as::<_, Entry>("SELECT * FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 50")
-        .bind(user.id)
-        .fetch_all(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+async fn get_entries_full(
+    user: User,
+    State(AppState { pool, .. }): State<AppState>,
+) -> InternalResult<Json<Vec<Entry>>> {
+    sqlx::query_as::<_, Entry>(
+        "SELECT * FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 50",
+    )
+    .bind(user.id)
+    .fetch_all(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
 #[derive(FromRow, Serialize)]
@@ -36,7 +41,10 @@ struct Rating {
     emotion_scale: f32,
 }
 
-async fn get_ratings(user: User, State(AppState { pool, .. }): State<AppState>) -> InternalResult<Json<Vec<Rating>>> {
+async fn get_ratings(
+    user: User,
+    State(AppState { pool, .. }): State<AppState>,
+) -> InternalResult<Json<Vec<Rating>>> {
     sqlx::query_as::<_, Rating>(
         "SELECT id, date, emotion_scale FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 100")
         .bind(user.id)
@@ -46,7 +54,10 @@ async fn get_ratings(user: User, State(AppState { pool, .. }): State<AppState>) 
         .map_err(Into::into)
 }
 
-async fn get_overall_average(user: User, State(AppState { pool, .. }): State<AppState>) -> InternalResult<Json<f64>> {
+async fn get_overall_average(
+    user: User,
+    State(AppState { pool, .. }): State<AppState>,
+) -> InternalResult<Json<f64>> {
     sqlx::query_scalar("SELECT AVG(emotion_scale) FROM entries WHERE author = $1")
         .bind(user.id)
         .fetch_one(&pool)
@@ -55,7 +66,10 @@ async fn get_overall_average(user: User, State(AppState { pool, .. }): State<App
         .map_err(Into::into)
 }
 
-async fn get_today_entry(profile: Profile, State(AppState { pool, .. }): State<AppState>) -> InternalResult<Json<Option<Entry>>> {
+async fn get_today_entry(
+    profile: Profile,
+    State(AppState { pool, .. }): State<AppState>,
+) -> InternalResult<Json<Option<Entry>>> {
     sqlx::query_as::<_, Entry>("SELECT * FROM entries WHERE author = $1 AND date = $2")
         .bind(profile.id)
         .bind(profile.current_date_by_timezone())
@@ -72,11 +86,17 @@ struct UpdateEntryPayload {
     text: Option<String>,
 }
 
-fn clean_string<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
+fn clean_string<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error> {
     let s = String::deserialize(deserializer)?;
     let trimmed = s.trim();
 
-    Ok(if trimmed.is_empty() { None } else { Some(trimmed.to_string()) })
+    Ok(if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed.to_string())
+    })
 }
 
 async fn update_today_entry(

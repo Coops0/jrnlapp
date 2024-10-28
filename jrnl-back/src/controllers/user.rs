@@ -9,8 +9,7 @@ use reqwest::StatusCode;
 use serde::{Deserialize, Deserializer};
 
 pub fn users_controller() -> Router<AppState> {
-    Router::new()
-        .route("/tz", put(update_timezone))
+    Router::new().route("/tz", put(update_timezone))
 }
 
 #[derive(Deserialize)]

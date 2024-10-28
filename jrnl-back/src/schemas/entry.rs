@@ -6,5 +6,5 @@ pub struct Entry {
     pub author: uuid::Uuid,
     pub date: chrono::NaiveDate,
     pub emotion_scale: f32,
-    pub text: Option<String>
+    pub text: Option<String>,
 }
