@@ -2,12 +2,12 @@ mod controllers;
 mod schemas;
 mod web;
 
+use crate::web::auth::User;
 use axum::Router;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::env;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::EnvFilter;
-use crate::web::auth::User;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -34,7 +34,7 @@ async fn main() -> anyhow::Result<()> {
     let pool = PgPoolOptions::new().connect_lazy_with(env::var("DATABASE_URL")?.parse::<PgConnectOptions>()?);
 
     let state = AppState {
-        pool: pool.clone(),
+        pool,
         supabase_url: env::var("SUPABASE_URL")?,
         supabase_anon_key: env::var("SUPABASE_ANON_KEY")?,
         supabase_key: env::var("SUPABASE_KEY")?,
@@ -43,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .nest("/users", controllers::user::users_controller())
         .nest("/entries", controllers::entry::entries_controller())
+        .nest("/groups", controllers::group::groups_controller())
         .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
         .with_state(state);
 

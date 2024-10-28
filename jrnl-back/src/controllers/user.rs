@@ -31,7 +31,7 @@ async fn update_timezone(
     State(AppState { pool, .. }): State<AppState>,
     Json(UpdateTimezonePayload { tz }): Json<UpdateTimezonePayload>,
 ) -> InternalResult<StatusCode> {
-    sqlx::query("UPDATE public.profiles SET timezone = $1 WHERE id = $2")
+    sqlx::query("UPDATE profiles SET timezone = $1 WHERE id = $2")
         .bind(tz.to_string())
         .bind(user.id)
         .execute(&pool)

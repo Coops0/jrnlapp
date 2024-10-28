@@ -59,7 +59,7 @@ impl FromRequestParts<AppState> for Profile {
     async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
         let user = parts.extract_with_state::<User, AppState>(state).await?;
 
-        let profile = sqlx::query_as::<_, Self>("SELECT * FROM public.profiles WHERE id = $1")
+        let profile = sqlx::query_as::<_, Self>("SELECT * FROM profiles WHERE id = $1")
             .bind(user.id)
             .fetch_optional(&state.pool)
             .await
