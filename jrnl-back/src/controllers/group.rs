@@ -1,6 +1,6 @@
 use crate::schemas::group::Group;
 use crate::web::auth::User;
-use crate::web::result::InternalResult;
+use crate::web::error::{JrnlError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, post};
@@ -30,8 +30,8 @@ struct CreateGroupPayload {
 async fn create_group(
     user: User,
     State(AppState { pool, .. }): State<AppState>,
-    Json(CreateGroupPayload { name }): Json<CreateGroupPayload>,
-) -> InternalResult<Json<Group>> {
+    JsonExtractor(CreateGroupPayload { name }): JsonExtractor<CreateGroupPayload>,
+) -> JrnlResult<Json<Group>> {
     let code = Group::generate_code();
     sqlx::query_as::<_, Group>(
         // language=postgresql
@@ -56,7 +56,7 @@ struct GetGroupBody {
 async fn get_group(
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<Option<GetGroupBody>>> {
+) -> JrnlResult<Json<Option<GetGroupBody>>> {
     sqlx::query_as::<_, GetGroupBody>(
         // language=postgresql
         "
@@ -71,19 +71,19 @@ async fn get_group(
         .fetch_optional(&pool)
         .await
         .map(Json)
-        .map_err(Into::into)
+        .map_err(|_| JrnlError::NoResultsFound)
 }
 
 async fn join_group(
     Path(code): Path<String>,
     user: User,
     State(AppState { pool, .. }): State<AppState>,
-) -> Result<StatusCode, (StatusCode, &'static str)> {
+) -> JrnlResult<StatusCode> {
     sqlx::query(
         // language=postgresql
         "
         INSERT INTO group_memberships (group_id, user_id) VALUES (
-                (SELECT id FROM groups WHERE code = $1),
+                (SELECT id FROM groups WHERE code = $1 LIMIT 1),
                 $2
             )
         ",
@@ -93,11 +93,10 @@ async fn join_group(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(|_| {
-            (
-                StatusCode::BAD_REQUEST,
-                "you are already a member of this group",
-            )
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => JrnlError::NoResultsFound,
+            sqlx::Error::Database(_) => JrnlError::AlreadyGroupMember,
+            _ => JrnlError::DatabaseError(e)
         })
 }
 
@@ -112,7 +111,7 @@ async fn get_group_members(
     user: User,
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<Vec<TrimmedUser>>> {
+) -> JrnlResult<Json<Vec<TrimmedUser>>> {
     sqlx::query_as::<_, TrimmedUser>(
         // language=postgresql
         "
@@ -135,31 +134,32 @@ async fn get_group_members(
         .fetch_all(&pool)
         .await
         .map(Json)
-        .map_err(Into::into)
+        .map_err(|_| JrnlError::NoResultsFound)
 }
 
 async fn leave_group(
     user: User,
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<StatusCode> {
+) -> JrnlResult<StatusCode> {
     let group = sqlx::query_as::<_, Group>(
         // language=postgresql
         "SELECT * FROM groups WHERE code = $1"
     )
         .bind(&code)
         .fetch_one(&pool)
-        .await?;
+        .await
+        .map_err(|_| JrnlError::NoResultsFound)?;
 
     sqlx::query(
         // language=postgresql
         "
         DELETE FROM group_memberships
-        WHERE group_id = (SELECT id FROM groups WHERE code = $1)
+        WHERE group_id = $1
         AND user_id = $2
     ",
     )
-        .bind(code)
+        .bind(group.id)
         .bind(user.id)
         .execute(&pool)
         .await?;
@@ -205,9 +205,9 @@ async fn kick_member(
     user: User,
     Path((code, target_user_id)): Path<(String, Uuid)>,
     State(AppState { pool, .. }): State<AppState>,
-) -> Result<StatusCode, (StatusCode, String)> {
+) -> JrnlResult<StatusCode> {
     if user.id == target_user_id {
-        return Err((StatusCode::BAD_REQUEST, String::from("you cannot kick yourself")));
+        return Err(JrnlError::CannotKickSelf);
     }
 
     sqlx::query(
@@ -224,7 +224,7 @@ async fn kick_member(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))
+        .map_err(|_| JrnlError::NoResultsFound)
 }
 
 #[derive(Serialize, FromRow)]
@@ -249,7 +249,7 @@ async fn get_week_data(
     Query(query): Query<WeekDataQuery>,
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<WeekData>> {
+) -> JrnlResult<Json<WeekData>> {
     let skip = query.skip.unwrap_or_default();
 
     let group_member_ids = sqlx::query_as::<_, (Uuid,)>(
@@ -268,7 +268,8 @@ async fn get_week_data(
         .bind(user.id)
         .bind(&code)
         .fetch_all(&pool)
-        .await?
+        .await
+        .map_err(|_| JrnlError::NoResultsFound)?
         .into_iter()
         .map(|(id, )| id)
         .collect::<Vec<Uuid>>();
@@ -327,7 +328,7 @@ struct SelfGroup {
 async fn joined_groups(
     user: User,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<Vec<SelfGroup>>> {
+) -> JrnlResult<Json<Vec<SelfGroup>>> {
     sqlx::query_as::<_, SelfGroup>(
         // language=postgresql
         "

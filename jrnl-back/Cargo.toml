@@ -18,6 +18,21 @@ uuid = { version = "1.11.0" , features = ["v4", "serde", "fast-rng", "macro-diag
 chrono-tz = "0.10.0"
 rand = "0.8.5"
 base64 = "0.22.1"
+thiserror = "1.0.65"
+proc-macro2 = "1.0.89"
+quote = "1.0.37"
+syn = "2.0.85"
+tower = "0.5.1"
+tracing = "0.1.40"
+
+[lib]
+name = "thiserror_status"
+proc-macro = true
+path = "src/web/thiserror_status.rs"
+
+[[bin]]
+name = "app"
+path = "src/main.rs"
 
 [lints.clippy]
 all = "warn"

@@ -6,6 +6,7 @@ use crate::web::auth::User;
 use axum::Router;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::env;
+use tower::ServiceBuilder;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::EnvFilter;
 
@@ -45,7 +46,9 @@ async fn main() -> anyhow::Result<()> {
         .nest("/users", controllers::user::users_controller())
         .nest("/entries", controllers::entry::entries_controller())
         .nest("/groups", controllers::group::groups_controller())
-        .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
+        .layer(ServiceBuilder::new()
+            .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
+        )
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await?;

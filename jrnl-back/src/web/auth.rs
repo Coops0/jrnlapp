@@ -1,8 +1,8 @@
 use crate::schemas::profile::Profile;
+use crate::web::error::JrnlError;
 use crate::AppState;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use axum::http::StatusCode;
 use axum::{async_trait, RequestPartsExt};
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ pub struct User {
 
 #[async_trait]
 impl FromRequestParts<AppState> for User {
-    type Rejection = (StatusCode, String);
+    type Rejection = JrnlError;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -26,12 +26,7 @@ impl FromRequestParts<AppState> for User {
             .get("Authorization")
             .and_then(|header| header.to_str().ok())
             .and_then(|header| header.strip_prefix("Bearer "))
-            .ok_or_else(|| {
-                (
-                    StatusCode::UNAUTHORIZED,
-                    String::from("Missing or invalid authorization header"),
-                )
-            })?;
+            .ok_or_else(|| JrnlError::AuthenticationError(String::from("missing token")))?;
 
         let client = reqwest::Client::new();
         let user_response = client
@@ -41,24 +36,14 @@ impl FromRequestParts<AppState> for User {
             .header("apikey", auth_header)
             .send()
             .await
-            .map_err(|e| {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Failed to verify token: {e}"),
-                )
-            })?;
+            .map_err(|e| JrnlError::AuthenticationError(format!("failed to validate token {e:?}")))?;
 
         if !user_response.status().is_success() {
-            return Err((StatusCode::UNAUTHORIZED, String::from("invalid token")));
+            return Err(JrnlError::AuthenticationError(format!("failed to validate token w status {}", user_response.status())));
         }
 
         user_response.json::<Self>().await.map_or_else(
-            |e| {
-                Err((
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Failed to parse user data: {e}"),
-                ))
-            },
+            |e| Err(JrnlError::AuthenticationError(format!("failed to parse user response {e:?}"))),
             Ok,
         )
     }
@@ -66,7 +51,7 @@ impl FromRequestParts<AppState> for User {
 
 #[async_trait]
 impl FromRequestParts<AppState> for Profile {
-    type Rejection = (StatusCode, String);
+    type Rejection = JrnlError;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -78,11 +63,11 @@ impl FromRequestParts<AppState> for Profile {
             .bind(user.id)
             .fetch_optional(&state.pool)
             .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+            .map_err(JrnlError::DatabaseError)?;
 
         profile.map_or_else(
             // this shouldn't happen hopefully
-            || Err((StatusCode::NOT_FOUND, String::from("Profile not found"))),
+            || Err(JrnlError::AuthenticationError(String::from("profile not found"))),
             Ok,
         )
     }

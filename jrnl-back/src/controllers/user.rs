@@ -1,6 +1,6 @@
 use crate::schemas::profile::Profile;
 use crate::web::auth::User;
-use crate::web::result::InternalResult;
+use crate::web::error::{JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::State;
 use axum::routing::{get, put};
@@ -31,8 +31,8 @@ fn deserialize_tz<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Tz, D::E
 async fn update_timezone(
     user: User,
     State(AppState { pool, .. }): State<AppState>,
-    Json(UpdateTimezonePayload { tz }): Json<UpdateTimezonePayload>,
-) -> InternalResult<StatusCode> {
+    JsonExtractor(UpdateTimezonePayload { tz }): JsonExtractor<UpdateTimezonePayload>,
+) -> JrnlResult<StatusCode> {
     sqlx::query("UPDATE profiles SET timezone = $1 WHERE id = $2")
         .bind(tz.to_string())
         .bind(user.id)
