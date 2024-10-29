@@ -5,7 +5,7 @@ import type { Profile } from '~/types/profile.type';
 interface WeekData {
     days: {
         ratings: number[];
-        date: Date;
+        date: string;
     }[];
     total_weeks: number;
 }
@@ -22,7 +22,7 @@ export class GroupService {
         return this.api('/groups');
     }
 
-    async getGroup(code: string): Promise<(Pick<Group, 'id' | 'name'> & { members: number }) | null> {
+    async getGroup(code: string): Promise<(Pick<Group, 'id' | 'name' | 'owner_id'> & { members: number }) | null> {
         return this.api(`/groups/${code}`);
     }
 

@@ -3,5 +3,5 @@ export interface Entry {
     author: string;
     text?: string;
     emotion_scale: number; // 0-10
-    date: Date;
+    date: string;
 }

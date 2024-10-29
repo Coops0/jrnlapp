@@ -3,47 +3,55 @@
     <p v-if="status === 'pending'">loading</p>
     <p v-else-if="status === 'error'">error</p>
     <div v-else-if="status === 'success'">
-      <h3>time left {{ formatTimeAgo(tomorrow) }}</h3>
-      <h5>last saved {{ formatTimeAgo(lastSaved) }}</h5>
-      <textarea name="" id="" cols="30" rows="10" v-model="text"/>
-      <input type="number" v-model="rating" min="0" max="10"/>
+      <h3 v-if="showTimeUntil" @click="() => toggleTimeUntil()">time left {{ tomorrowRelativeString }}</h3>
+      <h3 v-else @click="() => toggleTimeUntil()">show time left</h3>
+      <h5>last saved {{ lastSavedRelativeString }}</h5>
+      <textarea name="" id="" cols="30" rows="10" v-model="entry.text"/>
+      <input type="number" v-model="entry.emotion_scale" min="0" max="10"/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { EntryService } from '~/services/entry.service';
-import { formatTimeAgo } from '@vueuse/core';
+import { getTomorrow, isSameDay } from '~/util/index.util';
+import type { Entry } from '~/types/entry.type';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
-const storage = useLocalStorage('entry-today', { text: '', rating: 5, date: Date.now() });
 
-const { data: entry, status } = useAsyncData('entry-today', () => entryService.getToday());
+const BLANK_ENTRY = () => ({ text: '', emotion_scale: 5, date: new Date().toString() } as Entry);
 
-const text = ref('');
-const rating = ref(5);
+const todayStorage = useLocalStorage('entry-today', BLANK_ENTRY());
+
+const { data: entry, status } = useLazyAsyncData(
+    'entry-today',
+    () => entryService.getToday(),
+    {
+      default() {
+        const t = todayStorage.value;
+
+        if (isSameDay(new Date(t.date))) {
+          return t;
+        }
+
+        todayStorage.value = BLANK_ENTRY();
+        return BLANK_ENTRY();
+      }
+    }
+);
 
 const lastSaved = ref(new Date());
+const lastSavedRelativeString = useTimeAgo(lastSaved);
+const hasSavedBefore = ref(false);
+
 const tomorrow = ref(getTomorrow());
+const tomorrowRelativeString = useTimeAgo(tomorrow);
 
-watchOnce(storage, s => {
-  if (isSameDay(new Date(s.date), new Date())) {
-    text.value = s.text;
-    rating.value = s.rating;
-  } else {
-    storage.value = { text: '', rating: 5, date: Date.now() };
-  }
-});
+const showTimeUntil = useLocalStorage('show-time-until', true);
+const toggleTimeUntil = useToggle(showTimeUntil);
 
-watchOnce(entry, (e) => {
-  if (e) {
-    text.value = e.text || text.value;
-    rating.value = e.emotion_scale;
-  }
-});
-
-watchDebounced([text, rating], save, { debounce: 600, maxWait: 1000 });
+watchDebounced(entry, save, { deep: true, debounce: 600, maxWait: 1000 });
 
 useIntervalFn(async () => {
   const tmrw = getTomorrow();
@@ -52,30 +60,23 @@ useIntervalFn(async () => {
   }
 
   tomorrow.value = tmrw;
-  await save();
 
-  storage.value = { text: '', rating: 5, date: Date.now() };
+  entry.value = BLANK_ENTRY();
+  todayStorage.value = BLANK_ENTRY();
 }, 1000);
 
-function getTomorrow(): Date {
-  const tmrw = new Date();
-  tmrw.setHours(0, 0, 0);
-  tmrw.setDate(tmrw.getDate() + 1);
-
-  return tmrw;
-}
 
 async function save() {
-  storage.value = { text: text.value, rating: rating.value, date: Date.now() };
-  await entryService.putToday(rating.value, text.value);
+  // skip initial load
+  if (!hasSavedBefore.value) {
+    hasSavedBefore.value = true;
+    return;
+  }
+
+  todayStorage.value = { ...entry.value };
+  await entryService.putToday(entry.value.emotion_scale, entry.value.text);
 
   lastSaved.value = new Date();
 }
-
-const isSameDay = (a: Date, b: Date) =>
-    a.getDate() === b.getDate() &&
-    a.getMonth() === b.getMonth() &&
-    a.getFullYear() === b.getFullYear();
-
 </script>
 
