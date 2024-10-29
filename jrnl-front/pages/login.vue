@@ -1,8 +1,8 @@
 <template>
   <div>
-    <button @click="signInWithGoogle">
+    <Button @click="signInWithGoogle">
       google
-    </button>
+    </Button>
   </div>
 </template>
 
