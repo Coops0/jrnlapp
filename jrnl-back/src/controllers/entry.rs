@@ -1,60 +1,121 @@
 use crate::schemas::entry::Entry;
 use crate::schemas::profile::Profile;
 use crate::web::auth::User;
+use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
 use crate::web::result::InternalResult;
 use crate::AppState;
-use axum::extract::State;
+use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
+use base64::Engine;
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
 pub fn entries_controller() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_entries_full))
-        .route("/ratings", get(get_ratings))
+        .route("/", get(get_entries_paginated))
+        .route("/ratings", get(get_ratings_paginated))
         .route("/average", get(get_overall_average))
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
 
-async fn get_entries_full(
+async fn get_entries_paginated(
     user: User,
+    Query(params): Query<CursorParams>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<Vec<Entry>>> {
-    sqlx::query_as::<_, Entry>(
+) -> InternalResult<Json<CursorPaginatedResponse<Entry>>> {
+    let limit = params.limit.unwrap_or(20).clamp(1, 100);
+    let limit_plus_one = i64::from(limit) + 1;
+
+    let cursor = params.cursor.unwrap_or_default();
+
+    let mut entries = sqlx::query_as::<_, Entry>(
         // language=postgresql
-        "SELECT * FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 500",
+        "
+            SELECT * FROM entries
+            WHERE author = $1
+            AND (date, id) < ($2, $3)
+            ORDER BY date DESC, id DESC
+            LIMIT $4
+            "
     )
         .bind(user.id)
+        .bind(cursor.date)
+        .bind(cursor.id)
+        .bind(limit_plus_one)
         .fetch_all(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+        .await?;
+
+    let has_more = entries.len() > limit as usize;
+    if has_more {
+        entries.pop();
+    }
+
+    let next_cursor = match (has_more, entries.last()) {
+        (true, Some(last_entry)) => Some(Cursor { id: last_entry.id, date: last_entry.date }),
+        _ => None
+    };
+
+    Ok(Json(CursorPaginatedResponse {
+        items: entries,
+        next_cursor,
+        has_more,
+    }))
 }
 
 #[derive(FromRow, Serialize)]
 struct Rating {
     id: Uuid,
-    date: chrono::NaiveDate,
+    date: NaiveDate,
     emotion_scale: f32,
 }
 
-async fn get_ratings(
+async fn get_ratings_paginated(
     user: User,
+    Query(params): Query<CursorParams>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<Vec<Rating>>> {
-    sqlx::query_as::<_, Rating>(
+) -> InternalResult<Json<CursorPaginatedResponse<Rating>>> {
+    let limit = params.limit.unwrap_or(50).clamp(1, 200);
+    let limit_plus_one = i64::from(limit) + 1;
+
+    let cursor = params.cursor.unwrap_or_default();
+
+    let mut ratings = sqlx::query_as::<_, Rating>(
         // language=postgresql
-        "SELECT id, date, emotion_scale FROM entries WHERE author = $1 ORDER BY date DESC LIMIT 500"
+        "
+            SELECT (id, date, emotion_scale) FROM entries
+            WHERE author = $1
+            AND (date, id) < ($2, $3)
+            ORDER BY date DESC, id DESC
+            LIMIT $4
+            "
     )
         .bind(user.id)
+        .bind(cursor.date)
+        .bind(cursor.id)
+        .bind(limit_plus_one)
         .fetch_all(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+        .await?;
+
+    let has_more = ratings.len() > limit as usize;
+    if has_more {
+        ratings.pop();
+    }
+
+    let next_cursor = match (has_more, ratings.last()) {
+        (true, Some(last_rating)) => Some(Cursor { id: last_rating.id, date: last_rating.date }),
+        _ => None
+    };
+
+    Ok(Json(CursorPaginatedResponse {
+        items: ratings,
+        next_cursor,
+        has_more,
+    }))
 }
 
 async fn get_overall_average(

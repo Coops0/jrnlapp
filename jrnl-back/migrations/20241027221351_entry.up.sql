@@ -9,3 +9,4 @@ CREATE TABLE IF NOT EXISTS entries
 );
 
 CREATE INDEX IF NOT EXISTS idx_entries_author_date ON entries (author, date DESC);
+CREATE INDEX IF NOT EXISTS idx_entries_author_date_id ON entries (author, date DESC, id DESC);
