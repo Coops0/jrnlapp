@@ -5,17 +5,10 @@ use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
-use rand::seq::SliceRandom;
-use rand::Rng;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use std::cell::LazyCell;
 use uuid::Uuid;
-
-const WORDS_STRING_LIST: &str = include_str!("../../static/all_words_cleaned.txt");
-#[allow(clippy::declare_interior_mutable_const)]
-const WORDS_ARRAY: LazyCell<Vec<&str>> = LazyCell::new(|| WORDS_STRING_LIST.lines().collect());
 
 pub fn groups_controller() -> Router<AppState> {
     Router::new()
@@ -29,23 +22,6 @@ pub fn groups_controller() -> Router<AppState> {
         .route("/:group/week", get(get_week_data))
 }
 
-fn generate_code() -> String {
-    let mut rng = rand::thread_rng();
-
-    #[allow(clippy::borrow_interior_mutable_const)]
-    let words = WORDS_ARRAY
-        .choose_multiple(&mut rng, 2)
-        .map(ToString::to_string)
-        .collect::<Vec<String>>();
-
-    let num = rng.gen_range(0..=9);
-    let [first_word, second_word] = &words[..] else {
-        unreachable!();
-    };
-
-    format!("{first_word}{num}{second_word}")
-}
-
 #[derive(Deserialize)]
 struct CreateGroupPayload {
     name: String,
@@ -56,7 +32,7 @@ async fn create_group(
     State(AppState { pool, .. }): State<AppState>,
     Json(CreateGroupPayload { name }): Json<CreateGroupPayload>,
 ) -> InternalResult<Json<Group>> {
-    let code = generate_code();
+    let code = Group::generate_code();
     sqlx::query_as::<_, Group>(
         // language=postgresql
         "INSERT INTO groups (name, code, owner_id) VALUES ($1, $2, $3) RETURNING *",
