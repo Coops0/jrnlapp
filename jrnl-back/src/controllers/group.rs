@@ -60,7 +60,7 @@ async fn get_group(
     sqlx::query_as::<_, GetGroupBody>(
         // language=postgresql
         "
-    SELECT g.id, g.name, COUNT(gm.user_id) as members
+    SELECT g.id, g.name, g.owner_id, COUNT(gm.user_id) as members
        FROM groups g
            LEFT JOIN group_memberships gm ON g.id = gm.group_id
      WHERE g.code = $1
@@ -143,6 +143,14 @@ async fn leave_group(
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
 ) -> InternalResult<StatusCode> {
+    let group = sqlx::query_as::<_, Group>(
+        // language=postgresql
+        "SELECT * FROM groups WHERE code = $1"
+    )
+        .bind(&code)
+        .fetch_one(&pool)
+        .await?;
+
     sqlx::query(
         // language=postgresql
         "
@@ -154,16 +162,54 @@ async fn leave_group(
         .bind(code)
         .bind(user.id)
         .execute(&pool)
-        .await
-        .map(|_| StatusCode::OK)
-        .map_err(Into::into)
+        .await?;
+
+    if group.owner_id != user.id {
+        return Ok(StatusCode::OK);
+    }
+
+    let members = sqlx::query_scalar::<_, i32>(
+        // language=postgresql
+        "
+        SELECT COUNT(*) FROM group_memberships WHERE group_id = $1
+        "
+    )
+        .bind(group.id)
+        .fetch_one(&pool)
+        .await?;
+
+    if members == 0 {
+        sqlx::query("DELETE FROM groups WHERE id = $1")
+            .bind(group.id)
+            .execute(&pool)
+            .await?;
+    } else {
+        sqlx::query(
+            // language=postgresql
+            "
+            UPDATE groups SET owner_id = (
+               SELECT user_id FROM group_memberships WHERE group_id = $1 LIMIT 1
+            )
+            WHERE id = $1
+            "
+        )
+            .bind(group.id)
+            .execute(&pool)
+            .await?;
+    }
+
+    Ok(StatusCode::OK)
 }
 
 async fn kick_member(
     user: User,
     Path((code, target_user_id)): Path<(String, Uuid)>,
     State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<StatusCode> {
+) -> Result<StatusCode, (StatusCode, String)> {
+    if user.id == target_user_id {
+        return Err((StatusCode::BAD_REQUEST, String::from("you cannot kick yourself")));
+    }
+
     sqlx::query(
         // language=postgresql
         "
@@ -178,7 +224,7 @@ async fn kick_member(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(Into::into)
+        .map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))
 }
 
 #[derive(Serialize, FromRow)]
@@ -285,8 +331,7 @@ async fn joined_groups(
     sqlx::query_as::<_, SelfGroup>(
         // language=postgresql
         "
-
-        SELECT gm.group_id as group_id FROM group_memberships gm
+        SELECT *, gm.group_id as group_id FROM group_memberships gm
         JOIN groups g ON gm.group_id = g.id
         WHERE gm.user_id = $1
     ",

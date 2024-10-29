@@ -4,21 +4,23 @@ use crate::web::auth::User;
 use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
 use crate::web::result::InternalResult;
 use crate::AppState;
-use axum::extract::{Query, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
 use serde::Deserialize;
+use uuid::Uuid;
 
 pub fn entries_controller() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_entries_paginated))
+        .route("/", get(get_trimmed_entries_paginated))
+        .route("/:id", get(get_entry))
         .route("/average", get(get_overall_average))
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
 
-async fn get_entries_paginated(
+async fn get_trimmed_entries_paginated(
     user: User,
     Query(params): Query<CursorParams>,
     State(AppState { pool, .. }): State<AppState>,
@@ -31,7 +33,7 @@ async fn get_entries_paginated(
     let mut entries = sqlx::query_as::<_, Entry>(
         // language=postgresql
         "
-            SELECT * FROM entries
+            SELECT emotion_scale, date, id FROM entries
             WHERE author = $1
             AND (date, id) < ($2, $3)
             ORDER BY date DESC, id DESC
@@ -60,6 +62,23 @@ async fn get_entries_paginated(
         next_cursor,
         has_more,
     }))
+}
+
+async fn get_entry(
+    user: User,
+    Path(id): Path<Uuid>,
+    State(AppState { pool, .. }): State<AppState>,
+) -> InternalResult<Json<Option<Entry>>> {
+    sqlx::query_as::<_, Entry>(
+        // language=postgresql
+        "SELECT * FROM entries WHERE author = $1 AND id = $2 LIMIT 1"
+    )
+        .bind(user.id)
+        .bind(id)
+        .fetch_optional(&pool)
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }
 
 async fn get_overall_average(

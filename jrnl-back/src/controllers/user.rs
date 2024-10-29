@@ -1,15 +1,18 @@
+use crate::schemas::profile::Profile;
 use crate::web::auth::User;
 use crate::web::result::InternalResult;
 use crate::AppState;
 use axum::extract::State;
-use axum::routing::put;
+use axum::routing::{get, put};
 use axum::{Json, Router};
 use chrono_tz::Tz;
 use reqwest::StatusCode;
 use serde::{Deserialize, Deserializer};
 
 pub fn users_controller() -> Router<AppState> {
-    Router::new().route("/tz", put(update_timezone))
+    Router::new()
+        .route("/tz", put(update_timezone))
+        .route("/me", get(get_self_profile))
 }
 
 #[derive(Deserialize)]
@@ -37,4 +40,8 @@ async fn update_timezone(
         .await
         .map(|_| StatusCode::OK)
         .map_err(Into::into)
+}
+
+async fn get_self_profile(profile: Profile) -> Json<Profile> {
+    Json(profile)
 }
