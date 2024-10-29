@@ -9,16 +9,11 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
-use base64::Engine;
-use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
-use uuid::Uuid;
+use serde::Deserialize;
 
 pub fn entries_controller() -> Router<AppState> {
     Router::new()
         .route("/", get(get_entries_paginated))
-        .route("/ratings", get(get_ratings_paginated))
         .route("/average", get(get_overall_average))
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
@@ -62,57 +57,6 @@ async fn get_entries_paginated(
 
     Ok(Json(CursorPaginatedResponse {
         items: entries,
-        next_cursor,
-        has_more,
-    }))
-}
-
-#[derive(FromRow, Serialize)]
-struct Rating {
-    id: Uuid,
-    date: NaiveDate,
-    emotion_scale: f32,
-}
-
-async fn get_ratings_paginated(
-    user: User,
-    Query(params): Query<CursorParams>,
-    State(AppState { pool, .. }): State<AppState>,
-) -> InternalResult<Json<CursorPaginatedResponse<Rating>>> {
-    let limit = params.limit.unwrap_or(50).clamp(1, 200);
-    let limit_plus_one = i64::from(limit) + 1;
-
-    let cursor = params.cursor.unwrap_or_default();
-
-    let mut ratings = sqlx::query_as::<_, Rating>(
-        // language=postgresql
-        "
-            SELECT (id, date, emotion_scale) FROM entries
-            WHERE author = $1
-            AND (date, id) < ($2, $3)
-            ORDER BY date DESC, id DESC
-            LIMIT $4
-            "
-    )
-        .bind(user.id)
-        .bind(cursor.date)
-        .bind(cursor.id)
-        .bind(limit_plus_one)
-        .fetch_all(&pool)
-        .await?;
-
-    let has_more = ratings.len() > limit as usize;
-    if has_more {
-        ratings.pop();
-    }
-
-    let next_cursor = match (has_more, ratings.last()) {
-        (true, Some(last_rating)) => Some(Cursor { id: last_rating.id, date: last_rating.date }),
-        _ => None
-    };
-
-    Ok(Json(CursorPaginatedResponse {
-        items: ratings,
         next_cursor,
         has_more,
     }))

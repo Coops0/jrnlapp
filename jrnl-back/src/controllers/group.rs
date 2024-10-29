@@ -19,7 +19,7 @@ const WORDS_ARRAY: LazyCell<Vec<&str>> = LazyCell::new(|| WORDS_STRING_LIST.line
 
 pub fn groups_controller() -> Router<AppState> {
     Router::new()
-        .route("/", post(create_group))
+        .route("/", post(create_group).get(joined_groups))
         .route(
             "/:group",
             get(get_group).post(join_group).delete(leave_group),
@@ -58,15 +58,16 @@ async fn create_group(
 ) -> InternalResult<Json<Group>> {
     let code = generate_code();
     sqlx::query_as::<_, Group>(
+        // language=postgresql
         "INSERT INTO groups (name, code, owner_id) VALUES ($1, $2, $3) RETURNING *",
     )
-    .bind(name)
-    .bind(code)
-    .bind(user.id)
-    .fetch_one(&pool)
-    .await
-    .map(Json)
-    .map_err(Into::into)
+        .bind(name)
+        .bind(code)
+        .bind(user.id)
+        .fetch_one(&pool)
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }
 
 #[derive(Serialize, FromRow)]
@@ -90,11 +91,11 @@ async fn get_group(
      GROUP BY g.id
 ",
     )
-    .bind(code)
-    .fetch_optional(&pool)
-    .await
-    .map(Json)
-    .map_err(Into::into)
+        .bind(code)
+        .fetch_optional(&pool)
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }
 
 async fn join_group(
@@ -103,6 +104,7 @@ async fn join_group(
     State(AppState { pool, .. }): State<AppState>,
 ) -> Result<StatusCode, (StatusCode, &'static str)> {
     sqlx::query(
+        // language=postgresql
         "
         INSERT INTO group_memberships (group_id, user_id) VALUES (
                 (SELECT id FROM groups WHERE code = $1),
@@ -110,17 +112,17 @@ async fn join_group(
             )
         ",
     )
-    .bind(code)
-    .bind(user.id)
-    .execute(&pool)
-    .await
-    .map(|_| StatusCode::OK)
-    .map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            "you are already a member of this group",
-        )
-    })
+        .bind(code)
+        .bind(user.id)
+        .execute(&pool)
+        .await
+        .map(|_| StatusCode::OK)
+        .map_err(|_| {
+            (
+                StatusCode::BAD_REQUEST,
+                "you are already a member of this group",
+            )
+        })
 }
 
 #[derive(FromRow, Serialize)]
@@ -142,7 +144,7 @@ async fn get_group_members(
         FROM profiles p
         JOIN group_memberships gm ON p.id = gm.user_id
         JOIN groups g ON gm.group_id = g.id
-        WHERE g.code = $1
+        WHERE g.code = $1 LIMIT 1
         AND EXISTS (
             SELECT 1
             FROM group_memberships gm2
@@ -152,12 +154,12 @@ async fn get_group_members(
         )
     ",
     )
-    .bind(code)
-    .bind(user.id)
-    .fetch_all(&pool)
-    .await
-    .map(Json)
-    .map_err(Into::into)
+        .bind(code)
+        .bind(user.id)
+        .fetch_all(&pool)
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }
 
 async fn leave_group(
@@ -173,12 +175,12 @@ async fn leave_group(
         AND user_id = $2
     ",
     )
-    .bind(code)
-    .bind(user.id)
-    .execute(&pool)
-    .await
-    .map(|_| StatusCode::OK)
-    .map_err(Into::into)
+        .bind(code)
+        .bind(user.id)
+        .execute(&pool)
+        .await
+        .map(|_| StatusCode::OK)
+        .map_err(Into::into)
 }
 
 async fn kick_member(
@@ -194,13 +196,13 @@ async fn kick_member(
         AND user_id = $3
     ",
     )
-    .bind(code)
-    .bind(user.id)
-    .bind(target_user_id)
-    .execute(&pool)
-    .await
-    .map(|_| StatusCode::OK)
-    .map_err(Into::into)
+        .bind(code)
+        .bind(user.id)
+        .bind(target_user_id)
+        .execute(&pool)
+        .await
+        .map(|_| StatusCode::OK)
+        .map_err(Into::into)
 }
 
 #[derive(Serialize, FromRow)]
@@ -241,13 +243,13 @@ async fn get_week_data(
         WHERE gm.group_id IN (SELECT id FROM found_group)
         ",
     )
-    .bind(user.id)
-    .bind(&code)
-    .fetch_all(&pool)
-    .await?
-    .into_iter()
-    .map(|(id,)| id)
-    .collect::<Vec<Uuid>>();
+        .bind(user.id)
+        .bind(&code)
+        .fetch_all(&pool)
+        .await?
+        .into_iter()
+        .map(|(id, )| id)
+        .collect::<Vec<Uuid>>();
 
     let days = sqlx::query_as::<_, DayData>(
         // language=postgresql
@@ -267,10 +269,10 @@ async fn get_week_data(
         OFFSET $2
         ",
     )
-    .bind(&group_member_ids)
-    .bind(skip)
-    .fetch_all(&pool)
-    .await?;
+        .bind(&group_member_ids)
+        .bind(skip)
+        .fetch_all(&pool)
+        .await?;
 
     let total_weeks = sqlx::query_scalar::<_, i64>(
         // language=postgresql
@@ -285,9 +287,37 @@ async fn get_week_data(
         FROM week_entries
         ",
     )
-    .bind(&group_member_ids)
-    .fetch_one(&pool)
-    .await?;
+        .bind(&group_member_ids)
+        .fetch_one(&pool)
+        .await?;
 
     Ok(Json(WeekData { days, total_weeks }))
+}
+
+
+#[derive(Serialize, FromRow)]
+struct SelfGroup {
+    id: Uuid,
+    name: String,
+    code: String,
+}
+
+async fn joined_groups(
+    user: User,
+    State(AppState { pool, .. }): State<AppState>,
+) -> InternalResult<Json<Vec<SelfGroup>>> {
+    sqlx::query_as::<_, SelfGroup>(
+        // language=postgresql
+        "
+
+        SELECT gm.group_id as group_id FROM group_memberships gm
+        JOIN groups g ON gm.group_id = g.id
+        WHERE gm.user_id = $1
+    ",
+    )
+        .bind(user.id)
+        .fetch_all(&pool)
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }

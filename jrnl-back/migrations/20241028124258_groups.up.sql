@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS groups
 (
     id       UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name     TEXT NOT NULL,
-    code     TEXT NOT NULL UNIQUE,
-    owner_id UUID NOT NULL REFERENCES profiles (id) ON DELETE RESTRICT
+    name     VARCHAR(255) NOT NULL,
+    code     TEXT         NOT NULL UNIQUE,
+    owner_id UUID         NOT NULL REFERENCES profiles (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS group_memberships
