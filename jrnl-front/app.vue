@@ -18,27 +18,27 @@ useHead({
     { name: 'keywords', content: 'jrnl, jr.nl, journal' },
     { name: 'theme-color', content: '#525252' },
     { name: 'apple-mobile-web-app-title', content: 'jr.nl' },
-    { name: 'apple-mobile-web-app-capable', content: 'yes' },
+    { name: 'mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-status-bar-style', content: 'black-transparent' },
     { name: 'application-name', content: 'jr.nl' },
     { name: 'msapplication-tooltip', content: 'you can\'t cheat your thoughts' },
     { name: 'msapplication-starturl', content: '/' }
   ],
   // https://realfavicongenerator.net
-  link: [
-    { rel: 'icon', type: 'image/jpg', sizes: '16x16', href: '/favicon-16.jpg' },
-    { rel: 'icon', type: 'image/jpg', sizes: '32x32', href: '/favicon-32.jpg' },
-    { rel: 'icon', type: 'image/jpg', sizes: '48x48', href: '/favicon-48.jpg' },
-    { rel: 'apple-touch-icon', href: '/touch-icon-iphone.jpg' },
-    { rel: 'apple-touch-icon', sizes: '76x76', href: '/touch-icon-ipad.jpg' },
-    { rel: 'apple-touch-icon', sizes: '120x120', href: '/touch-icon-iphone-retina.jpg' },
-    { rel: 'apple-touch-icon', sizes: '152x152', href: '/touch-icon-ipad-retina.jpg' },
-    { rel: 'apple-touch-startup-image', href: '/touch-icon-start-up-320x480.jpg' },
-    { rel: 'icon', sizes: '192x192', href: '/icon-192x192.jpg' },
-    { rel: 'icon', sizes: '128x128', href: '/icon-128x128.jpg' },
-    { rel: 'shortcut icon', type: 'image/x-icon', href: '/favicon.icon' },
-    { rel: 'apple-touch-icon-precomposed', sizes: '57x57', href: '/images/icon-52x52.jpg' },
-    { rel: 'apple-touch-icon', sizes: '72x72', href: '/images/icon-72x72.jpg' }
-  ]
+  // link: [
+  //   { rel: 'icon', type: 'image/jpg', sizes: '16x16', href: '/favicon-16.jpg' },
+  //   { rel: 'icon', type: 'image/jpg', sizes: '32x32', href: '/favicon-32.jpg' },
+  //   { rel: 'icon', type: 'image/jpg', sizes: '48x48', href: '/favicon-48.jpg' },
+  //   { rel: 'apple-touch-icon', href: '/touch-icon-iphone.jpg' },
+  //   { rel: 'apple-touch-icon', sizes: '76x76', href: '/touch-icon-ipad.jpg' },
+  //   { rel: 'apple-touch-icon', sizes: '120x120', href: '/touch-icon-iphone-retina.jpg' },
+  //   { rel: 'apple-touch-icon', sizes: '152x152', href: '/touch-icon-ipad-retina.jpg' },
+  //   { rel: 'apple-touch-startup-image', href: '/touch-icon-start-up-320x480.jpg' },
+  //   { rel: 'icon', sizes: '192x192', href: '/icon-192x192.jpg' },
+  //   { rel: 'icon', sizes: '128x128', href: '/icon-128x128.jpg' },
+  //   { rel: 'shortcut icon', type: 'image/x-icon', href: '/favicon.icon' },
+  //   { rel: 'apple-touch-icon-precomposed', sizes: '57x57', href: '/images/icon-52x52.jpg' },
+  //   { rel: 'apple-touch-icon', sizes: '72x72', href: '/images/icon-72x72.jpg' }
+  // ]
 });
 </script>

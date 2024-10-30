@@ -29,7 +29,7 @@ pub enum JrnlError {
     #[status(StatusCode::UNAUTHORIZED)]
     AuthenticationError(String),
 
-    #[error("database error")]
+    #[error("database error {0:?}")]
     #[status(StatusCode::INTERNAL_SERVER_ERROR)]
     DatabaseError(#[from] sqlx::Error),
 

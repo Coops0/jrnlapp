@@ -1,10 +1,9 @@
 CREATE TABLE IF NOT EXISTS profiles
 (
-    id         UUID                   NOT NULL REFERENCES auth.users ON DELETE CASCADE,
-    first_name TEXT,
-    last_name  TEXT,
-    theme      TEXT DEFAULT 'default' NOT NULL,
-    timezone   TEXT DEFAULT 'UTC'     NOT NULL,
+    id       UUID                   NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+    name     TEXT                   NOT NULL,
+    theme    TEXT DEFAULT 'default' NOT NULL,
+    timezone TEXT DEFAULT 'UTC'     NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -18,10 +17,8 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 AS
 $$
 BEGIN
-    INSERT INTO profiles (id, first_name, last_name)
-    VALUES (NEW.id,
-            NEW.raw_user_meta_data ->> 'first_name',
-            NEW.raw_user_meta_data ->> 'last_name');
+    INSERT INTO profiles (id, name)
+    VALUES (NEW.id, NEW.raw_user_meta_data ->> 'name');
     RETURN NEW;
 END;
 $$;

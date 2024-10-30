@@ -7,6 +7,8 @@ use axum::Router;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::env;
 use tower::ServiceBuilder;
+use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
+use tracing::info;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::EnvFilter;
 
@@ -23,9 +25,8 @@ async fn main() -> anyhow::Result<()> {
     let _ = dotenvy::dotenv();
 
     let filter = EnvFilter::builder()
-        .with_default_directive(LevelFilter::WARN.into())
-        .from_env()?
-        .add_directive("jrnl-back=debug".parse()?);
+        .with_default_directive(LevelFilter::DEBUG.into())
+        .from_env()?;
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)
@@ -47,11 +48,18 @@ async fn main() -> anyhow::Result<()> {
         .nest("/entries", controllers::entry::entries_controller())
         .nest("/groups", controllers::group::groups_controller())
         .layer(ServiceBuilder::new()
+            .layer(CorsLayer::new()
+                .allow_origin(AllowOrigin::any()) // todo
+                .allow_methods(AllowMethods::any())
+                .allow_headers(AllowHeaders::any())
+            )
             .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
         )
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await?;
+
+    info!("listening on {}", listener.local_addr()?);
     axum::serve(listener, app).await?;
 
     Ok(())

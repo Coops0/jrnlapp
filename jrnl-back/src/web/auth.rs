@@ -32,8 +32,8 @@ impl FromRequestParts<AppState> for User {
         let user_response = client
             .get(format!("{}/auth/v1/user", state.supabase_url))
             .header("Authorization", format!("Bearer {auth_header}"))
-            // .header("apikey", &state.supabase_key)
-            .header("apikey", auth_header)
+            .header("apikey", &state.supabase_key)
+            // .header("apikey", auth_header)
             .send()
             .await
             .map_err(|e| JrnlError::AuthenticationError(format!("failed to validate token {e:?}")))?;

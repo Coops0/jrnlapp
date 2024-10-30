@@ -30,7 +30,7 @@ export class GroupService {
         return this.api('/groups/join', { method: 'POST', body: { code } });
     }
 
-    async getGroupMembers(code: string): Promise<Pick<Profile, 'id' | 'first_name' | 'last_name'>[]> {
+    async getGroupMembers(code: string): Promise<Pick<Profile, 'id' | 'name'>[]> {
         return this.api(`/groups/${code}/members`);
     }
 

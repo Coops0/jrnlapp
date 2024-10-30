@@ -23,10 +23,17 @@ const entryService = new EntryService($localApi);
 const BLANK_ENTRY = () => ({ text: '', emotion_scale: 5, date: new Date().toString() } as Entry);
 
 const todayStorage = useLocalStorage('entry-today', BLANK_ENTRY());
+const entry = ref(todayStorage.value);
 
-const { data: entry, status } = useLazyAsyncData(
+const { data, status } = useLazyAsyncData(
     'entry-today',
-    () => entryService.getToday(),
+    async () => {
+      const t = await entryService.getToday();
+      todayStorage.value = { ...t };
+      entry.value = { ...t };
+
+      return t;
+    },
     {
       default() {
         const t = todayStorage.value;
@@ -55,7 +62,7 @@ watchDebounced(entry, save, { deep: true, debounce: 600, maxWait: 1000 });
 
 useIntervalFn(async () => {
   const tmrw = getTomorrow();
-  if (tmrw.getTime() === tomorrow.value.getTime()) {
+  if (isSameDay(tmrw, tomorrow.value)) {
     return;
   }
 
@@ -67,6 +74,10 @@ useIntervalFn(async () => {
 
 
 async function save() {
+  if (!entry.value) {
+    return;
+  }
+
   // skip initial load
   if (!hasSavedBefore.value) {
     hasSavedBefore.value = true;

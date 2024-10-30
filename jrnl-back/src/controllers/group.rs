@@ -103,8 +103,7 @@ async fn join_group(
 #[derive(FromRow, Serialize)]
 struct TrimmedUser {
     id: Uuid,
-    first_name: String,
-    last_name: String,
+    name: String
 }
 
 async fn get_group_members(
@@ -115,7 +114,7 @@ async fn get_group_members(
     sqlx::query_as::<_, TrimmedUser>(
         // language=postgresql
         "
-        SELECT p.id, p.first_name, p.last_name 
+        SELECT p.id, p.name 
         FROM profiles p
         JOIN group_memberships gm ON p.id = gm.user_id
         JOIN groups g ON gm.group_id = g.id

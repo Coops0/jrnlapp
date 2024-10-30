@@ -44,8 +44,8 @@ fn impl_enum_variant(variant: &Variant) -> TokenStream {
     } else {
         quote!(#ident { .. })
     };
-    
-    let quoted_ident = format!("\"{ident}\"");
+
+    let quoted_ident = format!("{ident}");
     quote! {
         Self::#enum_syntax => {
             let m = format!("{}", self);

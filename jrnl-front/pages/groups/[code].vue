@@ -19,7 +19,7 @@ interface GroupInfo {
 }
 
 const cachedGroup = useLocalStorage(`group-${code}`, {} as {
-  members?: Pick<Profile, 'id' | 'first_name' | 'last_name'>[];
+  members?: Pick<Profile, 'id' | 'name'>[];
   info?: GroupInfo;
 });
 
