@@ -8,6 +8,7 @@ use axum::{Json, Router};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use std::collections::HashMap;
 use uuid::Uuid;
 
 pub fn groups_controller() -> Router<AppState> {
@@ -19,7 +20,7 @@ pub fn groups_controller() -> Router<AppState> {
         )
         .route("/:group/:user", delete(kick_member))
         .route("/:group/members", get(get_group_members))
-        .route("/:group/week", get(get_week_data))
+        .route("/:group/day", get(get_days_data_paginated))
 }
 
 #[derive(Deserialize)]
@@ -103,7 +104,7 @@ async fn join_group(
 #[derive(FromRow, Serialize)]
 struct TrimmedUser {
     id: Uuid,
-    name: String
+    name: String,
 }
 
 async fn get_group_members(
@@ -226,94 +227,96 @@ async fn kick_member(
         .map_err(|_| JrnlError::NoResultsFound)
 }
 
-#[derive(Serialize, FromRow)]
-struct WeekData {
-    days: Vec<DayData>,
-    total_weeks: i64,
-}
-
-#[derive(Serialize, FromRow)]
+#[derive(Serialize)]
 struct DayData {
+    scales: Vec<f32>,
     day: chrono::NaiveDate,
-    ratings: Vec<f32>,
 }
 
-#[derive(Deserialize)]
-struct WeekDataQuery {
-    skip: Option<i32>,
+#[derive(FromRow)]
+struct DayDataRow {
+    emotion_scale: f32,
+    date: chrono::NaiveDate,
 }
 
-async fn get_week_data(
+#[derive(Debug, Deserialize)]
+struct GetDaysDataParams {
+    day_limit: Option<i64>,
+    before: Option<chrono::NaiveDate>,
+}
+
+async fn get_days_data_paginated(
     user: User,
-    Query(query): Query<WeekDataQuery>,
+    Query(params): Query<GetDaysDataParams>,
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
-) -> JrnlResult<Json<WeekData>> {
-    let skip = query.skip.unwrap_or_default();
+) -> JrnlResult<Json<Vec<DayData>>> {
+    let day_limit = params.day_limit.unwrap_or(7).clamp(1, 30);
+    let before = params.before.unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
 
-    let group_member_ids = sqlx::query_as::<_, (Uuid,)>(
+    let group = sqlx::query_as::<_, Group>(
         // language=postgresql
         "
-        WITH found_group AS (
-            SELECT g.id FROM groups g 
-            JOIN group_memberships gm ON g.id = gm.group_id AND gm.user_id = $1
-            WHERE g.code = $2
+        SELECT id FROM groups WHERE code = $1 LIMIT 1
+        AND EXISTS (
+            SELECT 1
+            FROM group_memberships gm
+            WHERE gm.group_id = groups.id
+            AND gm.user_id = $2
         )
-        SELECT gm.user_id 
-        FROM group_memberships gm
-        WHERE gm.group_id IN (SELECT id FROM found_group)
-        ",
+        "
     )
+        .bind(code)
         .bind(user.id)
-        .bind(&code)
+        .fetch_one(&pool)
+        .await
+        .map_err(|_| JrnlError::NoResultsFound)?;
+
+    let group_members = sqlx::query_scalar::<_, Uuid>(
+        // language=postgresql
+        "
+        SELECT user_id FROM group_memberships WHERE group_id = $1
+        "
+    )
+        .bind(group.id)
+        .fetch_all(&pool)
+        .await?;
+
+
+    let dates = (0..day_limit)
+        .map(|i| before - chrono::Duration::days(i))
+        .collect::<Vec<_>>();
+
+    // todo make sure this date checking works
+    let all_entries = sqlx::query_as::<_, DayDataRow>(
+        // language=postgresql
+        "
+        SELECT date, emotion_scalec FROM entries
+        WHERE author IN ($1) AND date IN ($2)
+        ORDER BY date DESC
+        LIMIT 500
+        "
+    )
+        .bind(&group_members)
+        .bind(&dates)
         .fetch_all(&pool)
         .await
-        .map_err(|_| JrnlError::NoResultsFound)?
+        .map_err(JrnlError::DatabaseError)?;
+
+    let entries_grouped_by_day = all_entries
         .into_iter()
-        .map(|(id, )| id)
-        .collect::<Vec<Uuid>>();
+        .fold(HashMap::<chrono::NaiveDate, Vec<f32>>::new(), |mut acc, entry| {
+            acc
+                .entry(entry.date)
+                .or_default()
+                .push(entry.emotion_scale);
+            acc
+        })
+        .into_iter()
+        .map(|(day, scales)| DayData { scales, day })
+        .collect::<Vec<_>>();
 
-    let days = sqlx::query_as::<_, DayData>(
-        // language=postgresql
-        "
-        WITH week_entries AS (
-            SELECT date, emotion_scale
-            FROM entries
-            WHERE author = ANY($1)
-            AND date > NOW() - INTERVAL '7 days'
-        )
-        SELECT 
-            date as day,
-            array_agg(emotion_scale ORDER BY emotion_scale) as ratings
-        FROM week_entries
-        GROUP BY date
-        ORDER BY date
-        OFFSET $2
-        ",
-    )
-        .bind(&group_member_ids)
-        .bind(skip)
-        .fetch_all(&pool)
-        .await?;
-
-    let total_weeks = sqlx::query_scalar::<_, i64>(
-        // language=postgresql
-        "
-        WITH week_entries AS (
-            SELECT date
-            FROM entries
-            WHERE author = ANY($1)
-            AND date > NOW() - INTERVAL '7 days'
-        )
-        SELECT COUNT(DISTINCT date_trunc('week', date))
-        FROM week_entries
-        ",
-    )
-        .bind(&group_member_ids)
-        .fetch_one(&pool)
-        .await?;
-
-    Ok(Json(WeekData { days, total_weeks }))
+    Ok(Json(entries_grouped_by_day))
 }
 
 
