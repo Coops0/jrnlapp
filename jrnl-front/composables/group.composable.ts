@@ -2,7 +2,7 @@ import type { GroupService } from '~/services/group.service';
 import type { Profile } from '~/types/profile.type';
 import type { User } from '@supabase/supabase-js';
 import { useLazyAsyncData } from '#app';
-import type { GroupWeekData } from '~/types/weekly-data.type';
+import type { GroupedDayData } from '~/types/weekly-data.type';
 
 interface GroupInfo {
     name: string;
@@ -17,7 +17,7 @@ export const useGroup = (
     const cachedGroupAndMembers = useLocalStorage(`group-${code}`, {} as {
         members?: Pick<Profile, 'id' | 'name'>[];
         info?: GroupInfo;
-        weeklies?: GroupWeekData[];
+        days?: GroupedDayData[];
     });
 
     const { data: group } = useLazyAsyncData(
@@ -44,11 +44,37 @@ export const useGroup = (
         }
     );
 
-    const { data: weekly } = useLazyAsyncData(`weekly-${code}`, () => groupService.getWeeklyData(code), {
-        default() {
-            return cachedGroupAndMembers.value.weeklies;
-        }
-    });
+
+    const before = ref<Date | null>(null);
+    const { data: days } = useLazyAsyncData(
+        `days-${code}-${before.value}`,
+        () => groupService.getDaysData(code, before.value?.toLocaleDateString() || undefined, 7),
+        {
+            default() {
+                return cachedGroupAndMembers.value.days;
+            },
+            transform(days) {
+                if (!days) return days;
+
+                const dedupedDays = [...(cachedGroupAndMembers.value.days ?? [])];
+                for (const day of days) {
+                    const i = dedupedDays.findIndex(d => d.date === d.date);
+
+                    if (i !== -1) {
+                        // overwrite old w/ new
+                        dedupedDays[i] = day;
+                    } else {
+                        dedupedDays.push(day);
+                    }
+                }
+
+                const sorted = dedupedDays.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                cachedGroupAndMembers.value.days = sorted;
+
+                return sorted;
+            },
+            watch: [before]
+        });
 
     watchImmediate([group, members], () => {
         if (group.value) {
@@ -58,18 +84,13 @@ export const useGroup = (
         if (members.value) {
             cachedGroupAndMembers.value.members = members.value;
         }
-
-        if (weekly.value) {
-            cachedGroupAndMembers.value.weeklies = weekly.value;
-        }
     });
 
     return {
         group,
         members,
 
-        weekly,
-        isWeeklyCurrent,
-        weeklyCursor
+        weekly: days,
+        before
     };
 };

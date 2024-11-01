@@ -1,7 +1,7 @@
 import type { $Fetch } from 'nitropack';
 import type { Group } from '~/types/group.type';
 import type { Profile } from '~/types/profile.type';
-import type { GroupWeekData } from '~/types/weekly-data.type';
+import type { GroupedDayData } from '~/types/weekly-data.type';
 
 export class GroupService {
     constructor(private readonly api: $Fetch) {
@@ -35,7 +35,7 @@ export class GroupService {
         return this.api(`/groups/${code}/kick/${member_id}`, { method: 'DELETE' });
     }
 
-    async getWeeklyData(code: string, skip?: number): Promise<GroupWeekData> {
-        return this.api(`/groups/${code}weekly`, { query: { skip } });
+    async getDaysData(code: string, before?: string, limit?: number): Promise<GroupedDayData[]> {
+        return this.api(`/groups/${code}/day`, { query: { before, limit } });
     }
 }

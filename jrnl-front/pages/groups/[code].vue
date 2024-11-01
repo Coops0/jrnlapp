@@ -34,8 +34,44 @@ const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 const supabaseUser = useSupabaseUser();
 
-let { group, members, weekly } = useGroup(code as string, groupService, supabaseUser);
+let { group, members, weekly, before } = useGroup(code as string, groupService, supabaseUser);
 
+const dateWindowRange = computed(() => {
+  // window size is 7 by default
+  let start = before.value;
+  if (!start) {
+    const f = weekly.value?.[0]?.date;
+    start = f ? new Date(f) : new Date();
+  }
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+
+  return { start, end };
+});
+
+const dateWindow = computed(() => {
+  const { start, end } = dateWindowRange.value;
+  return weekly.value?.filter(w => {
+    const d = new Date(w.date);
+    return d >= start && d < end;
+  });
+});
+
+const move = (days: number) => {
+  if(days > 0 && before.value === null) {
+    // have already reached the newest
+    return false;
+  }
+
+  const { start } = dateWindowRange.value;
+
+  const d = new Date(start);
+
+  d.setDate(d.getDate() + days);
+
+  before.value = d;
+};
 
 async function kick(index: number) {
   const member = members.value!.splice(index, 1)[0]!;

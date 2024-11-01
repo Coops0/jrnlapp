@@ -291,7 +291,7 @@ async fn get_days_data_paginated(
     let all_entries = sqlx::query_as::<_, DayDataRow>(
         // language=postgresql
         "
-        SELECT date, emotion_scalec FROM entries
+        SELECT date, emotion_scale FROM entries
         WHERE author IN ($1) AND date IN ($2)
         ORDER BY date DESC
         LIMIT 500

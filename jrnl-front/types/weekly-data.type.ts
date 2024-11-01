@@ -1,9 +1,4 @@
-export interface GroupWeekData {
-    days: GroupDayData[];
-    total_weeks: number;
-}
-
-export interface GroupDayData {
+export interface GroupedDayData {
     date: string;
     ratings: number[];
 }
