@@ -2,7 +2,7 @@
   <div>
     <div v-if="group">
       <h1>{{ group.name }}</h1>
-      <h2>{{ group.isOwned ? 'owned' : 'not owned' }}</h2>
+      <h2>{{ isOwned ? 'owned' : 'not owned' }}</h2>
     </div>
     <div v-else>
       <h1>loading group info...</h1>
@@ -13,7 +13,7 @@
       <ul>
         <li v-for="(member, index) in members" :key="member.id">
           <p>{{ member.name }} // {{ member.id }}</p>
-          <div v-if="group?.isOwned" @click="kick(index)">kick</div>
+          <div v-if="isOwned && member.id !== supabaseUser?.id" @click="kick(index)">kick</div>
         </li>
       </ul>
     </div>
@@ -32,15 +32,19 @@ const { code } = route.params;
 
 const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
-const supabaseUser = useSupabaseUser();
 
-let { group, members, weekly, before } = useGroup(code as string, groupService, supabaseUser);
+const supabaseUser = useSupabaseUser();
+let { group, members, days, before, execute } = useGroup(code as string, groupService);
+
+onMounted(execute);
+
+const isOwned = computed(() => members.value?.some(m => m.owner && m.id === supabaseUser.value?.id));
 
 const dateWindowRange = computed(() => {
   // window size is 7 by default
   let start = before.value;
   if (!start) {
-    const f = weekly.value?.[0]?.date;
+    const f = days.value?.[0]?.date;
     start = f ? new Date(f) : new Date();
   }
 
@@ -52,14 +56,14 @@ const dateWindowRange = computed(() => {
 
 const dateWindow = computed(() => {
   const { start, end } = dateWindowRange.value;
-  return weekly.value?.filter(w => {
+  return days.value?.filter(w => {
     const d = new Date(w.date);
     return d >= start && d < end;
   });
 });
 
 const move = (days: number) => {
-  if(days > 0 && before.value === null) {
+  if (days > 0 && before.value === null) {
     // have already reached the newest
     return false;
   }

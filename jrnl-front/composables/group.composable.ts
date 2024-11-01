@@ -1,40 +1,37 @@
 import type { GroupService } from '~/services/group.service';
 import type { Profile } from '~/types/profile.type';
-import type { User } from '@supabase/supabase-js';
 import { useLazyAsyncData } from '#app';
 import type { GroupedDayData } from '~/types/weekly-data.type';
 
 interface GroupInfo {
     name: string;
-    isOwned: boolean;
+    id: string;
 }
 
 export const useGroup = (
     code: string,
-    groupService: GroupService,
-    supabaseUser: Ref<User | null>
+    groupService: GroupService
 ) => {
     const cachedGroupAndMembers = useLocalStorage(`group-${code}`, {} as {
-        members?: Pick<Profile, 'id' | 'name'>[];
+        members?: (Pick<Profile, 'id' | 'name'> & { owner: boolean })[];
         info?: GroupInfo;
         days?: GroupedDayData[];
     });
 
-    const { data: group } = useLazyAsyncData(
-        `members-${code}`,
+    const { data: group, execute: executeGroup } = useLazyAsyncData(
+        `group-${code}`,
         () => groupService.getGroup(code),
         {
             default() {
                 return cachedGroupAndMembers.value.info;
             },
             transform(g) {
-                return g && { name: g.name, isOwned: g.owner_id === supabaseUser.value?.id } as GroupInfo;
-            },
-
+                return g && { name: g.name, id: g.id } as GroupInfo;
+            }
         }
     );
 
-    const { data: members } = useLazyAsyncData(
+    const { data: members, execute: executeMembers } = useLazyAsyncData(
         `members-${code}`,
         () => groupService.getGroupMembers(code),
         {
@@ -46,7 +43,7 @@ export const useGroup = (
 
 
     const before = ref<Date | null>(null);
-    const { data: days } = useLazyAsyncData(
+    const { data: days, execute: executeDays } = useLazyAsyncData(
         `days-${code}-${before.value}`,
         () => groupService.getDaysData(code, before.value?.toLocaleDateString() || undefined, 7),
         {
@@ -84,13 +81,19 @@ export const useGroup = (
         if (members.value) {
             cachedGroupAndMembers.value.members = members.value;
         }
-    });
+    }, { deep: true });
+
+    const execute = async () => Promise.all([
+        executeGroup(),
+        executeMembers(),
+        executeDays()
+    ]);
 
     return {
         group,
         members,
-
-        weekly: days,
-        before
+        days,
+        before,
+        execute
     };
 };

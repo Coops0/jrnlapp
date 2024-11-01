@@ -5,11 +5,10 @@ use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
 use crate::web::error::{JrnlError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use uuid::Uuid;
 
 pub fn entries_controller() -> Router<AppState> {
@@ -20,21 +19,28 @@ pub fn entries_controller() -> Router<AppState> {
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
 
+#[derive(Serialize, FromRow)]
+struct StrippedEntry {
+    emotion_scale: f32,
+    date: chrono::NaiveDate,
+    id: Uuid,
+}
+
 async fn get_trimmed_entries_paginated(
     user: User,
     Query(params): Query<CursorParams>,
     State(AppState { pool, .. }): State<AppState>,
-) -> JrnlResult<Json<CursorPaginatedResponse<Entry>>> {
+) -> JrnlResult<Json<CursorPaginatedResponse<StrippedEntry>>> {
     let limit = params.limit.unwrap_or(20).clamp(1, 100);
     let limit_plus_one = i64::from(limit) + 1;
 
     let cursor = params.cursor.unwrap_or_default();
 
-    let mut entries = sqlx::query_as::<_, Entry>(
+    let mut entries = sqlx::query_as::<_, StrippedEntry>(
         // language=postgresql
         "
             SELECT emotion_scale, date, id FROM entries
-            WHERE author = $1
+            WHERE entries.author = $1
             AND (date, id) < ($2, $3)
             ORDER BY date DESC, id DESC
             LIMIT $4
@@ -79,7 +85,7 @@ async fn get_entry(
         .fetch_optional(&pool)
         .await
         .map(Json)
-        .map_err(|_| JrnlError::NoResultsFound)
+        .map_err(JrnlError::DatabaseError)
 }
 
 async fn get_overall_average(
@@ -114,10 +120,14 @@ struct UpdateEntryPayload {
     text: Option<String>,
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn clean_string<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
 ) -> Result<Option<String>, D::Error> {
-    let s = String::deserialize(deserializer)?;
+    let Ok(s) = String::deserialize(deserializer) else {
+        return Ok(None);
+    };
+
     let trimmed = s.trim();
 
     Ok(if trimmed.is_empty() {

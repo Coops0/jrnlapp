@@ -51,7 +51,7 @@ async fn create_group(
 struct GetGroupBody {
     id: Uuid,
     name: String,
-    members: i32, // doesn't support unsigned ints
+    members: i64, // doesn't support unsigned ints
 }
 
 async fn get_group(
@@ -72,7 +72,7 @@ async fn get_group(
         .fetch_optional(&pool)
         .await
         .map(Json)
-        .map_err(|_| JrnlError::NoResultsFound)
+        .map_err(JrnlError::DatabaseError)
 }
 
 async fn join_group(
@@ -101,40 +101,63 @@ async fn join_group(
         })
 }
 
-#[derive(FromRow, Serialize)]
+#[derive(FromRow)]
 struct TrimmedUser {
     id: Uuid,
     name: String,
+}
+
+#[derive(Serialize)]
+struct TrimmedUserWithOwner {
+    id: Uuid,
+    name: String,
+    owner: bool,
 }
 
 async fn get_group_members(
     user: User,
     Path(code): Path<String>,
     State(AppState { pool, .. }): State<AppState>,
-) -> JrnlResult<Json<Vec<TrimmedUser>>> {
-    sqlx::query_as::<_, TrimmedUser>(
+) -> JrnlResult<Json<Vec<TrimmedUserWithOwner>>> {
+    let group = sqlx::query_as::<_, Group>(
         // language=postgresql
         "
-        SELECT p.id, p.name 
-        FROM profiles p
-        JOIN group_memberships gm ON p.id = gm.user_id
-        JOIN groups g ON gm.group_id = g.id
-        WHERE g.code = $1 LIMIT 1
+        SELECT * FROM groups WHERE code = $1
         AND EXISTS (
             SELECT 1
-            FROM group_memberships gm2
-            JOIN groups g2 ON gm2.group_id = g2.id
-            WHERE g2.code = $1 
-            AND gm2.user_id = $2
+            FROM group_memberships gm
+            WHERE gm.group_id = groups.id
+            AND gm.user_id = $2
         )
-    ",
+        LIMIT 1
+        "
     )
         .bind(code)
         .bind(user.id)
+        .fetch_one(&pool)
+        .await
+        .map_err(JrnlError::DatabaseError)?;
+
+    let members = sqlx::query_as::<_, TrimmedUser>(
+        // language=postgresql
+        "
+        SELECT p.id, p.name FROM profiles p
+        JOIN group_memberships gm ON p.id = gm.user_id
+        WHERE gm.group_id = $1
+
+    "
+    )
+        .bind(group.id)
         .fetch_all(&pool)
         .await
-        .map(Json)
-        .map_err(|_| JrnlError::NoResultsFound)
+        .map_err(JrnlError::DatabaseError)?;
+
+    let members_with_owners = members
+        .into_iter()
+        .map(|user| TrimmedUserWithOwner { id: user.id, name: user.name, owner: user.id.eq(&group.owner_id) })
+        .collect::<Vec<_>>();
+
+    Ok(Json(members_with_owners))
 }
 
 async fn leave_group(
@@ -149,7 +172,7 @@ async fn leave_group(
         .bind(&code)
         .fetch_one(&pool)
         .await
-        .map_err(|_| JrnlError::NoResultsFound)?;
+        .map_err(JrnlError::DatabaseError)?;
 
     sqlx::query(
         // language=postgresql
@@ -224,7 +247,7 @@ async fn kick_member(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(|_| JrnlError::NoResultsFound)
+        .map_err(JrnlError::DatabaseError)
 }
 
 #[derive(Serialize)]
@@ -254,23 +277,24 @@ async fn get_days_data_paginated(
     let day_limit = params.day_limit.unwrap_or(7).clamp(1, 30);
     let before = params.before.unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
 
-    let group = sqlx::query_as::<_, Group>(
+    let group_id = sqlx::query_scalar::<_, Uuid>(
         // language=postgresql
         "
-        SELECT id FROM groups WHERE code = $1 LIMIT 1
+        SELECT id FROM groups WHERE code = $1
         AND EXISTS (
             SELECT 1
             FROM group_memberships gm
             WHERE gm.group_id = groups.id
             AND gm.user_id = $2
         )
+        LIMIT 1
         "
     )
         .bind(code)
         .bind(user.id)
         .fetch_one(&pool)
         .await
-        .map_err(|_| JrnlError::NoResultsFound)?;
+        .map_err(JrnlError::DatabaseError)?;
 
     let group_members = sqlx::query_scalar::<_, Uuid>(
         // language=postgresql
@@ -278,7 +302,7 @@ async fn get_days_data_paginated(
         SELECT user_id FROM group_memberships WHERE group_id = $1
         "
     )
-        .bind(group.id)
+        .bind(group_id)
         .fetch_all(&pool)
         .await?;
 
@@ -292,7 +316,7 @@ async fn get_days_data_paginated(
         // language=postgresql
         "
         SELECT date, emotion_scale FROM entries
-        WHERE author IN ($1) AND date IN ($2)
+        WHERE author = ANY($1) AND date = ANY($2)
         ORDER BY date DESC
         LIMIT 500
         "

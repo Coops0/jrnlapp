@@ -3,7 +3,7 @@
     <h1>Groups</h1>
     <div>
       <div v-for="group in groups" :key="group.code">
-        <NuxtLink :to="{ name: 'group-code', params: { code: group.code } }">
+        <NuxtLink :to="{ name: 'groups-code', params: { code: group.code } }">
           <div>{{ group.name }}</div>
         </NuxtLink>
       </div>
@@ -14,8 +14,7 @@
       </div>
 
       <div>
-        <input v-model="joinGroupCode" placeholder="Group code" @change="updateGroupSearchResults"/>
-
+        <input v-model="joinGroupCode" placeholder="Group code" @input="updateGroupSearchResults"/>
 
         <div v-if="groupSearchResults">
           <div>{{ groupSearchResults.name }}</div>
@@ -45,20 +44,22 @@ const { data: groups, refresh } = useLazyAsyncData(
     }
 );
 
+onMounted(refresh);
+
 watchImmediate(groups, (g) => {
   if (g) {
     cachedGroups.value = g;
   }
-});
+}, { deep: true });
 
 const groupName = ref('');
 const joinGroupCode = ref('');
 const groupSearchResults = ref<{ id: string; name: string; members: number; } | null>(null);
 
-async function updateGroupSearchResults() {
+const updateGroupSearchResults = useDebounceFn(async () => {
   const c = joinGroupCode.value;
   groupSearchResults.value = c.length ? await groupService.getGroup(joinGroupCode.value) : null;
-}
+}, 250);
 
 async function joinGroup() {
   const c = joinGroupCode.value;

@@ -15,36 +15,39 @@ export const useTodayEntry = (entryService: EntryService) => {
     const entry = ref<Entry>(storage.value);
 
     const lastSaved = ref(new Date(1900, 1, 1));
-    const tomorrow = ref(new Date());
+    const tomorrow = ref(getTomorrow());
 
     const save = useDebounceFn(async () => {
+        console.debug('saved debounce fn called');
         if (!entry.value) {
             return;
         }
 
         storage.value = entry.value;
         await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+        console.debug('saved entry');
 
         lastSaved.value = new Date();
     }, 600);
 
 
-    const { pause, resume } = pausableWatch(entry, save);
-    // immediately pause as to not save on initial load
-    pause();
-
+    const { ignoreUpdates } = watchIgnorable(entry, () => save(), { deep: true });
 
     async function beginFetch() {
         try {
             const today = await entryService.getToday();
+            today.text = today.text || '';
 
             if (entry.value.text === storage.value.text && entry.value.emotion_scale === storage.value.emotion_scale) {
                 // no modifications have been made, we can overwrite
-                entry.value = today;
+                ignoreUpdates(() => {
+                    entry.value = today;
+                });
+
                 storage.value = today;
             }
         } finally {
-            resume();
+            console.debug('finished initial entry fetch');
         }
     }
 
@@ -55,10 +58,12 @@ export const useTodayEntry = (entryService: EntryService) => {
             return;
         }
 
+        console.debug('tripped daily reset');
         tomorrow.value = getTomorrow();
-        pause();
-        entry.value = BLANK_ENTRY();
-        resume();
+
+        ignoreUpdates(() => {
+            entry.value = BLANK_ENTRY();
+        });
 
         storage.value = BLANK_ENTRY();
     }, 1000);

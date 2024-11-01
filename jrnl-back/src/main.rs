@@ -25,12 +25,15 @@ async fn main() -> anyhow::Result<()> {
     let _ = dotenvy::dotenv();
 
     let filter = EnvFilter::builder()
-        .with_default_directive(LevelFilter::DEBUG.into())
-        .from_env()?;
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env()?
+        .add_directive("jrnl-back=debug".parse()?)
+        .add_directive("app=debug".parse()?);
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)
-        .pretty()
+
+        .compact()
         .init();
 
     let pool = PgPoolOptions::new()

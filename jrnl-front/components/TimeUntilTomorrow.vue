@@ -8,7 +8,7 @@
 <script setup lang="ts">
 const props = defineProps<{ tomorrow: Date }>();
 
-const timeUntilTomorrow = useTimeAgo(props.tomorrow);
+const timeUntilTomorrow = useTimeAgo(props.tomorrow, { updateInterval: 800, showSecond: true });
 
 const show = useLocalStorage('show-time-until', true);
 const toggle = useToggle(show);

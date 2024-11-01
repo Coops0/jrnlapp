@@ -2,15 +2,17 @@
   <div>
     <h1>Pages</h1>
     <div>
-      <PastEntry
-          v-for="entry in entries"
-          :key="entry.id"
-          :id="entry.id"
-          :rating="entry.emotion_scale"
-          :date="entry.date"
-      />
+      <ClientOnly>
+        <PastEntry
+            v-for="entry in entries"
+            :key="entry.id"
+            :id="entry.id"
+            :rating="entry.emotion_scale"
+            :date="entry.date"
+        />
 
-      <div v-if="paginator.has_more" @click="loadMore">load more</div>
+        <div v-if="paginator.has_more" @click="loadMore">load more</div>
+      </ClientOnly>
     </div>
   </div>
 </template>
@@ -28,7 +30,7 @@ const entries = ref<StrippedEntry[]>([]);
 
 const nextCursor = ref<string | null>(null);
 
-const { data: paginator } = useLazyAsyncData(
+const { data: paginator, execute } = useLazyAsyncData(
     'entries',
     () => entryService.getEntriesPaginated(nextCursor.value || undefined, 50),
     {
@@ -39,9 +41,11 @@ const { data: paginator } = useLazyAsyncData(
           has_more: false
         };
       },
-      watch: [nextCursor]
+      watch: [nextCursor],
     }
 );
+
+onMounted(execute);
 
 watch(paginator, (p) => {
   if (!p?.items?.length) {
@@ -55,7 +59,7 @@ watch(paginator, (p) => {
   }
 
   reactiveStorage.value = [...entries.value];
-}, { immediate: true });
+}, { immediate: true, deep: true });
 
 function loadMore() {
   if (paginator.value.has_more && paginator.value.next_cursor) {

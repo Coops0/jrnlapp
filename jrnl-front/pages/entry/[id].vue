@@ -22,23 +22,22 @@ const { id } = route.params;
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const localEntry = useLocalStorage(`entry-${id}`, null as Entry | null);
+const localEntry = useLocalStorage(`entry-${id}`, {} as Entry);
 
-
-const { data: entry, error } = useLazyAsyncData(
+const { data: entry, error, execute } = useLazyAsyncData(
     `entry-${id}`,
     () => entryService.getEntry(id as string),
     {
       default() {
         return localEntry;
-      }
+      },
+      transform: (e) => {
+        localEntry.value = e;
+        return e;
+      },
     }
 );
 
-watchImmediate(entry, () => {
-  if (entry.value) {
-    localEntry.value = entry.value;
-  }
-});
+onMounted(execute);
 </script>
 

@@ -23,7 +23,7 @@ export class GroupService {
         return this.api('/groups/join', { method: 'POST', body: { code } });
     }
 
-    async getGroupMembers(code: string): Promise<Pick<Profile, 'id' | 'name'>[]> {
+    async getGroupMembers(code: string): Promise<(Pick<Profile, 'id' | 'name'> & { owner: boolean })[]> {
         return this.api(`/groups/${code}/members`);
     }
 
@@ -32,7 +32,7 @@ export class GroupService {
     }
 
     async kickMember(code: string, member_id: string): Promise<void> {
-        return this.api(`/groups/${code}/kick/${member_id}`, { method: 'DELETE' });
+        return this.api(`/groups/${code}/${member_id}`, { method: 'DELETE' });
     }
 
     async getDaysData(code: string, before?: string, limit?: number): Promise<GroupedDayData[]> {

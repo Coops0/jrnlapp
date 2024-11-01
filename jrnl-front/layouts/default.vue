@@ -1,13 +1,18 @@
 <template>
-  <template>
+  <div>
     <header>
-      <h1><NuxtLink to="/">jrnl</NuxtLink></h1>
+      <h1>
+        <NuxtLink to="/">jrnl</NuxtLink>
+      </h1>
     </header>
-    <slot/>
+
+    <main>
+      <slot/>
+    </main>
     <footer>
       <p>hm?</p>
     </footer>
-  </template>
+  </div>
 </template>
 
 <script setup lang="ts">
