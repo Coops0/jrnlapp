@@ -1,10 +1,12 @@
+use axum::async_trait;
 use axum::extract::rejection::JsonRejection;
 use axum::extract::{FromRequest, Request};
 use axum::http::StatusCode;
-use axum::{async_trait, RequestPartsExt};
 use thiserror::Error;
 use thiserror_status::ErrorStatus;
-use tracing::error;
+use tracing::warn;
+
+pub type JrnlResult<T> = Result<T, JrnlError>;
 
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Error, ErrorStatus)]
@@ -16,29 +18,52 @@ pub enum JrnlError {
     #[error("no results found")]
     #[status(StatusCode::NOT_FOUND)]
     NoResultsFound,
-    
+
     #[error("already group member")]
     #[status(StatusCode::CONFLICT)]
     AlreadyGroupMember,
-    
+
     #[error("cannot kick self")]
     #[status(StatusCode::BAD_REQUEST)]
     CannotKickSelf,
-    
+
     #[error("authentication error {0}")]
     #[status(StatusCode::UNAUTHORIZED)]
     AuthenticationError(String),
 
+    #[deprecated(note = "use `DatabaseError` wrapper instead")]
     #[error("database error {0:?}")]
     #[status(StatusCode::INTERNAL_SERVER_ERROR)]
-    DatabaseError(#[from] sqlx::Error),
+    DatabaseError(/*#[from]*/ sqlx::Error),
 
     #[error("other error occurred {0:}")]
     #[status(StatusCode::INTERNAL_SERVER_ERROR)]
     Other(#[from] anyhow::Error),
 }
 
-pub type JrnlResult<T> = Result<T, JrnlError>;
+#[allow(clippy::module_name_repetitions)]
+pub struct DatabaseError(pub sqlx::Error);
+
+#[allow(deprecated)]
+impl From<DatabaseError> for JrnlError {
+    fn from(err: DatabaseError) -> Self {
+        match err {
+            DatabaseError(sqlx::Error::RowNotFound) => return Self::NoResultsFound,
+            DatabaseError(sqlx::Error::Database(_)) => {
+                warn!("Database error: {:?}", err.0);
+            }
+            _ => {}
+        }
+
+        Self::DatabaseError(err.0)
+    }
+}
+
+impl From<sqlx::Error> for JrnlError {
+    fn from(err: sqlx::Error) -> Self {
+        DatabaseError(err).into()
+    }
+}
 
 pub struct JsonExtractor<T>(pub T);
 

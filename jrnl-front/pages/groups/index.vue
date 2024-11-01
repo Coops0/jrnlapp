@@ -54,6 +54,7 @@ watchImmediate(groups, (g) => {
 
 const groupName = ref('');
 const joinGroupCode = ref('');
+
 const groupSearchResults = ref<{ id: string; name: string; members: number; } | null>(null);
 
 const updateGroupSearchResults = useDebounceFn(async () => {
@@ -64,6 +65,7 @@ const updateGroupSearchResults = useDebounceFn(async () => {
 async function joinGroup() {
   const c = joinGroupCode.value;
   if (!c.length) {
+    groupSearchResults.value = null;
     return;
   }
 

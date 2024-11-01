@@ -3,6 +3,7 @@ mod schemas;
 mod web;
 
 use crate::web::auth::User;
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::Router;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::env;
@@ -47,14 +48,14 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let app = Router::new()
-        .nest("/users", controllers::user::users_controller())
+        .nest("/user", controllers::user::users_controller())
         .nest("/entries", controllers::entry::entries_controller())
         .nest("/groups", controllers::group::groups_controller())
         .layer(ServiceBuilder::new()
             .layer(CorsLayer::new()
                 .allow_origin(AllowOrigin::any()) // todo
                 .allow_methods(AllowMethods::any())
-                .allow_headers(AllowHeaders::any())
+                .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
             )
             .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
         )

@@ -1,6 +1,6 @@
 use crate::schemas::group::Group;
 use crate::web::auth::User;
-use crate::web::error::{JrnlError, JrnlResult, JsonExtractor};
+use crate::web::error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, post};
@@ -65,14 +65,14 @@ async fn get_group(
        FROM groups g
            LEFT JOIN group_memberships gm ON g.id = gm.group_id
      WHERE g.code = $1
-     GROUP BY g.id
-",
+     GROUP BY g.id LIMIT 1
+        ",
     )
         .bind(code)
         .fetch_optional(&pool)
         .await
         .map(Json)
-        .map_err(JrnlError::DatabaseError)
+        .map_err(Into::into)
 }
 
 async fn join_group(
@@ -94,11 +94,12 @@ async fn join_group(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(|e| match e {
-            sqlx::Error::RowNotFound => JrnlError::NoResultsFound,
-            sqlx::Error::Database(_) => JrnlError::AlreadyGroupMember,
-            _ => JrnlError::DatabaseError(e)
-        })
+        .map_err(|why|
+            match &why {
+                sqlx::Error::Database(d) if d.is_unique_violation() => JrnlError::AlreadyGroupMember,
+                _ => DatabaseError(why).into()
+            }
+        )
 }
 
 #[derive(FromRow)]
@@ -136,7 +137,7 @@ async fn get_group_members(
         .bind(user.id)
         .fetch_one(&pool)
         .await
-        .map_err(JrnlError::DatabaseError)?;
+        .map_err(DatabaseError)?;
 
     let members = sqlx::query_as::<_, TrimmedUser>(
         // language=postgresql
@@ -150,7 +151,7 @@ async fn get_group_members(
         .bind(group.id)
         .fetch_all(&pool)
         .await
-        .map_err(JrnlError::DatabaseError)?;
+        .map_err(DatabaseError)?;
 
     let members_with_owners = members
         .into_iter()
@@ -172,7 +173,7 @@ async fn leave_group(
         .bind(&code)
         .fetch_one(&pool)
         .await
-        .map_err(JrnlError::DatabaseError)?;
+        .map_err(DatabaseError)?;
 
     sqlx::query(
         // language=postgresql
@@ -247,7 +248,7 @@ async fn kick_member(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(JrnlError::DatabaseError)
+        .map_err(Into::into)
 }
 
 #[derive(Serialize)]
@@ -294,7 +295,7 @@ async fn get_days_data_paginated(
         .bind(user.id)
         .fetch_one(&pool)
         .await
-        .map_err(JrnlError::DatabaseError)?;
+        .map_err(DatabaseError)?;
 
     let group_members = sqlx::query_scalar::<_, Uuid>(
         // language=postgresql
@@ -325,7 +326,7 @@ async fn get_days_data_paginated(
         .bind(&dates)
         .fetch_all(&pool)
         .await
-        .map_err(JrnlError::DatabaseError)?;
+        .map_err(DatabaseError)?;
 
     let entries_grouped_by_day = all_entries
         .into_iter()

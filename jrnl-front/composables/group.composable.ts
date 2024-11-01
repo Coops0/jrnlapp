@@ -55,7 +55,7 @@ export const useGroup = (
 
                 const dedupedDays = [...(cachedGroupAndMembers.value.days ?? [])];
                 for (const day of days) {
-                    const i = dedupedDays.findIndex(d => d.date === d.date);
+                    const i = dedupedDays.findIndex(d => d.day === day.day);
 
                     if (i !== -1) {
                         // overwrite old w/ new
@@ -65,7 +65,7 @@ export const useGroup = (
                     }
                 }
 
-                const sorted = dedupedDays.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                const sorted = dedupedDays.sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime());
                 cachedGroupAndMembers.value.days = sorted;
 
                 return sorted;

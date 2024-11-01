@@ -1,5 +1,5 @@
 use crate::schemas::profile::Profile;
-use crate::web::error::JrnlError;
+use crate::web::error::{DatabaseError, JrnlError};
 use crate::AppState;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
@@ -63,7 +63,7 @@ impl FromRequestParts<AppState> for Profile {
             .bind(user.id)
             .fetch_optional(&state.pool)
             .await
-            .map_err(JrnlError::DatabaseError)?;
+            .map_err(DatabaseError)?;
 
         profile.map_or_else(
             // this shouldn't happen hopefully

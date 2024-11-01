@@ -2,7 +2,7 @@ use crate::schemas::entry::Entry;
 use crate::schemas::profile::Profile;
 use crate::web::auth::User;
 use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
-use crate::web::error::{JrnlError, JrnlResult, JsonExtractor};
+use crate::web::error::{DatabaseError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
@@ -52,7 +52,7 @@ async fn get_trimmed_entries_paginated(
         .bind(limit_plus_one)
         .fetch_all(&pool)
         .await
-        .map_err(JrnlError::DatabaseError)?;
+        .map_err(DatabaseError)?;
 
     let has_more = entries.len() > limit as usize;
     if has_more {
@@ -85,7 +85,7 @@ async fn get_entry(
         .fetch_optional(&pool)
         .await
         .map(Json)
-        .map_err(JrnlError::DatabaseError)
+        .map_err(Into::into)
 }
 
 async fn get_overall_average(
@@ -158,5 +158,5 @@ async fn update_today_entry(
         .fetch_one(&pool)
         .await
         .map(Json)
-        .map_err(JrnlError::DatabaseError)
+        .map_err(Into::into)
 }

@@ -1,4 +1,4 @@
 export interface GroupedDayData {
-    date: string;
-    ratings: number[];
+    day: string;
+    scales: number[];
 }
