@@ -31,7 +31,7 @@ const { data: entry, error, execute } = useLazyAsyncData(
       default() {
         return localEntry;
       },
-      transform: (e) => {
+      transform(e) {
         localEntry.value = e;
         return e;
       },
@@ -40,4 +40,3 @@ const { data: entry, error, execute } = useLazyAsyncData(
 
 onMounted(execute);
 </script>
-
