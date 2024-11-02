@@ -25,7 +25,7 @@ const editor = useEditor({
   extensions: [StarterKit],
   editorProps: {
     attributes: {
-      class: 'm-5 focus:outline-none font-code'
+      class: 'dark:prose-invert font-code m-5 prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
     }
   },
   autofocus: true,

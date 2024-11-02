@@ -68,8 +68,9 @@ export const useTodayEntry = (entryService: EntryService) => {
         }
 
         try {
-            if (wasLocalStorageValid.value === true && JSON.stringify(storage.value) !== JSON.stringify(entry.value)) {
+            if (wasLocalStorageValid.value && JSON.stringify(today) !== JSON.stringify(entry.value)) {
                 console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
+                await save();
                 return;
             }
         } catch (e) {
