@@ -1,6 +1,6 @@
 import type { Entry } from '~/types/entry.type';
 import type { EntryService } from '~/services/entry.service';
-import { getTomorrow, isSameDay } from '~/util/index.util';
+import { getTomorrow, isSameDay, parseServerDate } from '~/util/index.util';
 
 const BLANK_ENTRY = (): Entry => ({
     text: '',
@@ -11,17 +11,16 @@ const BLANK_ENTRY = (): Entry => ({
 });
 
 export const useTodayEntry = (entryService: EntryService) => {
-    const storage = useLocalStorage('entry-today', BLANK_ENTRY());
-    const entry = ref<Entry>(storage.value);
+    const entry = ref<Entry>(BLANK_ENTRY());
 
     const lastSaved = ref(new Date(1900, 1, 1));
     const tomorrow = ref(getTomorrow());
 
+    const storage = useLocalStorage('entry-today', BLANK_ENTRY());
+
     const save = useDebounceFn(async () => {
         console.debug('saved debounce fn called');
-        if (!entry.value) {
-            return;
-        }
+        if (!entry.value) return;
 
         storage.value = entry.value;
         await entryService.putToday(entry.value.emotion_scale, entry.value.text);
@@ -30,25 +29,59 @@ export const useTodayEntry = (entryService: EntryService) => {
         lastSaved.value = new Date();
     }, 600);
 
-
     const { ignoreUpdates } = watchIgnorable(entry, () => save(), { deep: true });
 
+    const hasFetched = ref(false);
+    const wasLocalStorageValid = ref<boolean>(false);
+
+    onMounted(() => {
+        if (hasFetched.value) {
+            console.debug('already fetched, skipping initial local storage check');
+            return;
+        }
+
+        if (isSameDay(parseServerDate(storage.value.date))) {
+            console.debug('loading from local storage');
+
+            wasLocalStorageValid.value = true;
+            ignoreUpdates(() => {
+                entry.value = storage.value;
+            });
+        } else {
+            console.debug('resetting local storage', storage.value, parseServerDate(storage.value.date));
+            storage.value = BLANK_ENTRY();
+        }
+    });
+
     async function beginFetch() {
+        let today: Entry | null;
         try {
-            const today = await entryService.getToday();
-            today.text = today.text || '';
-
-            if (entry.value.text === storage.value.text && entry.value.emotion_scale === storage.value.emotion_scale) {
-                // no modifications have been made, we can overwrite
-                ignoreUpdates(() => {
-                    entry.value = today;
-                });
-
-                storage.value = today;
-            }
+            today = await entryService.getToday();
         } finally {
             console.debug('finished initial entry fetch');
+            hasFetched.value = true;
         }
+
+        if (today === null) {
+            console.debug('fetch entry returned null, defaulting to blank');
+            today = BLANK_ENTRY();
+        }
+
+        try {
+            if (wasLocalStorageValid.value === true && JSON.stringify(storage.value) !== JSON.stringify(entry.value)) {
+                console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
+                return;
+            }
+        } catch (e) {
+            console.warn('error comparing storage and fetched state', e);
+        }
+
+        console.debug('setting entry to fetched state');
+        ignoreUpdates(() => {
+            entry.value = today;
+        });
+
+        storage.value = today;
     }
 
     // if day changes as we are writing, then reset too

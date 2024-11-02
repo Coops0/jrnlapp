@@ -25,7 +25,7 @@ export class EntryService {
         return this.api('/entries/average');
     }
 
-    async getToday(): Promise<Entry> {
+    async getToday(): Promise<Entry | null> {
         return this.api('/entries/today');
     }
 

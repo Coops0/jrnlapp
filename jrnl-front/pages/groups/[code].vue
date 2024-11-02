@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { GroupService } from '~/services/group.service';
 import { useGroup } from '~/composables/group.composable';
+import { parseServerDate } from '~/util/index.util';
 
 const route = useRoute();
 const code = route.params.code as string;
@@ -81,7 +82,7 @@ const dateWindowRange = computed(() => {
 const dateWindow = computed(() => {
   const { start, end } = dateWindowRange.value;
   return days.value?.filter(w => {
-    const d = new Date(w.day).getTime();
+    const d = parseServerDate(w.day).getTime();
     return d >= start.getTime() && d < end.getTime();
   });
 });

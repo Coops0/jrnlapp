@@ -2,6 +2,7 @@ import type { GroupService } from '~/services/group.service';
 import type { Profile } from '~/types/profile.type';
 import { useLazyAsyncData } from '#app';
 import type { GroupedDayData } from '~/types/weekly-data.type';
+import { parseServerDate } from '~/util/index.util';
 
 interface GroupInfo {
     name: string;
@@ -65,7 +66,7 @@ export const useGroup = (
                     }
                 }
 
-                const sorted = dedupedDays.sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime());
+                const sorted = dedupedDays.sort((a, b) => parseServerDate(b.day).getTime() - parseServerDate(a.day).getTime());
                 cachedGroupAndMembers.value.days = sorted;
 
                 return sorted;

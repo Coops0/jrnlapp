@@ -6,10 +6,22 @@
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 
-const content = defineModel<string>({ required: true });
+const props = defineProps<{ modelValue?: string }>();
+const emit = defineEmits<{
+  'update:modelValue': [content: string]
+}>();
+
+watch(() => props.modelValue, value => {
+  const e = editor.value;
+  if (!e) return;
+
+  if (e.getHTML() !== value) {
+    editor.value?.commands.setContent(value ?? '', false);
+  }
+});
 
 const editor = useEditor({
-  content: content.value ?? '',
+  content: props.modelValue ?? '',
   extensions: [StarterKit],
   editorProps: {
     attributes: {
@@ -18,9 +30,11 @@ const editor = useEditor({
   },
   autofocus: true,
   onUpdate({ editor: e }) {
-    content.value = e.getHTML();
+    emit('update:modelValue', e.getHTML());
   },
 });
+
+
 </script>
 
 <style scoped>

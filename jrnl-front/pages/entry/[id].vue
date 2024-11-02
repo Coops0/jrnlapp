@@ -5,7 +5,7 @@
     </div>
     <div v-else-if="entry">
       <div>{{ entry.date }}</div>
-      <div>{{ entry.text }}</div>
+      <div v-html="entry.text ?? 'no text'"></div>
       <div>{{ entry.emotion_scale }}</div>
     </div>
 

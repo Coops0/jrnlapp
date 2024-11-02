@@ -116,12 +116,12 @@ async fn get_today_entry(
 #[derive(Deserialize)]
 struct UpdateEntryPayload {
     emotion_scale: f32,
-    #[serde(deserialize_with = "sanitize_html")]
+    #[serde(deserialize_with = "sanitize_html_string")]
     text: Option<String>,
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn sanitize_html<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
+fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
     let Ok(s) = String::deserialize(deserializer) else {
         return Ok(None);
     };
