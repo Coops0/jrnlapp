@@ -4,9 +4,11 @@
 
 <script setup lang="ts">
 import { useTimeoutFn } from '@vueuse/core';
+import { ProfileService } from '~/services/profile.service';
 
 const user = useSupabaseUser();
 const { $localApi } = useNuxtApp();
+const profileService = new ProfileService($localApi);
 
 watch(user, async () => {
   if (!user.value) {
@@ -19,11 +21,7 @@ watch(user, async () => {
   redirectCookie.value = null;
 
   try {
-    await $localApi('/user/tz', {
-      ignoreError: true,
-      method: 'PUT',
-      body: JSON.stringify({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
-    });
+    await profileService.updateMe({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
   } catch (e) {
     console.warn(e);
   }

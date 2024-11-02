@@ -3,6 +3,7 @@ mod schemas;
 mod web;
 
 use crate::web::auth::User;
+use axum::extract::DefaultBodyLimit;
 use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::Router;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
@@ -58,6 +59,7 @@ async fn main() -> anyhow::Result<()> {
                 .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
             )
             .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
+            .layer(DefaultBodyLimit::max(1024))
         )
         .with_state(state);
 

@@ -1,9 +1,10 @@
 CREATE TABLE IF NOT EXISTS profiles
 (
-    id       UUID                   NOT NULL REFERENCES auth.users ON DELETE CASCADE,
-    name     TEXT                   NOT NULL,
-    theme    TEXT DEFAULT 'default' NOT NULL,
-    timezone TEXT DEFAULT 'UTC'     NOT NULL,
+    id             UUID                           NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+    name           TEXT                           NOT NULL,
+    theme          TEXT         DEFAULT 'default' NOT NULL,
+    favorite_color VARCHAR(255) DEFAULT null,
+    timezone       TEXT         DEFAULT 'UTC'     NOT NULL,
     PRIMARY KEY (id)
 );
 

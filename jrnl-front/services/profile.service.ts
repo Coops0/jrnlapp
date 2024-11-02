@@ -5,11 +5,11 @@ export class ProfileService {
     constructor(private readonly api: $Fetch) {
     };
 
-    async putTimezone(tz: string): Promise<void> {
-        return this.api('/users/timezone', { method: 'PUT', body: { timezone: tz } });
+    async updateMe(payload: { tz?: string; favorite_color?: string; }): Promise<Profile> {
+        return this.api('/user/me', { method: 'PATCH', body: payload });
     }
 
     async getMe(): Promise<Profile> {
-        return this.api('/users/me');
+        return this.api('/user/me');
     }
 }

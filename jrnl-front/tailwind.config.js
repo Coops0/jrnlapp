@@ -1,52 +1,157 @@
+const { createThemes } = require('tw-colors');
+
 /** @type {import('tailwindcss').Config} */
 export default {
 	content: [],
 	plugins: [
-		require('@tailwindcss/typography')
+		require('@tailwindcss/typography'),
+		createThemes({
+			purple: {
+				colors: {
+					text: {
+						50: '#eae9fc',
+						100: '#d6d2f9',
+						200: '#ada5f3',
+						300: '#8478ed',
+						400: '#5b4be7',
+						500: '#321fe0',
+						600: '#2818b4',
+						700: '#1e1287',
+						800: '#140c5a',
+						900: '#0a062d',
+						950: '#050316'
+					},
+					background: {
+						50: '#ebebfa',
+						100: '#d6d6f5',
+						200: '#adadeb',
+						300: '#8585e0',
+						400: '#5c5cd6',
+						500: '#3333cc',
+						600: '#2929a3',
+						700: '#1f1f7a',
+						800: '#141452',
+						900: '#0a0a29',
+						950: '#050514'
+					},
+					primary: {
+						50: '#eaeafb',
+						100: '#d6d4f7',
+						200: '#ada9ef',
+						300: '#847ee7',
+						400: '#5b54de',
+						500: '#3129d6',
+						600: '#2821ab',
+						700: '#1e1881',
+						800: '#141056',
+						900: '#0a082b',
+						950: '#050415'
+					},
+					secondary: {
+						50: '#e7e5ff',
+						100: '#cfccff',
+						200: '#9e99ff',
+						300: '#6e66ff',
+						400: '#3d33ff',
+						500: '#0d00ff',
+						600: '#0a00cc',
+						700: '#080099',
+						800: '#050066',
+						900: '#030033',
+						950: '#01001a'
+					},
+					accent: {
+						50: '#e6e5ff',
+						100: '#ceccff',
+						200: '#9c99ff',
+						300: '#6b66ff',
+						400: '#3a33ff',
+						500: '#0800ff',
+						600: '#0700cc',
+						700: '#050099',
+						800: '#030066',
+						900: '#020033',
+						950: '#01001a'
+					}
+				}
+			},
+			plant: {
+				colors: {
+					text: {
+						50: '#f2f3f2',
+						100: '#e5e6e5',
+						200: '#caceca',
+						300: '#b0b5b0',
+						400: '#969c96',
+						500: '#7c837c',
+						600: '#636963',
+						700: '#4a4f4a',
+						800: '#313531',
+						900: '#191a19',
+						950: '#0c0d0c'
+					},
+					background: {
+						50: '#f3f3f1',
+						100: '#e6e8e3',
+						200: '#cdd0c8',
+						300: '#b5b9ac',
+						400: '#9ca191',
+						500: '#838a75',
+						600: '#696e5e',
+						700: '#4f5346',
+						800: '#34372f',
+						900: '#1a1c17',
+						950: '#0d0e0c'
+					},
+					primary: {
+						50: '#f3f4f1',
+						100: '#e8e9e2',
+						200: '#d1d3c5',
+						300: '#b9bca9',
+						400: '#a2a68c',
+						500: '#8b906f',
+						600: '#6f7359',
+						700: '#535643',
+						800: '#383a2c',
+						900: '#1c1d16',
+						950: '#0e0e0b'
+					},
+					secondary: {
+						50: '#f4f5f0',
+						100: '#e9eae1',
+						200: '#d2d5c3',
+						300: '#bcc0a5',
+						400: '#a5ab87',
+						500: '#8f9669',
+						600: '#727854',
+						700: '#565a3f',
+						800: '#393c2a',
+						900: '#1d1e15',
+						950: '#0e0f0a'
+					},
+					accent: {
+						50: '#f4f5ef',
+						100: '#e9ebe0',
+						200: '#d3d8c0',
+						300: '#bec4a1',
+						400: '#a8b082',
+						500: '#929d62',
+						600: '#757d4f',
+						700: '#585e3b',
+						800: '#3a3f27',
+						900: '#1d1f14',
+						950: '#0f100a'
+					}
+				}
+
+			}
+		})
 	],
 	theme: {
 		extend: {
 			fontFamily: {
 				code: ['Fira Code', 'monospace']
-			},
-			// typography: ({ theme }) => ({
-			// 	pink: {
-			// 		css: {
-			// 			'--tw-prose-body': theme('colors.pink[800]'),
-			// 			'--tw-prose-headings': theme('colors.pink[900]'),
-			// 			'--tw-prose-lead': theme('colors.pink[700]'),
-			// 			'--tw-prose-links': theme('colors.pink[900]'),
-			// 			'--tw-prose-bold': theme('colors.pink[900]'),
-			// 			'--tw-prose-counters': theme('colors.pink[600]'),
-			// 			'--tw-prose-bullets': theme('colors.pink[400]'),
-			// 			'--tw-prose-hr': theme('colors.pink[300]'),
-			// 			'--tw-prose-quotes': theme('colors.pink[900]'),
-			// 			'--tw-prose-quote-borders': theme('colors.pink[300]'),
-			// 			'--tw-prose-captions': theme('colors.pink[700]'),
-			// 			'--tw-prose-code': theme('colors.pink[900]'),
-			// 			'--tw-prose-pre-code': theme('colors.pink[100]'),
-			// 			'--tw-prose-pre-bg': theme('colors.pink[900]'),
-			// 			'--tw-prose-th-borders': theme('colors.pink[300]'),
-			// 			'--tw-prose-td-borders': theme('colors.pink[200]'),
-			// 			'--tw-prose-invert-body': theme('colors.pink[200]'),
-			// 			'--tw-prose-invert-headings': theme('colors.white'),
-			// 			'--tw-prose-invert-lead': theme('colors.pink[300]'),
-			// 			'--tw-prose-invert-links': theme('colors.white'),
-			// 			'--tw-prose-invert-bold': theme('colors.white'),
-			// 			'--tw-prose-invert-counters': theme('colors.pink[400]'),
-			// 			'--tw-prose-invert-bullets': theme('colors.pink[600]'),
-			// 			'--tw-prose-invert-hr': theme('colors.pink[700]'),
-			// 			'--tw-prose-invert-quotes': theme('colors.pink[100]'),
-			// 			'--tw-prose-invert-quote-borders': theme('colors.pink[700]'),
-			// 			'--tw-prose-invert-captions': theme('colors.pink[400]'),
-			// 			'--tw-prose-invert-code': theme('colors.white'),
-			// 			'--tw-prose-invert-pre-code': theme('colors.pink[300]'),
-			// 			'--tw-prose-invert-pre-bg': 'rgb(0 0 0 / 50%)',
-			// 			'--tw-prose-invert-th-borders': theme('colors.pink[600]'),
-			// 			'--tw-prose-invert-td-borders': theme('colors.pink[700]'),
-			// 		},
-			// 	},
-			// })
+			}
 		}
 	}
 };

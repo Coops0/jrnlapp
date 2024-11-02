@@ -122,9 +122,7 @@ struct UpdateEntryPayload {
 
 #[allow(clippy::unnecessary_wraps)]
 fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
-    let Ok(s) = String::deserialize(deserializer) else {
-        return Ok(None);
-    };
+    let Ok(s) = String::deserialize(deserializer) else { return Ok(None); };
 
     let trimmed = s.trim();
     if trimmed.is_empty() {

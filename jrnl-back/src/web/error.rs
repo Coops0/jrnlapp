@@ -80,7 +80,11 @@ where
         let req = Request::from_parts(parts, body);
         match axum::Json::<T>::from_request(req, state).await {
             Ok(value) => Ok(Self(value.0)),
-            Err(why) => Err(JrnlError::BadRequestSyntax(why)),
+            Err(why) => {
+                warn!("got bad json syntax in req {why:?}");
+
+                Err(JrnlError::BadRequestSyntax(why))
+            }
         }
     }
 }

@@ -20,7 +20,6 @@ const entryService = new EntryService($localApi);
 const { beginFetch, tomorrow, entry, lastSaved } = useTodayEntry(entryService);
 const lastSavedRelativeString = useTimeAgo(lastSaved, { updateInterval: 800, showSecond: true });
 
-// don't await... we have localstorage cache for until then
 beginFetch();
 </script>
 

@@ -6,8 +6,9 @@ use uuid::Uuid;
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Profile {
     pub id: Uuid,
-    pub theme: String,
     pub name: String,
+    pub theme: String,
+    pub favorite_color: Option<String>,
     pub timezone: String,
 }
 
