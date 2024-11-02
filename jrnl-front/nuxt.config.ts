@@ -4,13 +4,7 @@ import Aura from '@primevue/themes/aura';
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
     devtools: { enabled: true },
-    modules: [
-        '@primevue/nuxt-module',
-        '@nuxtjs/tailwindcss',
-        '@nuxtjs/supabase',
-        '@vueuse/nuxt',
-    ],
-
+    modules: ['@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/supabase', '@vueuse/nuxt', '@nuxt/fonts'],
     runtimeConfig: {
         public: {
             base: process.env.BASE_URL ? process.env.BASE_URL : 'http://localhost:3000',

@@ -8,6 +8,8 @@
 
 <script setup lang="ts">
 const supabase = useSupabaseClient();
+const supabaseUser = useSupabaseUser();
+
 const { base } = useRuntimeConfig().public;
 
 async function signInWithGoogle() {
@@ -21,4 +23,10 @@ async function signInWithGoogle() {
     console.error(error);
   }
 }
+
+onMounted(() => {
+  if (supabaseUser.value?.id) {
+    navigateTo('/page');
+  }
+});
 </script>

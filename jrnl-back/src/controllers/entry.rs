@@ -116,25 +116,24 @@ async fn get_today_entry(
 #[derive(Deserialize)]
 struct UpdateEntryPayload {
     emotion_scale: f32,
-    #[serde(deserialize_with = "clean_string")]
+    #[serde(deserialize_with = "sanitize_html")]
     text: Option<String>,
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn clean_string<'de, D: serde::Deserializer<'de>>(
-    deserializer: D,
-) -> Result<Option<String>, D::Error> {
+fn sanitize_html<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
     let Ok(s) = String::deserialize(deserializer) else {
         return Ok(None);
     };
 
     let trimmed = s.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
 
-    Ok(if trimmed.is_empty() {
-        None
-    } else {
-        Some(trimmed.to_string())
-    })
+    let cleaned = ammonia::clean(trimmed);
+
+    Ok(Some(cleaned))
 }
 
 async fn update_today_entry(
