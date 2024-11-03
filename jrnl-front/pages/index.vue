@@ -5,6 +5,5 @@
 </template>
 
 <script setup lang="ts">
-// if not logged in, supabase lib will intercept
 navigateTo('/page');
 </script>

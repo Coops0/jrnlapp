@@ -1,8 +1,8 @@
 import type { GroupService } from '~/services/group.service';
-import type { Profile } from '~/types/profile.type';
 import { useLazyAsyncData } from '#app';
 import type { GroupedDayData } from '~/types/weekly-data.type';
 import { parseServerDate } from '~/util/index.util';
+import type { User } from '~/types/user.type';
 
 interface GroupInfo {
     name: string;
@@ -14,7 +14,7 @@ export const useGroup = (
     groupService: GroupService
 ) => {
     const cachedGroupAndMembers = useLocalStorage(`group-${code}`, {} as {
-        members?: (Pick<Profile, 'id' | 'name'> & { owner: boolean })[];
+        members?: (Pick<User, 'id' | 'name'> & { owner: boolean })[];
         info?: GroupInfo;
         days?: GroupedDayData[];
     });

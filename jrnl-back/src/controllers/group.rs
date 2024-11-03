@@ -1,15 +1,15 @@
-use crate::schemas::group::Group;
-use crate::web::auth::User;
-use crate::web::error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor};
+use crate::error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::collections::HashMap;
+use axum::http::StatusCode;
 use uuid::Uuid;
+use crate::schemas::group::Group;
+use crate::schemas::user::User;
 
 pub fn groups_controller() -> Router<AppState> {
     Router::new()
@@ -30,7 +30,7 @@ struct CreateGroupPayload {
 
 async fn create_group(
     user: User,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
     JsonExtractor(CreateGroupPayload { name }): JsonExtractor<CreateGroupPayload>,
 ) -> JrnlResult<Json<Group>> {
     let code = Group::generate_code();
@@ -118,7 +118,7 @@ struct TrimmedUserWithOwner {
 async fn get_group_members(
     user: User,
     Path(code): Path<String>,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<Vec<TrimmedUserWithOwner>>> {
     let group = sqlx::query_as::<_, Group>(
         // language=postgresql
@@ -142,8 +142,8 @@ async fn get_group_members(
     let members = sqlx::query_as::<_, TrimmedUser>(
         // language=postgresql
         "
-        SELECT p.id, p.name FROM profiles p
-        JOIN group_memberships gm ON p.id = gm.user_id
+        SELECT u.id, u.name FROM users u
+        JOIN group_memberships gm ON u.id = gm.user_id
         WHERE gm.group_id = $1
 
     "
@@ -164,7 +164,7 @@ async fn get_group_members(
 async fn leave_group(
     user: User,
     Path(code): Path<String>,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<StatusCode> {
     let group = sqlx::query_as::<_, Group>(
         // language=postgresql
@@ -228,7 +228,7 @@ async fn leave_group(
 async fn kick_member(
     user: User,
     Path((code, target_user_id)): Path<(String, Uuid)>,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<StatusCode> {
     if user.id == target_user_id {
         return Err(JrnlError::CannotKickSelf);
@@ -273,7 +273,7 @@ async fn get_days_data_paginated(
     user: User,
     Query(params): Query<GetDaysDataParams>,
     Path(code): Path<String>,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<Vec<DayData>>> {
     let day_limit = params.day_limit.unwrap_or(7).clamp(1, 30);
     let before = params.before.unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
@@ -354,7 +354,7 @@ struct SelfGroup {
 
 async fn joined_groups(
     user: User,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<Vec<SelfGroup>>> {
     sqlx::query_as::<_, SelfGroup>(
         // language=postgresql

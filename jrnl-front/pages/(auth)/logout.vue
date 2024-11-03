@@ -1,14 +1,25 @@
 <template>
-<div>one min im logging you out the jrnl</div>
+  <div>one min im logging you out the jrnl</div>
 </template>
 
 <script setup lang="ts">
-const supabase = useSupabaseClient();
+import { AuthService } from '~/services/auth.service';
+import { useUser } from '~/composables/user.composable';
+import { UserService } from '~/services/user.service';
+
+const { $localApi } = useNuxtApp();
+
+const authService = new AuthService($localApi);
+const userService = new UserService($localApi);
+const { user, updateStorage } = useUser(userService);
 
 onMounted(async () => {
   try {
-    await supabase.auth.signOut();
+    await authService.logout();
   } finally {
+    user.value = {};
+    updateStorage();
+
     await navigateTo('/login');
   }
 });

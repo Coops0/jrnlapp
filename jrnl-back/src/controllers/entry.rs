@@ -1,8 +1,7 @@
 use crate::schemas::entry::Entry;
-use crate::schemas::profile::Profile;
-use crate::web::auth::User;
+use crate::schemas::user::User;
 use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
-use crate::web::error::{DatabaseError, JrnlResult, JsonExtractor};
+use crate::error::{DatabaseError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
@@ -29,7 +28,7 @@ struct StrippedEntry {
 async fn get_trimmed_entries_paginated(
     user: User,
     Query(params): Query<CursorParams>,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<CursorPaginatedResponse<StrippedEntry>>> {
     let limit = params.limit.unwrap_or(20).clamp(1, 100);
     let limit_plus_one = i64::from(limit) + 1;
@@ -74,7 +73,7 @@ async fn get_trimmed_entries_paginated(
 async fn get_entry(
     user: User,
     Path(id): Path<Uuid>,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<Option<Entry>>> {
     sqlx::query_as::<_, Entry>(
         // language=postgresql
@@ -100,13 +99,10 @@ async fn get_overall_average(
         .map_err(Into::into)
 }
 
-async fn get_today_entry(
-    profile: Profile,
-    State(AppState { pool, .. }): State<AppState>,
-) -> JrnlResult<Json<Option<Entry>>> {
+async fn get_today_entry(user: User, State(AppState { pool }): State<AppState>) -> JrnlResult<Json<Option<Entry>>> {
     sqlx::query_as::<_, Entry>("SELECT * FROM entries WHERE author = $1 AND date = $2 LIMIT 1")
-        .bind(profile.id)
-        .bind(profile.current_date_by_timezone())
+        .bind(user.id)
+        .bind(user.current_date_by_timezone())
         .fetch_optional(&pool)
         .await
         .map(Json)
@@ -135,8 +131,8 @@ fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Re
 }
 
 async fn update_today_entry(
-    profile: Profile,
-    State(AppState { pool, .. }): State<AppState>,
+    user: User,
+    State(AppState { pool }): State<AppState>,
     JsonExtractor(payload): JsonExtractor<UpdateEntryPayload>,
 ) -> JrnlResult<Json<Entry>> {
     sqlx::query_as::<_, Entry>(
@@ -148,8 +144,8 @@ async fn update_today_entry(
             RETURNING *
         "
     )
-        .bind(profile.id)
-        .bind(profile.current_date_by_timezone())
+        .bind(user.id)
+        .bind(user.current_date_by_timezone())
         .bind(payload.emotion_scale)
         .bind(payload.text)
         .fetch_one(&pool)

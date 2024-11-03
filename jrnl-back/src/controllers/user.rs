@@ -1,7 +1,6 @@
-use crate::schemas::profile::Profile;
-use crate::web::auth::User;
+use crate::schemas::user::User;
 use crate::web::deserialize_empty_string;
-use crate::web::error::{JrnlResult, JsonExtractor};
+use crate::error::{JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::State;
 use axum::routing::get;
@@ -11,11 +10,11 @@ use serde::{Deserialize, Deserializer};
 
 pub fn users_controller() -> Router<AppState> {
     Router::new()
-        .route("/me", get(get_self_profile).patch(update_self_profile))
+        .route("/me", get(get_self_user).patch(update_self_user))
 }
 
-async fn get_self_profile(profile: Profile) -> Json<Profile> {
-    Json(profile)
+async fn get_self_user(user: User) -> Json<User> {
+    Json(user)
 }
 
 #[derive(Debug, Deserialize)]
@@ -41,14 +40,14 @@ fn deserialize_tz<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<T
         .map_err(serde::de::Error::custom)
 }
 
-async fn update_self_profile(
+async fn update_self_user(
     user: User,
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool }): State<AppState>,
     JsonExtractor(payload): JsonExtractor<UpdateSelfPayload>,
-) -> JrnlResult<Json<Profile>> {
-    sqlx::query_as::<_, Profile>(
+) -> JrnlResult<Json<User>> {
+    sqlx::query_as::<_, User>(
         // language=postgresql
-        "UPDATE profiles SET 
+        "UPDATE users SET
             timezone = COALESCE($1, timezone),
             theme = COALESCE($2, theme)
             WHERE id = $3 RETURNING *

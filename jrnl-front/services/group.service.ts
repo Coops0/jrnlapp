@@ -1,7 +1,7 @@
 import type { $Fetch } from 'nitropack';
 import type { Group } from '~/types/group.type';
-import type { Profile } from '~/types/profile.type';
 import type { GroupedDayData } from '~/types/weekly-data.type';
+import type { User } from '~/types/user.type';
 
 export class GroupService {
     constructor(private readonly api: $Fetch) {
@@ -23,7 +23,7 @@ export class GroupService {
         return this.api('/groups/join', { method: 'POST', body: { code } });
     }
 
-    async getGroupMembers(code: string): Promise<(Pick<Profile, 'id' | 'name'> & { owner: boolean })[]> {
+    async getGroupMembers(code: string): Promise<(Pick<User, 'id' | 'name'> & { owner: boolean })[]> {
         return this.api(`/groups/${code}/members`);
     }
 

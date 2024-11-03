@@ -7,26 +7,18 @@
 </template>
 
 <script setup lang="ts">
-const supabase = useSupabaseClient();
-const supabaseUser = useSupabaseUser();
+import { AuthService } from '~/services/auth.service';
+import { definePageMeta } from '#imports';
 
-const { base } = useRuntimeConfig().public;
+const { $localApi } = useNuxtApp();
+const authService = new AuthService($localApi);
+
+definePageMeta({
+  redirectUnautheticated: false,
+});
 
 async function signInWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google', options: {
-      redirectTo: `${base}/confirm`
-    }
-  });
-
-  if (error) {
-    console.error(error);
-  }
+  const redirectResponse = await authService.getGoogleRedirect() as unknown as Response;
+  await navigateTo(redirectResponse.url);
 }
-
-onMounted(() => {
-  if (supabaseUser.value?.id) {
-    navigateTo('/page');
-  }
-});
 </script>

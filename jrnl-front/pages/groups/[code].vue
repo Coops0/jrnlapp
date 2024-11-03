@@ -15,7 +15,7 @@
       <ul>
         <li v-for="(member, index) in members" :key="member.id">
           <p>{{ member.name }} // {{ member.id }}</p>
-          <div v-if="isOwned && member.id !== maybeProfile?.id" @click="kick(index)">kick</div>
+          <div v-if="isOwned && member.id !== user?.id" @click="kick(index)">kick</div>
         </li>
       </ul>
     </div>
@@ -46,22 +46,22 @@
 import { GroupService } from '~/services/group.service';
 import { useGroup } from '~/composables/group.composable';
 import { parseServerDate } from '~/util/index.util';
-import { useProfile } from '~/composables/profile.composable';
-import { ProfileService } from '~/services/profile.service';
+import { UserService } from '~/services/user.service';
+import { useUser } from '~/composables/user.composable';
 
 const route = useRoute();
 const code = route.params.code as string;
 
 const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
-const profileService = new ProfileService($localApi);
+const userService = new UserService($localApi);
 
-const { profile } = useProfile(profileService);
+const { user } = useUser(userService);
 let { group, members, days, before, execute } = useGroup(code, groupService);
 
 onMounted(execute);
 
-const isOwned = computed(() => members.value?.some(m => m.owner && m.id === profile.value?.id));
+const isOwned = computed(() => members.value?.some(m => m.owner && m.id === user.value?.id));
 
 const dateWindowRange = computed(() => {
   // window size is 7 by default

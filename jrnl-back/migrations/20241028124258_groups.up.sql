@@ -3,13 +3,13 @@ CREATE TABLE IF NOT EXISTS groups
     id       UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name     VARCHAR(255) NOT NULL,
     code     TEXT         NOT NULL UNIQUE,
-    owner_id UUID         NOT NULL REFERENCES profiles (id) ON DELETE RESTRICT
+    owner_id UUID         NOT NULL REFERENCES users (id) ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS group_memberships
 (
     group_id UUID NOT NULL REFERENCES groups (id) ON DELETE CASCADE,
-    user_id  UUID NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
+    user_id  UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     PRIMARY KEY (group_id, user_id)
 );
 

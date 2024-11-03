@@ -16,14 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { ProfileService } from '~/services/profile.service';
+import { UserService } from '~/services/user.service';
+import { useUser } from '~/composables/user.composable';
 
 const { $localApi } = useNuxtApp();
-const profileService = new ProfileService($localApi);
-const { profile } = useProfile(profileService);
+const userService = new UserService($localApi);
+const { user } = useUser(userService);
 
 const theme = useColorMode({
-  initialValue: profile.value?.theme ?? 'purple',
+  initialValue: user.value?.theme ?? 'purple',
   attribute: 'data-theme',
   modes: {
     purple: 'purple',
@@ -31,9 +32,9 @@ const theme = useColorMode({
   }
 });
 
-watchImmediate(profile, p => {
+watchImmediate(user, p => {
   if (p?.theme) {
-    console.debug('layout: setting theme to', p.theme)
+    console.debug('layout: setting theme to', p.theme);
     theme.value = p.theme;
   }
 }, { deep: true });
