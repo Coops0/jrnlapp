@@ -7,8 +7,7 @@ use uuid::Uuid;
 pub struct Profile {
     pub id: Uuid,
     pub name: String,
-    pub theme: String,
-    pub favorite_color: Option<String>,
+    pub theme: Option<String>,
     pub timezone: String,
 }
 

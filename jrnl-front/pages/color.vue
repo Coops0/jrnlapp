@@ -3,7 +3,7 @@
     <h1 class="text-colors-text-400">what's your favorite color?</h1>
     <div class="flex flex-row flex-wrap">
       <div v-for="(color, name) in colors" :key="name" class="m-2" @click="setTheme(name)">
-        <div class="w-32 h-32 rounded-lg" :style="{ backgroundColor: color }" :class="{ 'ring-colors-accent-400 ring-1 ring-offset-1': profile?.favorite_color === name }"/>
+        <div class="w-32 h-32 rounded-lg" :style="{ backgroundColor: color }" :class="{ 'ring-colors-accent-400 ring-1 ring-offset-1': profile?.theme === name }"/>
         <p>{{ name }}</p>
       </div>
     </div>
@@ -30,7 +30,7 @@ async function setTheme(name: string) {
     await refresh();
   }
 
-  profile.value!.favorite_color = name;
-  await profileService.updateMe({ favorite_color: name });
+  profile.value!.theme = name;
+  await profileService.updateMe({ theme: name });
 }
 </script>

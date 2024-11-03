@@ -116,7 +116,7 @@ async fn get_today_entry(
 #[derive(Deserialize)]
 struct UpdateEntryPayload {
     emotion_scale: f32,
-    #[serde(deserialize_with = "sanitize_html_string")]
+    #[serde(default, deserialize_with = "sanitize_html_string")]
     text: Option<String>,
 }
 

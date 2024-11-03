@@ -25,7 +25,7 @@ struct UpdateSelfPayload {
     tz: Option<Tz>,
 
     #[serde(default, deserialize_with = "deserialize_empty_string")]
-    favorite_color: Option<String>,
+    theme: Option<String>,
 }
 
 fn deserialize_tz<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<Tz>, D::Error> {
@@ -50,12 +50,12 @@ async fn update_self_profile(
         // language=postgresql
         "UPDATE profiles SET 
             timezone = COALESCE($1, timezone),
-            favorite_color = COALESCE($2, favorite_color)
+            theme = COALESCE($2, theme)
             WHERE id = $3 RETURNING *
         "
     )
         .bind(payload.tz.map(|tz| tz.to_string()))
-        .bind(payload.favorite_color)
+        .bind(payload.theme)
         .bind(user.id)
         .fetch_one(&pool)
         .await

@@ -23,7 +23,7 @@ const profileService = new ProfileService($localApi);
 const { profile } = useProfile(profileService);
 
 const theme = useColorMode({
-  initialValue: profile.value?.favorite_color ?? 'purple',
+  initialValue: profile.value?.theme ?? 'purple',
   attribute: 'data-theme',
   modes: {
     purple: 'purple',
@@ -32,9 +32,9 @@ const theme = useColorMode({
 });
 
 watchImmediate(profile, p => {
-  if (p?.favorite_color) {
-    console.debug('layout: setting theme to', p.favorite_color)
-    theme.value = p.favorite_color;
+  if (p?.theme) {
+    console.debug('layout: setting theme to', p.theme)
+    theme.value = p.theme;
   }
 }, { deep: true });
 </script>

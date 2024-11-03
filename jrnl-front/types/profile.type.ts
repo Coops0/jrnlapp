@@ -1,7 +1,6 @@
 export interface Profile {
     id: string;
-    theme: string;
-    favorite_color: string;
+    theme?: string;
     name: string;
     timezone: string;
 }
