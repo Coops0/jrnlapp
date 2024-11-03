@@ -2,6 +2,7 @@ use axum::async_trait;
 use axum::extract::rejection::JsonRejection;
 use axum::extract::{FromRequest, Request};
 use axum::http::StatusCode;
+use oauth_axum::error::OauthError;
 use thiserror::Error;
 use thiserror_status::ErrorStatus;
 use tracing::warn;
@@ -30,6 +31,10 @@ pub enum JrnlError {
     #[error("authentication error {0}")]
     #[status(StatusCode::UNAUTHORIZED)]
     AuthenticationError(String),
+
+    #[error("oauth error {0}")]
+    #[status(StatusCode::INTERNAL_SERVER_ERROR)]
+    OAuthError(String),
 
     #[deprecated(note = "use `DatabaseError` wrapper instead")]
     #[error("database error {0:?}")]
@@ -62,6 +67,17 @@ impl From<DatabaseError> for JrnlError {
 impl From<sqlx::Error> for JrnlError {
     fn from(err: sqlx::Error) -> Self {
         DatabaseError(err).into()
+    }
+}
+
+impl From<OauthError> for JrnlError {
+    fn from(err: OauthError) -> Self {
+        let e = match err {
+            OauthError::TokenRequestFailed => "token request failed",
+            OauthError::AuthUrlCreationFailed => "auth url creation failed",
+        };
+
+        Self::OAuthError(String::from(e))
     }
 }
 

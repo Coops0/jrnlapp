@@ -26,6 +26,10 @@ tracing = "0.1.40"
 tower-http = { version = "0.6.1", features = ["cors"] }
 tower = "0.5.1"
 ammonia = "4.0.0"
+oauth-axum = "0.1.3"
+tower-sessions = "0.13.0"
+tower-sessions-sqlx-store = { version = "0.14.2", features = ["postgres"] }
+# tower-sessions-core = { version = "0.13.0", features = ["deletion-task"] }
 
 [lib]
 name = "thiserror_status"
