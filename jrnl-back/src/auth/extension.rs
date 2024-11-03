@@ -18,7 +18,15 @@ impl FromRequestParts<AppState> for User {
             .ok_or(AuthenticationError::NoSessionCookie)?
             .value();
 
-        let user = sqlx::query_as::<_, Self>("SELECT * FROM users WHERE id = $1")
+        let user = sqlx::query_as::<_, Self>(
+            // language=postgresql
+            "
+            SELECT * FROM users
+                JOIN sessions s ON users.id = s.user_id
+                WHERE s.id = $1 AND s.expires_at > NOW()
+            LIMIT 1
+            "
+        )
             .bind(session_id)
             .fetch_one(pool)
             .await
