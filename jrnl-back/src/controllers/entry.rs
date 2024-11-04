@@ -1,7 +1,7 @@
+use crate::error::{DatabaseError, JrnlResult, JsonExtractor};
 use crate::schemas::entry::Entry;
 use crate::schemas::user::User;
 use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
-use crate::error::{DatabaseError, JrnlResult, JsonExtractor};
 use crate::AppState;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
@@ -103,7 +103,10 @@ async fn get_overall_average(
 }
 
 async fn get_today_entry(user: User, State(AppState { pool }): State<AppState>) -> JrnlResult<Json<Option<Entry>>> {
-    sqlx::query_as::<_, Entry>("SELECT * FROM entries WHERE author = $1 AND date = $2 LIMIT 1")
+    sqlx::query_as::<_, Entry>(
+        // language=postgresql
+        "SELECT * FROM entries WHERE author = $1 AND date = $2 LIMIT 1"
+    )
         .bind(user.id)
         .bind(user.current_date_by_timezone())
         .fetch_optional(&pool)

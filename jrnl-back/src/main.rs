@@ -4,6 +4,8 @@ mod auth;
 mod schemas;
 mod error;
 
+use crate::auth::clean_expired_sessions;
+use crate::schemas::user::User;
 use axum::extract::DefaultBodyLimit;
 use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::Router;
@@ -15,8 +17,6 @@ use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use tracing::info;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::EnvFilter;
-use crate::auth::clean_expired_sessions;
-use crate::schemas::user::User;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -26,7 +26,7 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenvy::dotenv();
-    
+
     let filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
         .from_env()?
