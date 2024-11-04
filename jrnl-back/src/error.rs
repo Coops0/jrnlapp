@@ -46,18 +46,21 @@ pub enum JrnlError {
 pub enum AuthenticationError {
     #[error("failed to generate provider session {0:?}")]
     ProviderGenerationFailed(anyhow::Error),
-    #[error("no cookie temporary auth session id")]
-    NoCookieId,
-    #[error("bad temporary session cookie")]
-    BadTempSessionCookie,
-    #[error("bad csrf token")]
-    BadCsrfToken,
-    #[error("code exchanged failed")]
+    #[error("bad callback state {0:?}")]
+    BadCallbackState(sqlx::Error),
+    #[error("code exchanged failed {0:?}")]
     CodeExchangeFailed(anyhow::Error),
-    #[error("no session cookie")]
-    NoSessionCookie,
-    #[error("invalid session id")]
-    InvalidSessionId,
+    #[error("failed to fetch your google profile {0:?}")]
+    FetchGoogleProfileFailed(anyhow::Error),
+
+    #[error("bad authentication header")]
+    BadAuthenticationHeader,
+    #[error("invalid auth token")]
+    InvalidToken,
+    #[error("expired auth token")]
+    ExpiredToken,
+    #[error("failed to find your profile")]
+    ProfileNotFound,
 }
 
 #[allow(clippy::module_name_repetitions)]
@@ -66,12 +69,9 @@ pub struct DatabaseError(pub sqlx::Error);
 #[allow(deprecated)]
 impl From<DatabaseError> for JrnlError {
     fn from(err: DatabaseError) -> Self {
-        match err {
-            DatabaseError(sqlx::Error::RowNotFound) => return Self::NoResultsFound,
-            DatabaseError(sqlx::Error::Database(_)) => {
-                warn!("Database error: {:?}", err.0);
-            }
-            _ => {}
+        warn!("Database error: {:?}", err.0);
+        if matches!(err, DatabaseError(sqlx::Error::RowNotFound)) {
+            return Self::NoResultsFound;
         }
 
         Self::DatabaseError(err.0)

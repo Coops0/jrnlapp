@@ -13,7 +13,7 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::PgPool;
 use std::env;
 use tower::ServiceBuilder;
-use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
+use tower_http::cors::{AllowCredentials, AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use tracing::info;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::EnvFilter;
@@ -58,9 +58,11 @@ async fn main() -> anyhow::Result<()> {
         .nest("/auth", auth::routes::auth_controller())
         .layer(ServiceBuilder::new()
             .layer(CorsLayer::new()
-                .allow_origin(AllowOrigin::any()) // todo
-                .allow_methods(AllowMethods::any())
+                .allow_origin(AllowOrigin::exact(env::var("FRONTEND_URL")?.parse()?))
+                // .allow_origin(AllowOrigin::any()) // todo
+                .allow_methods(AllowMethods::mirror_request())
                 .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
+                .allow_credentials(AllowCredentials::yes())
             )
             .layer(DefaultBodyLimit::max(1024))
         )

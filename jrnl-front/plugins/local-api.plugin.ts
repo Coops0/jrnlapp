@@ -1,14 +1,18 @@
+import { useAuth } from '~/composables/auth.composable';
+
 export default defineNuxtPlugin(nuxtApp => {
     const config = useRuntimeConfig();
+    const { jwt } = useAuth();
 
     const localApi = $fetch.create({
+        credentials: 'include',
         baseURL: config.public.apiBase,
-        // onRequest({ options }) {
-            // const t = session.value?.access_token;
-            // if (t) {
-            //     options.headers.set('Authorization', `Bearer ${t}`);
-            // }
-        // },
+        onRequest({ options }) {
+            const j = jwt.value;
+            if (j?.length) {
+                options.headers.set('Authorization', `Bearer ${j}`);
+            }
+        },
         async onResponseError({ options, response }) {
             if ((options as any).ignoreError) {
                 return;

@@ -13,7 +13,7 @@ export class AuthService {
         return this.api('/auth/google');
     }
 
-    async loginWithGoogle(state: string, code: string): Promise<User> {
+    async loginWithGoogle(state: string, code: string): Promise<{ user: User, token: string }> {
         return this.api('/auth/google/callback', { method: 'POST', body: { state, code } });
     }
 }
