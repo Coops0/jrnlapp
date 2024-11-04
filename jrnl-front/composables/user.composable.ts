@@ -6,14 +6,14 @@ export const useUser = (userService: UserService) => {
 
     const user = useState('user', () => localStorageUser.value);
 
-    const refresh = async () => {
-        user.value = await userService.getMe();
+    const refresh = async (ignoreError?: boolean) => {
+        user.value = await userService.getMe(ignoreError);
         localStorageUser.value = user.value;
     };
 
-    const updateStorage = () => {
+    watch(user, () => {
         localStorageUser.value = user.value;
-    }
+    }, { deep: true });
 
-    return { refresh, user, updateStorage };
+    return { refresh, user };
 };

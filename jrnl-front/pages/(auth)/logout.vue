@@ -11,16 +11,14 @@ const { $localApi } = useNuxtApp();
 
 const authService = new AuthService($localApi);
 const userService = new UserService($localApi);
-const { user, updateStorage } = useUser(userService);
+const { user } = useUser(userService);
 
 onMounted(async () => {
   try {
     await authService.logout();
   } finally {
     user.value = {};
-    updateStorage();
-
-    await navigateTo('/login');
+    await navigateTo('/');
   }
 });
 </script>

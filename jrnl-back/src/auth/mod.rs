@@ -1,5 +1,5 @@
-use std::time::Duration;
 use sqlx::PgPool;
+use std::time::Duration;
 use tokio::time::interval;
 use tracing::error;
 
@@ -12,18 +12,24 @@ pub async fn clean_expired_sessions(pool: PgPool) {
     loop {
         ticker.tick().await;
 
-        let deletion_result = sqlx::query(
+        let delete_sessions_future = sqlx::query(
             // language=postgresql
-            "
-            DELETE FROM sessions WHERE expires_at < NOW();
-            DELETE FROM temp_auth_sessions WHERE expires_at < NOW();
-            "
-        )
-            .execute(&pool)
-            .await;
+            "DELETE FROM sessions WHERE expires_at < NOW()"
+        ).execute(&pool);
 
-        if let Err(why) = deletion_result {
+        let delete_temp_sessions_future = sqlx::query(
+            // language=postgresql
+            "DELETE FROM temp_auth_sessions WHERE expires_at < NOW()"
+        ).execute(&pool);
+        
+        let (dl_sessions_result, dl_temp_sessions_result) = tokio::join!(delete_sessions_future, delete_temp_sessions_future);
+
+        if let Err(why) = dl_sessions_result {
             error!("Failed to clean expired sessions: {}", why);
+        }
+        
+        if let Err(why) = dl_temp_sessions_result {
+            error!("Failed to clean expired temp sessions: {}", why);
         }
     }
 }

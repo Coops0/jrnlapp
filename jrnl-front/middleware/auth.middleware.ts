@@ -13,15 +13,25 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     if (requiresAuth) {
         if (!user.value?.id) {
-            await refresh();
+            await refresh(true);
         }
 
         if (!user.value?.id) {
             return navigateTo('/login');
         }
-    } else {
-        if (user.value?.id) {
-            return navigateTo('/');
-        }
+
+        // we're good
+        return;
     }
+
+    // if we came from a page that required auth, then let's try
+    if (from.name && from.meta['requiresAuth'] !== false) {
+        await refresh(true);
+    }
+
+    if (user.value?.id) {
+        return navigateTo('/page');
+    }
+
+    // we're good, stay on your unauthenticated page
 });

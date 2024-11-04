@@ -3,18 +3,19 @@ export default defineNuxtPlugin(nuxtApp => {
 
     const localApi = $fetch.create({
         baseURL: config.public.apiBase,
-        onRequest({ options }) {
+        // onRequest({ options }) {
             // const t = session.value?.access_token;
             // if (t) {
             //     options.headers.set('Authorization', `Bearer ${t}`);
             // }
-        },
+        // },
         async onResponseError({ options, response }) {
             if ((options as any).ignoreError) {
                 return;
             }
 
             if (response.status === 401) {
+                console.debug('got unauthorized response in $api plugin, redirecting to login');
                 await nuxtApp.runWithContext(() => navigateTo('/login'));
             }
         }

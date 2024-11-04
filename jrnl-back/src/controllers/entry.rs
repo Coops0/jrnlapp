@@ -91,7 +91,10 @@ async fn get_overall_average(
     user: User,
     State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<Json<f64>> {
-    sqlx::query_scalar("SELECT AVG(emotion_scale) FROM entries WHERE author = $1")
+    sqlx::query_scalar(
+        // language=postgresql
+        "SELECT AVG(emotion_scale) FROM entries WHERE author = $1"
+    )
         .bind(user.id)
         .fetch_one(&pool)
         .await

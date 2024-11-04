@@ -10,7 +10,6 @@ pub fn google_provider() -> anyhow::Result<BasicClient> {
         AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".parse()?)?,
         None,
     ).set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
-
-
+    
     Ok(client)
 }

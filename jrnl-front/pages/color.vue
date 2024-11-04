@@ -18,7 +18,7 @@ import { useUser } from '~/composables/user.composable';
 const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 
-const { user, refresh } = useUser(userService);
+const { user } = useUser(userService);
 
 const colors = {
   purple: '#3129d6',
@@ -26,11 +26,6 @@ const colors = {
 } as const;
 
 async function setTheme(name: string) {
-  if (!user.value) {
-    console.debug('user is null, refreshing');
-    await refresh();
-  }
-
   user.value!.theme = name;
   await userService.updateMe({ theme: name });
 }

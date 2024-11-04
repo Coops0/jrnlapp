@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header>
+    <header class="bg-colors-background-400 text-colors-text-400 p-4">
       <h1>
         <NuxtLink to="/">jrnl</NuxtLink>
       </h1>
@@ -9,7 +9,8 @@
     <main>
       <slot/>
     </main>
-    <footer>
+
+    <footer class="bg-colors-background-400 text-colors-text-400 p-4">
       <p>hm?</p>
     </footer>
   </div>

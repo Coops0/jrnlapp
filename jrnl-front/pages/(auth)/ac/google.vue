@@ -18,6 +18,8 @@ const { $localApi } = useNuxtApp();
 const authService = new AuthService($localApi);
 const userService = new UserService($localApi);
 
+const userComposable = useUser(userService);
+
 definePageMeta({
   redirectUnautheticated: false,
 });
@@ -34,10 +36,7 @@ onMounted(async () => {
     return;
   }
 
-  const userComposable = useUser(new UserService($localApi));
-
   userComposable.user.value = user;
-  userComposable.updateStorage();
 
   try {
     await userService.updateMe({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone });

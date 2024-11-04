@@ -42,7 +42,7 @@ async fn google_url(State(AppState { pool }): State<AppState>) -> JrnlResult<imp
         .set_pkce_challenge(pkce_challenge)
         .url();
 
-    let (temp_session_id, ) = sqlx::query_as::<_, (String,)>(
+    let (temp_session_id, ) = sqlx::query_as::<_, (Uuid,)>(
         // language=postgresql
         "
         INSERT INTO temp_auth_sessions (csrf_token, pkce_verifier, expires_at)
@@ -57,7 +57,7 @@ async fn google_url(State(AppState { pool }): State<AppState>) -> JrnlResult<imp
         .map_err(DatabaseError)?;
 
     let c_jar = CookieJar::new().add(
-        Cookie::build(("g-a-id", temp_session_id))
+        Cookie::build(("g-a-id", temp_session_id.to_string()))
             .http_only(true)
             .secure(false) // todo
             .build()
@@ -73,7 +73,6 @@ async fn google_callback(
     JsonExtractor(CallbackPayload { code, state }): JsonExtractor<CallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
     let temp_session_id = c_jar.get("g-a-id").ok_or(AuthenticationError::NoCookieId)?.value().to_string();
-    let c_jar = c_jar.remove("g-a-id");
 
     let (csrf, pkce_verifier) = sqlx::query_as::<_, (String, String)>(
         // language=postgresql
@@ -86,7 +85,7 @@ async fn google_callback(
         .bind(&temp_session_id)
         .fetch_one(&pool)
         .await
-        .map_err(DatabaseError)?;
+        .map_err(|_| AuthenticationError::BadTempSessionCookie)?;
 
     if csrf != state {
         return Err(AuthenticationError::BadCsrfToken.into());

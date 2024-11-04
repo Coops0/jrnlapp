@@ -48,6 +48,8 @@ pub enum AuthenticationError {
     ProviderGenerationFailed(anyhow::Error),
     #[error("no cookie temporary auth session id")]
     NoCookieId,
+    #[error("bad temporary session cookie")]
+    BadTempSessionCookie,
     #[error("bad csrf token")]
     BadCsrfToken,
     #[error("code exchanged failed")]

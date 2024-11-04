@@ -9,7 +9,7 @@ export class UserService {
         return this.api('/user/me', { method: 'PATCH', body: payload });
     }
 
-    async getMe(): Promise<User> {
-        return this.api('/user/me');
+    async getMe(ignoreError?: boolean): Promise<User> {
+        return this.api('/user/me', { ignoreError } as any);
     }
 }
