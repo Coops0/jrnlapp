@@ -17,26 +17,5 @@
 </template>
 
 <script setup lang="ts">
-import { UserService } from '~/services/user.service';
-import { useUser } from '~/composables/user.composable';
 
-const { $localApi } = useNuxtApp();
-const userService = new UserService($localApi);
-const { user } = useUser(userService);
-
-const theme = useColorMode({
-  initialValue: user.value?.theme ?? 'purple',
-  attribute: 'data-theme',
-  modes: {
-    purple: 'purple',
-    plant: 'plant'
-  }
-});
-
-watchImmediate(user, p => {
-  if (p?.theme) {
-    console.debug('layout: setting theme to', p.theme);
-    theme.value = p.theme;
-  }
-}, { deep: true });
 </script>

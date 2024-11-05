@@ -2,17 +2,15 @@
   <div>
     <h1>Pages</h1>
     <div>
-      <ClientOnly>
-        <PastEntry
-            v-for="entry in entries"
-            :key="entry.id"
-            :id="entry.id"
-            :rating="entry.emotion_scale"
-            :date="entry.date"
-        />
+      <PastEntry
+          v-for="entry in entries"
+          :key="entry.id"
+          :id="entry.id"
+          :rating="entry.emotion_scale"
+          :date="entry.date"
+      />
 
-        <div v-if="paginator.has_more" @click="loadMore">load more</div>
-      </ClientOnly>
+      <div v-if="paginator.has_more" @click="loadMore">load more</div>
     </div>
   </div>
 </template>

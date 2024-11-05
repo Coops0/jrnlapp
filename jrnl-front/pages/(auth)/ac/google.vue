@@ -1,9 +1,7 @@
 <template>
   <div>
-    <ClientOnly>
-      hold up! {{ status }}
-      <div v-if="error" class="text-red-500">{{ error }}</div>
-    </ClientOnly>
+    hold up! {{ status }}
+    <div v-if="error" class="text-red-500">{{ error }}</div>
   </div>
 </template>
 
@@ -21,16 +19,11 @@ const userService = new UserService($localApi);
 const userComposable = useUser(userService);
 const { jwt } = useAuth();
 
-definePageMeta({
-  redirectUnautheticated: false,
-});
+definePageMeta({ redirectUnautheticated: false });
 
 const { data, error, status } = useAsyncData(
     'google-oauth',
-    () => authService.loginWithGoogle(route.query.state as string, route.query.code as string),
-    {
-      server: false
-    }
+    () => authService.loginWithGoogle(route.query.state as string, route.query.code as string)
 );
 
 watch(data, async d => {

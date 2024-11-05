@@ -8,13 +8,11 @@
       <div v-html="entry.text ?? 'no text'"></div>
       <div>{{ entry.emotion_scale }}</div>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { EntryService } from '~/services/entry.service';
-import type { Entry } from '~/types/entry.type';
 
 const route = useRoute();
 const { id } = route.params;
@@ -22,19 +20,19 @@ const { id } = route.params;
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const localEntry = useLocalStorage(`entry-${id}`, {} as Entry);
+// const localEntry = useLocalStorage(`entry-${id}`, {} as Entry);
 
 const { data: entry, error, execute } = useLazyAsyncData(
     `entry-${id}`,
     () => entryService.getEntry(id as string),
     {
-      default() {
-        return localEntry;
-      },
-      transform(e) {
-        localEntry.value = e;
-        return e;
-      },
+      // default() {
+      //   return localEntry;
+      // },
+      // transform(e) {
+      //   localEntry.value = e;
+      //   return e;
+      // },
     }
 );
 

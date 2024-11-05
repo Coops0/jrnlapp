@@ -4,7 +4,7 @@
     <div class="flex flex-row flex-wrap">
       <div v-for="(color, name) in colors" :key="name" class="m-2" @click="setTheme(name)">
         <div class="w-32 h-32 rounded-lg" :style="{ backgroundColor: color }"
-             :class="{ 'ring-colors-accent-400 ring-1 ring-offset-1': user?.theme === name }"/>
+             :class="{ 'ring-colors-accent-400 ring-1 ring-offset-1': theme === name }"/>
         <p>{{ name }}</p>
       </div>
     </div>
@@ -13,20 +13,14 @@
 
 <script setup lang="ts">
 import { UserService } from '~/services/user.service';
-import { useUser } from '~/composables/user.composable';
+import { useTheme } from '~/composables/theme.composable';
 
 const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 
-const { user } = useUser(userService);
-
+const { theme, setTheme } = useTheme(userService);
 const colors = {
   purple: '#3129d6',
   plant: '#757d4f'
 } as const;
-
-async function setTheme(name: string) {
-  user.value!.theme = name;
-  await userService.updateMe({ theme: name });
-}
 </script>

@@ -16,7 +16,11 @@ export const useTodayEntry = (entryService: EntryService) => {
     const lastSaved = ref(new Date(1900, 1, 1));
     const tomorrow = ref(getTomorrow());
 
-    const storage = useLocalStorage('entry-today', BLANK_ENTRY());
+    const storage = useCookie('entry-today', {
+        default() {
+            return BLANK_ENTRY();
+        }
+    });
 
     const save = useDebounceFn(async () => {
         console.debug('saved debounce fn called');
@@ -32,7 +36,7 @@ export const useTodayEntry = (entryService: EntryService) => {
     const { ignoreUpdates } = watchIgnorable(entry, () => save(), { deep: true });
 
     const hasFetched = ref(false);
-    const wasLocalStorageValid = ref<boolean>(false);
+    const wasCachedEntryValid = ref<boolean>(false);
 
     onMounted(() => {
         if (hasFetched.value) {
@@ -43,7 +47,7 @@ export const useTodayEntry = (entryService: EntryService) => {
         if (isSameDay(parseServerDate(storage.value.date))) {
             console.debug('loading from local storage');
 
-            wasLocalStorageValid.value = true;
+            wasCachedEntryValid.value = true;
             ignoreUpdates(() => {
                 entry.value = storage.value;
             });
@@ -68,7 +72,7 @@ export const useTodayEntry = (entryService: EntryService) => {
         }
 
         try {
-            if (wasLocalStorageValid.value && JSON.stringify(today) !== JSON.stringify(entry.value)) {
+            if (wasCachedEntryValid.value && JSON.stringify(today) !== JSON.stringify(entry.value)) {
                 console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
                 await save();
                 return;

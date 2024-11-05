@@ -33,24 +33,24 @@ import type { Group } from '~/types/group.type';
 const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 
-const cachedGroups = useLocalStorage('groups', [] as Group[]);
+// const cachedGroups = useLocalStorage('groups', [] as Group[]);
 const { data: groups, refresh } = useLazyAsyncData(
     'groups',
     () => groupService.getJoinedGroups(),
     {
-      default() {
-        return cachedGroups.value;
-      }
+      // default() {
+      //   return cachedGroups.value;
+      // }
     }
 );
 
 onMounted(refresh);
 
-watchImmediate(groups, (g) => {
-  if (g) {
-    cachedGroups.value = g;
-  }
-}, { deep: true });
+// watchImmediate(groups, (g) => {
+//   if (g) {
+//     cachedGroups.value = g;
+//   }
+// }, { deep: true });
 
 const groupName = ref('');
 const joinGroupCode = ref('');
@@ -84,7 +84,7 @@ async function createGroup() {
   groupName.value = '';
   const group = await groupService.createGroup(n);
   // todo proper sorting
-  cachedGroups.value.push(group);
+  // cachedGroups.value.push(group);
 
   await navigateTo({ name: 'groups-code', params: { code: group.code } });
 }

@@ -14,7 +14,7 @@ export default defineNuxtPlugin(nuxtApp => {
             }
         },
         async onResponseError({ options, response }) {
-            if ((options as any).ignoreError) {
+            if (options.ignoreResponseError) {
                 return;
             }
 

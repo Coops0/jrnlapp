@@ -14,6 +14,10 @@ export class AuthService {
     }
 
     async loginWithGoogle(state: string, code: string): Promise<{ user: User, token: string }> {
-        return this.api('/auth/google/callback', { method: 'POST', body: { state, code } });
+        return this.api('/auth/google/callback', {
+            ignoreResponseError: true,
+            method: 'POST',
+            body: { state, code }
+        });
     }
 }
