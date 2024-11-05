@@ -4,40 +4,42 @@ import { useUser } from '~/composables/user.composable';
 export const useTheme = (userService: UserService | null) => {
     const { user } = useUser(userService);
 
-    const cachedTheme = useCookie<string>('theme');
-    const theme = useState('theme', () => user.value?.theme || cachedTheme.value || 'purple');
+    const theme = useState('theme', () => user.value?.theme || 'purple');
+    const activeTheme = useColorMode();
 
-    watchImmediate(theme, t => {
-        cachedTheme.value = t;
+    watchImmediate(theme, p => {
+        activeTheme.value = p;
+        activeTheme.preference = p;
     });
 
-    useColorMode({
-        storageKey: null,
-        storageRef: theme,
-        initialValue: user.value?.theme ?? 'purple',
-        attribute: 'data-theme',
-        modes: {
-            purple: 'purple',
-            plant: 'plant'
-        }
-    });
+    const setThemeLocal = (name: string) => {
+        theme.value = name;
+        activeTheme.value = name;
+        activeTheme.preference = name;
+    };
 
     watchImmediate(user, p => {
         if (p?.theme && p.theme !== theme.value) {
             console.debug('useTheme: user theme changed, setting theme to', p.theme);
-            theme.value = p.theme;
+            setThemeLocal(p.theme);
         }
     }, { deep: true });
 
     async function setTheme(name: string) {
-        theme.value = name;
+        if (name === theme.value) {
+            return;
+        }
+
+        setThemeLocal(name);
         if (!userService) {
             throw new Error('userService is required for useTheme.setTheme');
         }
 
-        await userService.updateMe({ theme: name });
-        user.value.theme = name;
+        await debouncedUpdate();
+        user.value!.theme = name;
     }
+
+    const debouncedUpdate = useDebounceFn(() => userService!.updateMe({ theme: theme.value }), 150);
 
     return {
         theme: readonly(theme),

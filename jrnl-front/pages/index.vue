@@ -1,9 +1,10 @@
 <template>
   <div>
-    <h1>
+    <p>
       you can't cheat your thoughts
-      <NuxtLink v-if="!!jwt" to="/page">go to your jrnl</NuxtLink>
-    </h1>
+    </p>
+
+    <NuxtLink v-if="!!jwt" to="/page">go to your jrnl</NuxtLink>
   </div>
 </template>
 
