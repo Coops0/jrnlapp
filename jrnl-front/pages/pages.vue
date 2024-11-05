@@ -3,7 +3,7 @@
     <h1>Pages</h1>
     <div v-if="paginator">
       <PastEntry
-          v-for="entry in entries"
+          v-for="entry in paginator.items"
           :id="entry.id"
           :key="entry.id"
           :date="entry.date"
@@ -23,27 +23,29 @@ import PastEntry from '~/components/PastEntry.vue';
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const entries = ref<StrippedEntry[]>([]);
-
 const nextCursor = ref<string | null>(null);
 
 const { data: paginator } = useLazyAsyncData(
     'entries',
     () => entryService.getEntriesPaginated(nextCursor.value || undefined, 50),
-    { watch: [nextCursor] }
-);
+    {
+      watch: [nextCursor],
+      transform(p) {
+        const entries: StrippedEntry[] = [...(paginator.value?.items ?? [])];
 
-watch(paginator, (p) => {
-  if (!p?.items?.length) {
-    return;
-  }
+        for (const entry of (p?.items ?? [])) {
+          if (!entries.find((e: StrippedEntry) => e.id === entry.id)) {
+            entries.push(entry);
+          }
+        }
 
-  for (const entry of p.items) {
-    if (!entries.value.find(e => e.id === entry.id)) {
-      entries.value.push(entry);
+        return {
+          ...p,
+          items: entries
+        };
+      }
     }
-  }
-}, { immediate: true, deep: true });
+);
 
 function loadMore() {
   if (paginator.value?.has_more && paginator.value?.next_cursor) {

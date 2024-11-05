@@ -1,9 +1,12 @@
 <template>
   <div>
-    <h1>w</h1>
+    <h1>
+      you can't cheat your thoughts
+      <NuxtLink v-if="!!jwt" to="/page">go to your jrnl</NuxtLink>
+    </h1>
   </div>
 </template>
 
 <script lang="ts" setup>
-navigateTo('/page');
+const { jwt } = useAuth();
 </script>

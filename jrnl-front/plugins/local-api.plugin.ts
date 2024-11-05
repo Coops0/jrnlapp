@@ -14,12 +14,9 @@ export default defineNuxtPlugin(nuxtApp => {
             }
         },
         async onResponseError({ options, response }) {
-            if (options.ignoreResponseError) {
-                return;
-            }
-
-            if (response.status === 401) {
+            if (!options.ignoreResponseError && response.status === 401) {
                 console.debug('got unauthorized response in $api plugin, redirecting to login');
+                jwt.value = null;
                 await nuxtApp.runWithContext(() => navigateTo('/login'));
             }
         }

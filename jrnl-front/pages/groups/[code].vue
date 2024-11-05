@@ -70,8 +70,6 @@ const dateWindowRange = computed(() => {
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
 
-  start.setDate(start.getDate() - 7);
-
   start.setHours(0, 0, 0, 0);
   end.setHours(0, 0, 0, 0);
 

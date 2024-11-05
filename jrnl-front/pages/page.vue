@@ -3,9 +3,9 @@
     <ClientOnly>
       <h5 v-if="lastSaved.getFullYear() !== 1900">last saved {{ lastSavedRelativeString }}</h5>
       <TimeUntilTomorrow :tomorrow/>
+      <TextEditor v-model="entry.text" class="w-full h-full"/>
+      <Slider v-model="entry.emotion_scale" :max="10" :min="0" :step="0.1"/>
     </ClientOnly>
-    <TextEditor v-model="entry.text" class="w-full h-full"/>
-    <Slider v-model="entry.emotion_scale" :max="10" :min="0" :step="0.1"/>
   </div>
 </template>
 

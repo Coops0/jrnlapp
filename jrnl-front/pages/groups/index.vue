@@ -32,7 +32,7 @@ import { GroupService } from '~/services/group.service';
 const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 
-const { data: groups, refresh } = useLazyAsyncData('groups', groupService.getJoinedGroups);
+const { data: groups, refresh } = useLazyAsyncData('groups', () => groupService.getJoinedGroups());
 
 const groupName = ref('');
 const joinGroupCode = ref('');

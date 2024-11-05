@@ -36,6 +36,6 @@ export class GroupService {
     }
 
     async getDaysData(code: string, before?: string, limit?: number): Promise<GroupedDayData[]> {
-        return this.api(`/groups/${code}/day`, { query: { before, limit } });
+        return this.api(`/groups/${code}/day`, { query: { before: before && btoa(before), limit } });
     }
 }

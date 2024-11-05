@@ -22,68 +22,73 @@ export const useTodayEntry = (entryService: EntryService) => {
         }
     });
 
-    const save = useDebounceFn(async () => {
-        console.debug('saved debounce fn called');
-        if (!entry.value) return;
+    const save = useDebounceFn(
+        async () => {
+            console.debug('saved debounce fn called');
+            if (!entry.value) return;
 
-        storage.value = entry.value;
-        await entryService.putToday(entry.value.emotion_scale, entry.value.text);
-        console.debug('saved entry');
+            await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+            console.debug('saved entry');
 
-        lastSaved.value = new Date();
-    }, 600);
+            lastSaved.value = new Date();
+        },
+        200,
+        { maxWait: 2500 }
+    );
 
-    const { ignoreUpdates } = watchIgnorable(entry, save, { deep: true });
+    const { ignoreUpdates } = watchIgnorable(entry, async e => {
+        if (e) {
+            storage.value = e;
+        }
+        await save();
+    }, { deep: true });
+
 
     const {
-        data: todayFetchLazy,
+        status,
         execute: fetchToday
-    } = useLazyAsyncData('today-entry-fetch', entryService.getToday, { immediate: false });
+    } = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
+        immediate: false,
+        async transform(today) {
+            if (today === null) {
+                console.debug('fetch entry returned null, defaulting to blank');
+                today = BLANK_ENTRY();
+            }
 
-    const wasCachedEntryValid = ref<boolean>(false);
+            if (JSON.stringify(today) !== JSON.stringify(entry.value)) {
+                console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
+                await save();
+                return today;
+            }
+
+            console.debug('setting entry to fetched state');
+            ignoreUpdates(() => {
+                entry.value = today;
+            });
+
+            storage.value = today;
+            return today;
+        }
+    });
 
     onMounted(() => {
-        if (todayFetchLazy.value?.id) {
+        if (status.value === 'success') {
             console.debug('already fetched, skipping initial local storage check');
             return;
         }
 
-        if (isSameDay(parseServerDate(storage.value.date))) {
-            console.debug('loading from local storage');
-
-            wasCachedEntryValid.value = true;
-            ignoreUpdates(() => {
-                entry.value = storage.value;
-            });
-        } else {
+        if (!isSameDay(parseServerDate(storage.value.date))) {
             console.debug('resetting local storage', storage.value, parseServerDate(storage.value.date));
             storage.value = BLANK_ENTRY();
-        }
-    });
-
-    watchOnce(todayFetchLazy, async today => {
-        if (today === null) {
-            console.debug('fetch entry returned null, defaulting to blank');
-            today = BLANK_ENTRY();
+            return;
         }
 
-        try {
-            if (wasCachedEntryValid.value && JSON.stringify(today) !== JSON.stringify(entry.value)) {
-                console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
-                await save();
-                return;
-            }
-        } catch (e) {
-            console.warn('error comparing storage and fetched state', e);
-        }
+        console.debug('loading from local storage');
 
-        console.debug('setting entry to fetched state');
         ignoreUpdates(() => {
-            entry.value = today;
+            entry.value = storage.value;
         });
-
-        storage.value = today;
-    }, { deep: true });
+    });
 
     // if day changes as we are writing, then reset too
     useIntervalFn(() => {

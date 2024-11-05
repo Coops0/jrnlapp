@@ -7,8 +7,6 @@
 </template>
 
 <script lang="ts" setup>
-import { definePageMeta } from '#imports';
-
 const { public: { apiBase } } = useRuntimeConfig();
 
 definePageMeta({ redirectUnautheticated: false });

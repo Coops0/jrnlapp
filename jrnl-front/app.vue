@@ -5,6 +5,9 @@
 </template>
 
 <script lang="ts" setup>
+// need to init to immediately load theme
+const _theme = useTheme(null);
+
 useHead({
   title: 'jr.nl',
   meta: [

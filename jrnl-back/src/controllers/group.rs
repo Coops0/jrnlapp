@@ -6,6 +6,9 @@ use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
+use base64::engine::general_purpose::STANDARD;
+use base64::Engine;
+use chrono::Duration;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::collections::HashMap;
@@ -268,7 +271,21 @@ struct DayDataRow {
 #[derive(Debug, Deserialize)]
 struct GetDaysDataParams {
     day_limit: Option<i64>,
+    #[serde(default, deserialize_with = "deserialize_base_date")]
     before: Option<chrono::NaiveDate>,
+}
+
+fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<chrono::NaiveDate>, D::Error> {
+    let Some(encoded_date) = Option::<String>::deserialize(deserializer)? else {
+        return Ok(None)
+    };
+    
+    let decoded_bytes = STANDARD.decode(encoded_date).map_err(serde::de::Error::custom)?;
+    let date_string = String::from_utf8(decoded_bytes).map_err(serde::de::Error::custom)?;
+
+    chrono::NaiveDate::parse_from_str(&date_string, "%m/%d/%Y")
+        .map(Some)
+        .map_err(serde::de::Error::custom)
 }
 
 async fn get_days_data_paginated(
@@ -278,7 +295,7 @@ async fn get_days_data_paginated(
     State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<Vec<DayData>>> {
     let day_limit = params.day_limit.unwrap_or(7).clamp(1, 30);
-    let before = params
+    let before_date = params
         .before
         .unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
 
@@ -311,22 +328,23 @@ async fn get_days_data_paginated(
         .fetch_all(&pool)
         .await?;
 
-    let dates = (0..day_limit)
-        .map(|i| before - chrono::Duration::days(i))
-        .collect::<Vec<_>>();
 
-    // todo make sure this date checking works
+    let start_date = before_date - Duration::days(day_limit - 1);
+
     let all_entries = sqlx::query_as::<_, DayDataRow>(
         // language=postgresql
         "
         SELECT date, emotion_scale FROM entries
-        WHERE author = ANY($1) AND date = ANY($2)
+        WHERE author = ANY($1)
+        AND date >= $2
+        AND date <= $3
         ORDER BY date DESC
         LIMIT 500
         ",
     )
         .bind(&group_members)
-        .bind(&dates)
+        .bind(start_date)
+        .bind(before_date)
         .fetch_all(&pool)
         .await
         .map_err(DatabaseError)?;
@@ -364,7 +382,7 @@ async fn joined_groups(
         SELECT *, gm.group_id as group_id FROM group_memberships gm
         JOIN groups g ON gm.group_id = g.id
         WHERE gm.user_id = $1
-    ",
+    "
     )
         .bind(user.id)
         .fetch_all(&pool)
