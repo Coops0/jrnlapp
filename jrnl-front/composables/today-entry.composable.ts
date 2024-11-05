@@ -33,13 +33,17 @@ export const useTodayEntry = (entryService: EntryService) => {
         lastSaved.value = new Date();
     }, 600);
 
-    const { ignoreUpdates } = watchIgnorable(entry, () => save(), { deep: true });
+    const { ignoreUpdates } = watchIgnorable(entry, save, { deep: true });
 
-    const hasFetched = ref(false);
+    const {
+        data: todayFetchLazy,
+        execute: fetchToday
+    } = useLazyAsyncData('today-entry-fetch', entryService.getToday, { immediate: false });
+
     const wasCachedEntryValid = ref<boolean>(false);
 
     onMounted(() => {
-        if (hasFetched.value) {
+        if (todayFetchLazy.value?.id) {
             console.debug('already fetched, skipping initial local storage check');
             return;
         }
@@ -57,15 +61,7 @@ export const useTodayEntry = (entryService: EntryService) => {
         }
     });
 
-    async function beginFetch() {
-        let today: Entry | null;
-        try {
-            today = await entryService.getToday();
-        } finally {
-            console.debug('finished initial entry fetch');
-            hasFetched.value = true;
-        }
-
+    watchOnce(todayFetchLazy, async today => {
         if (today === null) {
             console.debug('fetch entry returned null, defaulting to blank');
             today = BLANK_ENTRY();
@@ -87,7 +83,7 @@ export const useTodayEntry = (entryService: EntryService) => {
         });
 
         storage.value = today;
-    }
+    }, { deep: true });
 
     // if day changes as we are writing, then reset too
     useIntervalFn(() => {
@@ -110,7 +106,7 @@ export const useTodayEntry = (entryService: EntryService) => {
     return {
         entry,
         lastSaved,
-        beginFetch,
+        beginFetch: fetchToday,
         tomorrow
     };
 };
