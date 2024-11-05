@@ -42,12 +42,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { GroupService } from '~/services/group.service';
-import { useGroup } from '~/composables/group.composable';
 import { parseServerDate } from '~/util/index.util';
 import { UserService } from '~/services/user.service';
-import { useUser } from '~/composables/user.composable';
 
 const route = useRoute();
 const code = route.params.code as string;
@@ -57,9 +55,7 @@ const groupService = new GroupService($localApi);
 const userService = new UserService($localApi);
 
 const { user } = useUser(userService);
-let { group, members, days, before, execute } = useGroup(code, groupService);
-
-onMounted(execute);
+let { group, members, days, before } = useGroup(code, groupService);
 
 const isOwned = computed(() => members.value?.some(m => m.owner && m.id === user.value?.id));
 

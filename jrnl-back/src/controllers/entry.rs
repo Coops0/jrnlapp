@@ -43,15 +43,15 @@ async fn get_trimmed_entries_paginated(
             AND (date, id) < ($2, $3)
             ORDER BY date DESC, id DESC
             LIMIT $4
-            "
+            ",
     )
-        .bind(user.id)
-        .bind(cursor.date)
-        .bind(cursor.id)
-        .bind(limit_plus_one)
-        .fetch_all(&pool)
-        .await
-        .map_err(DatabaseError)?;
+    .bind(user.id)
+    .bind(cursor.date)
+    .bind(cursor.id)
+    .bind(limit_plus_one)
+    .fetch_all(&pool)
+    .await
+    .map_err(DatabaseError)?;
 
     let has_more = entries.len() > limit as usize;
     if has_more {
@@ -59,8 +59,11 @@ async fn get_trimmed_entries_paginated(
     }
 
     let next_cursor = match (has_more, entries.last()) {
-        (true, Some(last_entry)) => Some(Cursor { id: last_entry.id, date: last_entry.date }),
-        _ => None
+        (true, Some(last_entry)) => Some(Cursor {
+            id: last_entry.id,
+            date: last_entry.date,
+        }),
+        _ => None,
     };
 
     Ok(Json(CursorPaginatedResponse {
@@ -77,14 +80,14 @@ async fn get_entry(
 ) -> JrnlResult<Json<Option<Entry>>> {
     sqlx::query_as::<_, Entry>(
         // language=postgresql
-        "SELECT * FROM entries WHERE author = $1 AND id = $2 LIMIT 1"
+        "SELECT * FROM entries WHERE author = $1 AND id = $2 LIMIT 1",
     )
-        .bind(user.id)
-        .bind(id)
-        .fetch_optional(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(user.id)
+    .bind(id)
+    .fetch_optional(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
 async fn get_overall_average(
@@ -93,26 +96,29 @@ async fn get_overall_average(
 ) -> JrnlResult<Json<f64>> {
     sqlx::query_scalar(
         // language=postgresql
-        "SELECT AVG(emotion_scale) FROM entries WHERE author = $1"
+        "SELECT AVG(emotion_scale) FROM entries WHERE author = $1",
     )
-        .bind(user.id)
-        .fetch_one(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(user.id)
+    .fetch_one(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
-async fn get_today_entry(user: User, State(AppState { pool }): State<AppState>) -> JrnlResult<Json<Option<Entry>>> {
+async fn get_today_entry(
+    user: User,
+    State(AppState { pool }): State<AppState>,
+) -> JrnlResult<Json<Option<Entry>>> {
     sqlx::query_as::<_, Entry>(
         // language=postgresql
-        "SELECT * FROM entries WHERE author = $1 AND date = $2 LIMIT 1"
+        "SELECT * FROM entries WHERE author = $1 AND date = $2 LIMIT 1",
     )
-        .bind(user.id)
-        .bind(user.current_date_by_timezone())
-        .fetch_optional(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(user.id)
+    .bind(user.current_date_by_timezone())
+    .fetch_optional(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }
 
 #[derive(Deserialize)]
@@ -123,8 +129,12 @@ struct UpdateEntryPayload {
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
-    let Ok(s) = String::deserialize(deserializer) else { return Ok(None); };
+fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error> {
+    let Ok(s) = String::deserialize(deserializer) else {
+        return Ok(None);
+    };
 
     let trimmed = s.trim();
     if trimmed.is_empty() {
@@ -148,14 +158,14 @@ async fn update_today_entry(
             ON CONFLICT (author, date) 
             DO UPDATE SET emotion_scale = $3, text = $4 
             RETURNING *
-        "
+        ",
     )
-        .bind(user.id)
-        .bind(user.current_date_by_timezone())
-        .bind(payload.emotion_scale)
-        .bind(payload.text)
-        .fetch_one(&pool)
-        .await
-        .map(Json)
-        .map_err(Into::into)
+    .bind(user.id)
+    .bind(user.current_date_by_timezone())
+    .bind(payload.emotion_scale)
+    .bind(payload.text)
+    .fetch_one(&pool)
+    .await
+    .map(Json)
+    .map_err(Into::into)
 }

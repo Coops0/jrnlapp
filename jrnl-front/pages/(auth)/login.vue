@@ -6,14 +6,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { definePageMeta } from '#imports';
 
 const { public: { apiBase } } = useRuntimeConfig();
 
-definePageMeta({
-  redirectUnautheticated: false,
-});
+definePageMeta({ redirectUnautheticated: false });
 
 async function signInWithGoogle() {
   await navigateTo(`${apiBase}/auth/google`, { external: true });

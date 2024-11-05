@@ -33,7 +33,9 @@ impl Group {
             .collect::<Vec<String>>();
 
         let num = rng.gen_range(0..=9);
-        let [first_word, second_word] = &words[..] else { unreachable!(); };
+        let [first_word, second_word] = &words[..] else {
+            unreachable!();
+        };
 
         format!("{first_word}{num}{second_word}")
     }

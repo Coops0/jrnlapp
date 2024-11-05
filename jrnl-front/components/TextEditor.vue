@@ -2,7 +2,7 @@
   <editor-content :editor="editor"/>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 

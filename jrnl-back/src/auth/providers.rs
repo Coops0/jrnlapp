@@ -13,9 +13,11 @@ pub fn google_provider() -> anyhow::Result<BasicClient> {
         ClientId::new(env::var("GOOGLE_CLIENT_ID")?),
         Some(ClientSecret::new(env::var("GOOGLE_CLIENT_SECRET")?)),
         AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".parse()?)?,
-        Some(TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".parse()?)?),
+        Some(TokenUrl::new(
+            "https://www.googleapis.com/oauth2/v3/token".parse()?,
+        )?),
     )
-        .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
+    .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
 
     Ok(client)
 }
@@ -75,28 +77,37 @@ pub async fn fetch_google_profile(token: &str) -> anyhow::Result<(String, String
         .json::<GoogleResponse>()
         .await?;
 
-    let (name, _) = resp.names.into_iter()
+    let (name, _) = resp
+        .names
+        .into_iter()
         .filter_map(|n| {
             if n.display_name.is_empty() {
                 return None;
             }
 
-            Some((n.display_name, n.metadata.as_ref().map_or(0, Metadata::favorability)))
+            Some((
+                n.display_name,
+                n.metadata.as_ref().map_or(0, Metadata::favorability),
+            ))
         })
         .max_by_key(|(_, favorability)| *favorability)
         .context("no name found")?;
 
-    let (email, _) = resp.email_addresses.into_iter()
+    let (email, _) = resp
+        .email_addresses
+        .into_iter()
         .filter_map(|e| {
             if e.value.is_empty() {
                 return None;
             }
 
-            Some((e.value, e.metadata.as_ref().map_or(0, Metadata::favorability)))
+            Some((
+                e.value,
+                e.metadata.as_ref().map_or(0, Metadata::favorability),
+            ))
         })
         .max_by_key(|(_, favorability)| *favorability)
         .context("no email found")?;
-
 
     Ok((name, email))
 }

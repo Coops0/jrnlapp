@@ -10,10 +10,7 @@ const JWT_KEYS: LazyCell<(EncodingKey, DecodingKey)> = LazyCell::new(|| {
     let key_str = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let key = key_str.as_bytes();
 
-    (
-        EncodingKey::from_secret(key),
-        DecodingKey::from_secret(key),
-    )
+    (EncodingKey::from_secret(key), DecodingKey::from_secret(key))
 });
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -37,8 +34,7 @@ pub fn encode_jwt(uid: Uuid) -> anyhow::Result<String> {
     let header = Header::new(Algorithm::HS512);
 
     #[allow(clippy::borrow_interior_mutable_const)]
-    encode(&header, &claims, &JWT_KEYS.0)
-        .map_err(Into::into)
+    encode(&header, &claims, &JWT_KEYS.0).map_err(Into::into)
 }
 
 #[allow(clippy::module_name_repetitions)]

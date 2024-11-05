@@ -1,8 +1,8 @@
-mod controllers;
-mod web;
 mod auth;
-mod schemas;
+mod controllers;
 mod error;
+mod schemas;
+mod web;
 
 use crate::auth::clean_expired_sessions;
 use crate::schemas::user::User;
@@ -43,7 +43,6 @@ async fn main() -> anyhow::Result<()> {
 
     sqlx::migrate!().run(&pool).await?;
 
-
     #[allow(clippy::let_underscore_future)]
     let _ = tokio::task::spawn(clean_expired_sessions(pool.clone()));
 
@@ -56,15 +55,17 @@ async fn main() -> anyhow::Result<()> {
         // don't run middleware only for auth route
         .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
         .nest("/auth", auth::routes::auth_controller())
-        .layer(ServiceBuilder::new()
-            .layer(CorsLayer::new()
-                .allow_origin(AllowOrigin::exact(env::var("FRONTEND_URL")?.parse()?))
-                // .allow_origin(AllowOrigin::any()) // todo
-                .allow_methods(AllowMethods::mirror_request())
-                .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
-                .allow_credentials(AllowCredentials::yes())
-            )
-            .layer(DefaultBodyLimit::max(1024))
+        .layer(
+            ServiceBuilder::new()
+                .layer(
+                    CorsLayer::new()
+                        .allow_origin(AllowOrigin::exact(env::var("FRONTEND_URL")?.parse()?))
+                        // .allow_origin(AllowOrigin::any()) // todo
+                        .allow_methods(AllowMethods::mirror_request())
+                        .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
+                        .allow_credentials(AllowCredentials::yes()),
+                )
+                .layer(DefaultBodyLimit::max(1024)),
         )
         .with_state(state);
 

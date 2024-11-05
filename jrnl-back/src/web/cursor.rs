@@ -26,7 +26,9 @@ impl Cursor {
     }
 
     fn decode(s: &str) -> Option<Self> {
-        STANDARD.decode(s).ok()
+        STANDARD
+            .decode(s)
+            .ok()
             .and_then(|b| String::from_utf8(b).ok())
             .and_then(|c| {
                 let (date, id) = c.split_once(':')?;
@@ -41,8 +43,7 @@ impl Cursor {
 impl<'de> Deserialize<'de> for Cursor {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let s = String::deserialize(deserializer)?;
-        Self::decode(&s)
-            .ok_or_else(|| serde::de::Error::custom("invalid cursor"))
+        Self::decode(&s).ok_or_else(|| serde::de::Error::custom("invalid cursor"))
     }
 }
 
@@ -51,7 +52,6 @@ impl Serialize for Cursor {
         self.encode().serialize(serializer)
     }
 }
-
 
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Deserialize)]

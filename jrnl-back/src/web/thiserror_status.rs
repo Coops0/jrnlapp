@@ -12,12 +12,12 @@ pub fn derive_error_status(input: proc_macro::TokenStream) -> proc_macro::TokenS
     let ast: DeriveInput = parse_macro_input!(input);
 
     let Data::Enum(data) = ast.data else {
-        panic!(
-            "#[derive(ErrorStatus)] is only available for enums, other types are not supported."
-        )
+        panic!("#[derive(ErrorStatus)] is only available for enums, other types are not supported.")
     };
 
-    let cases = data.variants.iter()
+    let cases = data
+        .variants
+        .iter()
         .map(impl_enum_variant)
         .collect::<Punctuated<TokenStream, Comma>>();
 
@@ -30,7 +30,8 @@ pub fn derive_error_status(input: proc_macro::TokenStream) -> proc_macro::TokenS
                 }
             }
         }
-    }).into()
+    })
+    .into()
 }
 
 fn impl_enum_variant(variant: &Variant) -> TokenStream {
@@ -50,17 +51,18 @@ fn impl_enum_variant(variant: &Variant) -> TokenStream {
         Self::#enum_syntax => {
             let m = format!("{}", self);
             let status: u16 = #status_code.into();
-            
+
             let mut r = axum::response::IntoResponse::into_response(axum::Json(serde_json::json!({ "status": status, "msg": m, "code": #quoted_ident })));
             *r.status_mut() = #status_code;
-            
+
             r
         }
     }
 }
 
 fn find_status_code(input: &Variant) -> TokenStream {
-    let Some(Meta::List(l)) = input.attrs
+    let Some(Meta::List(l)) = input
+        .attrs
         .iter()
         .find(|attr| attr.path().is_ident("status"))
         .map(|attr| &attr.meta)

@@ -4,7 +4,7 @@
   </NuxtLayout>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 useHead({
   title: 'jr.nl',
   meta: [

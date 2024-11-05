@@ -9,10 +9,6 @@ export class AuthService {
         return this.api('/auth/logout');
     }
 
-    async getGoogleRedirect(): Promise<ReturnType<$Fetch>> {
-        return this.api('/auth/google');
-    }
-
     async loginWithGoogle(state: string, code: string): Promise<{ user: User, token: string }> {
         return this.api('/auth/google/callback', {
             ignoreResponseError: true,

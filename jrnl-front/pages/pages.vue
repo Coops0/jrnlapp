@@ -1,13 +1,13 @@
 <template>
   <div>
     <h1>Pages</h1>
-    <div>
+    <div v-if="paginator">
       <PastEntry
           v-for="entry in entries"
-          :key="entry.id"
           :id="entry.id"
-          :rating="entry.emotion_scale"
+          :key="entry.id"
           :date="entry.date"
+          :rating="entry.emotion_scale"
       />
 
       <div v-if="paginator.has_more" @click="loadMore">load more</div>
@@ -15,7 +15,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 
 import { EntryService, type StrippedEntry } from '~/services/entry.service';
 import PastEntry from '~/components/PastEntry.vue';
@@ -23,27 +23,15 @@ import PastEntry from '~/components/PastEntry.vue';
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const reactiveStorage = useLocalStorage('entry-cache', [] as StrippedEntry[]);
 const entries = ref<StrippedEntry[]>([]);
 
 const nextCursor = ref<string | null>(null);
 
-const { data: paginator, execute } = useLazyAsyncData(
+const { data: paginator } = useLazyAsyncData(
     'entries',
     () => entryService.getEntriesPaginated(nextCursor.value || undefined, 50),
-    {
-      default() {
-        return {
-          items: reactiveStorage.value,
-          next_cursor: null,
-          has_more: false
-        };
-      },
-      watch: [nextCursor],
-    }
+    { watch: [nextCursor] }
 );
-
-onMounted(execute);
 
 watch(paginator, (p) => {
   if (!p?.items?.length) {
@@ -55,12 +43,10 @@ watch(paginator, (p) => {
       entries.value.push(entry);
     }
   }
-
-  reactiveStorage.value = [...entries.value];
 }, { immediate: true, deep: true });
 
 function loadMore() {
-  if (paginator.value.has_more && paginator.value.next_cursor) {
+  if (paginator.value?.has_more && paginator.value?.next_cursor) {
     nextCursor.value = paginator.value.next_cursor;
   }
 }

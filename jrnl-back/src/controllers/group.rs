@@ -1,15 +1,15 @@
 use crate::error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor};
+use crate::schemas::group::Group;
+use crate::schemas::user::User;
 use crate::AppState;
 use axum::extract::{Path, Query, State};
+use axum::http::StatusCode;
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::collections::HashMap;
-use axum::http::StatusCode;
 use uuid::Uuid;
-use crate::schemas::group::Group;
-use crate::schemas::user::User;
 
 pub fn groups_controller() -> Router<AppState> {
     Router::new()
@@ -94,12 +94,10 @@ async fn join_group(
         .execute(&pool)
         .await
         .map(|_| StatusCode::OK)
-        .map_err(|why|
-            match &why {
-                sqlx::Error::Database(d) if d.is_unique_violation() => JrnlError::AlreadyGroupMember,
-                _ => DatabaseError(why).into()
-            }
-        )
+        .map_err(|why| match &why {
+            sqlx::Error::Database(d) if d.is_unique_violation() => JrnlError::AlreadyGroupMember,
+            _ => DatabaseError(why).into(),
+        })
 }
 
 #[derive(FromRow)]
@@ -131,7 +129,7 @@ async fn get_group_members(
             AND gm.user_id = $2
         )
         LIMIT 1
-        "
+        ",
     )
         .bind(code)
         .bind(user.id)
@@ -146,7 +144,7 @@ async fn get_group_members(
         JOIN group_memberships gm ON u.id = gm.user_id
         WHERE gm.group_id = $1
 
-    "
+    ",
     )
         .bind(group.id)
         .fetch_all(&pool)
@@ -155,7 +153,11 @@ async fn get_group_members(
 
     let members_with_owners = members
         .into_iter()
-        .map(|user| TrimmedUserWithOwner { id: user.id, name: user.name, owner: user.id.eq(&group.owner_id) })
+        .map(|user| TrimmedUserWithOwner {
+            id: user.id,
+            name: user.name,
+            owner: user.id.eq(&group.owner_id),
+        })
         .collect::<Vec<_>>();
 
     Ok(Json(members_with_owners))
@@ -168,7 +170,7 @@ async fn leave_group(
 ) -> JrnlResult<StatusCode> {
     let group = sqlx::query_as::<_, Group>(
         // language=postgresql
-        "SELECT * FROM groups WHERE code = $1"
+        "SELECT * FROM groups WHERE code = $1",
     )
         .bind(&code)
         .fetch_one(&pool)
@@ -196,7 +198,7 @@ async fn leave_group(
         // language=postgresql
         "
         SELECT COUNT(*) FROM group_memberships WHERE group_id = $1
-        "
+        ",
     )
         .bind(group.id)
         .fetch_one(&pool)
@@ -215,7 +217,7 @@ async fn leave_group(
                SELECT user_id FROM group_memberships WHERE group_id = $1 LIMIT 1
             )
             WHERE id = $1
-            "
+            ",
         )
             .bind(group.id)
             .execute(&pool)
@@ -276,7 +278,9 @@ async fn get_days_data_paginated(
     State(AppState { pool }): State<AppState>,
 ) -> JrnlResult<Json<Vec<DayData>>> {
     let day_limit = params.day_limit.unwrap_or(7).clamp(1, 30);
-    let before = params.before.unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
+    let before = params
+        .before
+        .unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
 
     let group_id = sqlx::query_scalar::<_, Uuid>(
         // language=postgresql
@@ -289,7 +293,7 @@ async fn get_days_data_paginated(
             AND gm.user_id = $2
         )
         LIMIT 1
-        "
+        ",
     )
         .bind(code)
         .bind(user.id)
@@ -301,12 +305,11 @@ async fn get_days_data_paginated(
         // language=postgresql
         "
         SELECT user_id FROM group_memberships WHERE group_id = $1
-        "
+        ",
     )
         .bind(group_id)
         .fetch_all(&pool)
         .await?;
-
 
     let dates = (0..day_limit)
         .map(|i| before - chrono::Duration::days(i))
@@ -320,7 +323,7 @@ async fn get_days_data_paginated(
         WHERE author = ANY($1) AND date = ANY($2)
         ORDER BY date DESC
         LIMIT 500
-        "
+        ",
     )
         .bind(&group_members)
         .bind(&dates)
@@ -330,20 +333,19 @@ async fn get_days_data_paginated(
 
     let entries_grouped_by_day = all_entries
         .into_iter()
-        .fold(HashMap::<chrono::NaiveDate, Vec<f32>>::new(), |mut acc, entry| {
-            acc
-                .entry(entry.date)
-                .or_default()
-                .push(entry.emotion_scale);
-            acc
-        })
+        .fold(
+            HashMap::<chrono::NaiveDate, Vec<f32>>::new(),
+            |mut acc, entry| {
+                acc.entry(entry.date).or_default().push(entry.emotion_scale);
+                acc
+            },
+        )
         .into_iter()
         .map(|(day, scales)| DayData { scales, day })
         .collect::<Vec<_>>();
 
     Ok(Json(entries_grouped_by_day))
 }
-
 
 #[derive(Serialize, FromRow)]
 struct SelfGroup {

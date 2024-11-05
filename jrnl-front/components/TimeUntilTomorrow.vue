@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h3 class="text-color-text-300" v-if="show" @click="() => toggle()">time left {{ timeUntilTomorrow }}</h3>
+    <h3 v-if="show" class="text-color-text-300" @click="() => toggle()">time left {{ timeUntilTomorrow }}</h3>
     <h3 v-else @click="() => toggle()">show time left</h3>
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 const props = defineProps<{ tomorrow: Date }>();
 
 const timeUntilTomorrow = useTimeAgo(props.tomorrow, { updateInterval: 800, showSecond: true });

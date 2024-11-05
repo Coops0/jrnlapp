@@ -2,9 +2,8 @@
   <div>one min im logging you out the jrnl</div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { AuthService } from '~/services/auth.service';
-import { useUser } from '~/composables/user.composable';
 import { UserService } from '~/services/user.service';
 
 const { $localApi } = useNuxtApp();
@@ -20,7 +19,7 @@ onMounted(async () => {
     await authService.logout();
   } finally {
     logout();
-    user.value = {};
+    user.value = null;
     await navigateTo('/');
   }
 });

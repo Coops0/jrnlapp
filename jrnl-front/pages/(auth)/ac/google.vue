@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { AuthService } from '~/services/auth.service';
 import { useUser } from '~/composables/user.composable';
 import { UserService } from '~/services/user.service';
@@ -21,13 +21,15 @@ const { jwt } = useAuth();
 
 definePageMeta({ redirectUnautheticated: false });
 
-const { data, error, status } = useAsyncData(
+const { data, error, status } = useLazyAsyncData(
     'google-oauth',
     () => authService.loginWithGoogle(route.query.state as string, route.query.code as string)
 );
 
 watch(data, async d => {
-  if (!d) return;
+  if (!d) {
+    return;
+  }
 
   jwt.value = d.token;
   userComposable.user.value = d.user;

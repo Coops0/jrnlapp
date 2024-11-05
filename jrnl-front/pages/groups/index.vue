@@ -3,7 +3,7 @@
     <h1>Groups</h1>
     <div>
       <div v-for="group in groups" :key="group.code">
-        <NuxtLink :to="{ name: 'groups-code', params: { code: group.code } }">
+        <NuxtLink :to="{ name: 'groups-code', params: { code: group.code } }" :prefetch="true">
           <div>{{ group.name }}</div>
         </NuxtLink>
       </div>
@@ -26,31 +26,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { GroupService } from '~/services/group.service';
-import type { Group } from '~/types/group.type';
 
 const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 
-// const cachedGroups = useLocalStorage('groups', [] as Group[]);
-const { data: groups, refresh } = useLazyAsyncData(
-    'groups',
-    () => groupService.getJoinedGroups(),
-    {
-      // default() {
-      //   return cachedGroups.value;
-      // }
-    }
-);
-
-onMounted(refresh);
-
-// watchImmediate(groups, (g) => {
-//   if (g) {
-//     cachedGroups.value = g;
-//   }
-// }, { deep: true });
+const { data: groups, refresh } = useLazyAsyncData('groups', groupService.getJoinedGroups);
 
 const groupName = ref('');
 const joinGroupCode = ref('');
@@ -84,7 +66,6 @@ async function createGroup() {
   groupName.value = '';
   const group = await groupService.createGroup(n);
   // todo proper sorting
-  // cachedGroups.value.push(group);
 
   await navigateTo({ name: 'groups-code', params: { code: group.code } });
 }

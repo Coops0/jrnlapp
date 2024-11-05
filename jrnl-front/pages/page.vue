@@ -5,11 +5,11 @@
       <TimeUntilTomorrow :tomorrow/>
     </ClientOnly>
     <TextEditor v-model="entry.text" class="w-full h-full"/>
-    <Slider v-model="entry.emotion_scale" :min="0" :max="10" :step="0.1"/>
+    <Slider v-model="entry.emotion_scale" :max="10" :min="0" :step="0.1"/>
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
 import { useTodayEntry } from '~/composables/today-entry.composable';
 import TimeUntilTomorrow from '~/components/TimeUntilTomorrow.vue';
