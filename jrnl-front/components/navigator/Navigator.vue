@@ -3,7 +3,7 @@
     <template v-if="!authenticated">
       <NuxtLink
           to="/login"
-          class="px-4 py-2 rounded-full bg-colors-primary-800 text-colors-primary-100 hover:bg-colors-primary-700 transition-colors"
+          class="text-colors-primary-400 hover:text-colors-primary-200 transition-colors"
       >
         login
       </NuxtLink>

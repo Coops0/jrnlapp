@@ -20,6 +20,11 @@ export default defineNuxtConfig({
         storage: 'cookie',
         storageKey: 'theme-cache'
     },
+    experimental: {
+        sharedPrerenderData: true,
+        asyncContext: true,
+        normalizeComponentNames: true
+    }
     // vite: {
     //     esbuild: {
     //         drop:  ['console'],
