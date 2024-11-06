@@ -1,7 +1,15 @@
 <template>
-  <div>
-    <h3 v-if="show" class="text-color-text-300" @click="() => toggle()">time left {{ timeUntilTomorrow }}</h3>
-    <h3 v-else @click="() => toggle()">show time left</h3>
+  <div class="text-right">
+    <h3 v-if="show"
+        class="text-colors-primary-300 hover:text-colors-primary-200 cursor-pointer text-sm"
+        @click="() => toggle()">
+      day ends in {{ timeUntilTomorrow }}
+    </h3>
+    <h3 v-else
+        class="text-colors-primary-500 hover:text-colors-primary-300 cursor-pointer text-sm"
+        @click="() => toggle()">
+      show time left
+    </h3>
   </div>
 </template>
 
@@ -13,4 +21,3 @@ const timeUntilTomorrow = useTimeAgo(props.tomorrow, { updateInterval: 800, show
 const show = useLocalStorage('show-time-until', true);
 const toggle = useToggle(show);
 </script>
-

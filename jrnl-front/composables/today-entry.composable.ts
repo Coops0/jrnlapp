@@ -11,16 +11,12 @@ const BLANK_ENTRY = (): Entry => ({
 });
 
 export const useTodayEntry = (entryService: EntryService) => {
-    const entry = ref<Entry>(BLANK_ENTRY());
+    const storage = useCookie<Entry>('entry-today');
+
+    const entry = ref<Entry>(storage.value ?? BLANK_ENTRY());
 
     const lastSaved = ref(new Date(1900, 1, 1));
     const tomorrow = ref(getTomorrow());
-
-    const storage = useCookie('entry-today', {
-        default() {
-            return BLANK_ENTRY();
-        }
-    });
 
     const save = useDebounceFn(
         async () => {
@@ -30,9 +26,10 @@ export const useTodayEntry = (entryService: EntryService) => {
             await entryService.putToday(entry.value.emotion_scale, entry.value.text);
             console.debug('saved entry');
 
+            storage.value = entry.value;
             lastSaved.value = new Date();
         },
-        200,
+        350,
         { maxWait: 2500 }
     );
 
@@ -55,8 +52,12 @@ export const useTodayEntry = (entryService: EntryService) => {
                 today = BLANK_ENTRY();
             }
 
-            if (JSON.stringify(today) !== JSON.stringify(entry.value)) {
+            if (
+                (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
+                (entry.value.text?.length || entry.value.emotion_scale !== 5)
+            ) {
                 console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
+                console.debug(today, entry.value);
                 await save();
                 return today;
             }
@@ -74,6 +75,11 @@ export const useTodayEntry = (entryService: EntryService) => {
     onMounted(() => {
         if (status.value === 'success') {
             console.debug('already fetched, skipping initial local storage check');
+            return;
+        }
+
+        if (!storage.value) {
+            console.debug('no local storage');
             return;
         }
 

@@ -12,7 +12,7 @@ export const isSameDay = (a: Date, b: Date = new Date()) =>
     a.getFullYear() === b.getFullYear();
 
 export const ratingLerp = (rating: number): string =>
-    interpolate('#ff0000', '#00ff00', rating / 10);
+    interpolate('#000000', '#ffffff', rating / 10);
 
 // https://stackoverflow.com/a/76126221
 function interpolate(color1: string, color2: string, percent: number) {

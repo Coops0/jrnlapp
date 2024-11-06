@@ -142,7 +142,6 @@ fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(
     }
 
     let cleaned = ammonia::clean(trimmed);
-
     Ok(Some(cleaned))
 }
 

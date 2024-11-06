@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <h1>Pages</h1>
-    <div v-if="paginator">
+  <div class="w-full">
+    <div v-if="paginator" class="flex flex-row gap-2 justify-evenly w-full">
       <PastEntry
           v-for="entry in paginator.items"
           :id="entry.id"
@@ -11,6 +10,9 @@
       />
 
       <div v-if="paginator.has_more" @click="loadMore">load more</div>
+    </div>
+    <div v-else>
+      <p class="text-colors-text-300 text-xl text-center">loading...</p>
     </div>
   </div>
 </template>

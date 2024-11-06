@@ -65,7 +65,7 @@ async fn main() -> anyhow::Result<()> {
                         .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
                         .allow_credentials(AllowCredentials::yes()),
                 )
-                .layer(DefaultBodyLimit::max(1024)),
+                .layer(DefaultBodyLimit::max(8192)),
         )
         .with_state(state);
 
