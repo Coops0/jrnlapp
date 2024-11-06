@@ -1,14 +1,21 @@
-use crate::error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor};
-use crate::schemas::group::Group;
-use crate::schemas::user::User;
-use crate::AppState;
-use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
-use axum::routing::{delete, get, post};
-use axum::{Json, Router};
-use base64::engine::general_purpose::STANDARD;
-use base64::Engine;
-use chrono::Duration;
+use crate::{
+    error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor},
+    schemas::group::Group,
+    schemas::user::User,
+    AppState
+};
+use axum::{
+    extract::{Path, Query, State},
+    http::StatusCode,
+    routing::{delete, get, post},
+    Json,
+    Router
+};
+use base64::{
+    engine::general_purpose::STANDARD,
+    Engine
+};
+use chrono::{Duration, NaiveDate};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::collections::HashMap;
@@ -259,23 +266,23 @@ async fn kick_member(
 #[derive(Serialize)]
 struct DayData {
     scales: Vec<f32>,
-    day: chrono::NaiveDate,
+    day: NaiveDate,
 }
 
 #[derive(FromRow)]
 struct DayDataRow {
     emotion_scale: f32,
-    date: chrono::NaiveDate,
+    date: NaiveDate,
 }
 
 #[derive(Debug, Deserialize)]
 struct GetDaysDataParams {
     day_limit: Option<i64>,
     #[serde(default, deserialize_with = "deserialize_base_date")]
-    before: Option<chrono::NaiveDate>,
+    before: Option<NaiveDate>,
 }
 
-fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<chrono::NaiveDate>, D::Error> {
+fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<NaiveDate>, D::Error> {
     let Some(encoded_date) = Option::<String>::deserialize(deserializer)? else {
         return Ok(None)
     };
@@ -283,7 +290,7 @@ fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(deserializer: D) -> R
     let decoded_bytes = STANDARD.decode(encoded_date).map_err(serde::de::Error::custom)?;
     let date_string = String::from_utf8(decoded_bytes).map_err(serde::de::Error::custom)?;
 
-    chrono::NaiveDate::parse_from_str(&date_string, "%m/%d/%Y")
+    NaiveDate::parse_from_str(&date_string, "%m/%d/%Y")
         .map(Some)
         .map_err(serde::de::Error::custom)
 }
@@ -352,7 +359,7 @@ async fn get_days_data_paginated(
     let entries_grouped_by_day = all_entries
         .into_iter()
         .fold(
-            HashMap::<chrono::NaiveDate, Vec<f32>>::new(),
+            HashMap::<NaiveDate, Vec<f32>>::new(),
             |mut acc, entry| {
                 acc.entry(entry.date).or_default().push(entry.emotion_scale);
                 acc

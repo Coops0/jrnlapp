@@ -4,19 +4,28 @@ mod error;
 mod schemas;
 mod web;
 
-use crate::auth::clean_expired_sessions;
-use crate::schemas::user::User;
-use axum::extract::DefaultBodyLimit;
-use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
-use axum::Router;
-use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
-use sqlx::PgPool;
+use crate::{
+    auth::clean_expired_sessions,
+    schemas::user::User,
+};
+use axum::{
+    extract::DefaultBodyLimit,
+    http::header::{AUTHORIZATION, CONTENT_TYPE},
+    Router,
+};
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    PgPool,
+};
 use std::env;
+use tokio::join;
 use tower::ServiceBuilder;
 use tower_http::cors::{AllowCredentials, AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use tracing::info;
-use tracing_subscriber::filter::LevelFilter;
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{
+    filter::LevelFilter,
+    EnvFilter,
+};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -42,9 +51,9 @@ async fn main() -> anyhow::Result<()> {
         .connect_lazy_with(env::var("DATABASE_URL")?.parse::<PgConnectOptions>()?);
 
     sqlx::migrate!().run(&pool).await?;
+    info!("migrations ran successfully / db connection valid");
 
-    #[allow(clippy::let_underscore_future)]
-    let _ = tokio::task::spawn(clean_expired_sessions(pool.clone()));
+    let session_clean_task = tokio::task::spawn(clean_expired_sessions(pool.clone()));
 
     let state = AppState { pool };
 
@@ -60,7 +69,6 @@ async fn main() -> anyhow::Result<()> {
                 .layer(
                     CorsLayer::new()
                         .allow_origin(AllowOrigin::exact(env::var("FRONTEND_URL")?.parse()?))
-                        // .allow_origin(AllowOrigin::any()) // todo
                         .allow_methods(AllowMethods::mirror_request())
                         .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
                         .allow_credentials(AllowCredentials::yes()),
@@ -70,9 +78,14 @@ async fn main() -> anyhow::Result<()> {
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await?;
+    info!("bound to {}", listener.local_addr()?);
 
-    info!("listening on {}", listener.local_addr()?);
-    axum::serve(listener, app).await?;
+    let axum_server = axum::serve(listener, app);
 
-    Ok(())
+    let _ = join!(
+        axum_server,
+        session_clean_task
+    );
+
+    unreachable!();
 }

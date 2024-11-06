@@ -1,7 +1,13 @@
 use anyhow::Context;
 use axum::http::header::AUTHORIZATION;
-use oauth2::basic::BasicClient;
-use oauth2::{AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
+use oauth2::{
+    basic::BasicClient,
+    AuthUrl,
+    ClientId,
+    ClientSecret,
+    RedirectUrl,
+    TokenUrl
+};
 use reqwest::Client;
 use serde::Deserialize;
 use std::env;

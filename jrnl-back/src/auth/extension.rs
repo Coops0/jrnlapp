@@ -17,19 +17,14 @@ impl<S> FromRequestParts<S> for Claims {
             .get("Authorization")
             .and_then(|header| header.to_str().ok())
             .and_then(|header| header.strip_prefix("Bearer "))
-            .ok_or_else(|| {
-                JrnlError::AuthenticationError(AuthenticationError::BadAuthenticationHeader)
-            })?;
+            .ok_or(JrnlError::AuthenticationError(AuthenticationError::BadAuthenticationHeader))?;
 
         let claims = decode_jwt(auth_header)
             .map_err(|_| JrnlError::AuthenticationError(AuthenticationError::InvalidToken))?;
 
-        if claims.exp
-            < usize::try_from(Utc::now().timestamp()).map_err(Into::<anyhow::Error>::into)?
-        {
-            return Err(JrnlError::AuthenticationError(
-                AuthenticationError::ExpiredToken,
-            ));
+        let parsed_exp = usize::try_from(Utc::now().timestamp()).map_err(Into::<anyhow::Error>::into)?;
+        if claims.exp < parsed_exp {
+            return Err(JrnlError::AuthenticationError(AuthenticationError::ExpiredToken));
         }
 
         Ok(claims)
@@ -52,9 +47,9 @@ impl FromRequestParts<AppState> for User {
             SELECT * FROM users WHERE id = $1 LIMIT 1
             ",
         )
-        .bind(sub)
-        .fetch_one(&state.pool)
-        .await
-        .map_err(|_| AuthenticationError::ProfileNotFound.into())
+            .bind(sub)
+            .fetch_one(&state.pool)
+            .await
+            .map_err(|_| AuthenticationError::ProfileNotFound.into())
     }
 }

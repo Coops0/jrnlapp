@@ -1,10 +1,15 @@
-use crate::error::{JrnlResult, JsonExtractor};
-use crate::schemas::user::User;
-use crate::web::deserialize_empty_string;
-use crate::AppState;
-use axum::extract::State;
-use axum::routing::get;
-use axum::{Json, Router};
+use crate::{
+    schemas::user::User,
+    error::{JrnlResult, JsonExtractor},
+    web::deserialize_empty_string,
+    AppState
+};
+use axum::{
+    extract::State,
+    routing::get,
+    Json,
+    Router
+};
 use chrono_tz::Tz;
 use serde::{Deserialize, Deserializer};
 

@@ -1,8 +1,10 @@
 use chrono::Utc;
 use jsonwebtoken::{encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use std::cell::LazyCell;
-use std::env;
+use std::{
+    cell::LazyCell,
+    env
+};
 use uuid::Uuid;
 
 #[allow(clippy::declare_interior_mutable_const)]

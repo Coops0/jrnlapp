@@ -1,16 +1,28 @@
-use crate::auth::jwt;
-use crate::auth::providers::{fetch_google_profile, google_provider};
-use crate::error::{AuthenticationError, DatabaseError, JrnlResult, JsonExtractor};
-use crate::schemas::user::User;
-use crate::AppState;
-use axum::extract::State;
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Redirect};
-use axum::routing::{get, post};
-use axum::{Json, Router};
-use oauth2::reqwest::async_http_client;
+use crate::{
+    error::{AuthenticationError, DatabaseError, JrnlResult, JsonExtractor},
+    auth::{
+        providers::{fetch_google_profile, google_provider},
+        jwt
+    },
+    schemas::user::User,
+    AppState
+};
+use axum::{
+    http::StatusCode,
+    extract::State,
+    response::{IntoResponse, Redirect},
+    routing::{get, post},
+    Json,
+    Router
+};
 use oauth2::{
-    AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse,
+    reqwest::async_http_client,
+    AuthorizationCode,
+    CsrfToken,
+    PkceCodeChallenge,
+    PkceCodeVerifier,
+    Scope,
+    TokenResponse
 };
 use serde::Deserialize;
 use serde_json::json;

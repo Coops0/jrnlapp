@@ -1,11 +1,16 @@
-use crate::error::{DatabaseError, JrnlResult, JsonExtractor};
-use crate::schemas::entry::Entry;
-use crate::schemas::user::User;
-use crate::web::cursor::{Cursor, CursorPaginatedResponse, CursorParams};
-use crate::AppState;
-use axum::extract::{Path, Query, State};
-use axum::routing::get;
-use axum::{Json, Router};
+use crate::{
+    schemas::entry::Entry,
+    error::{DatabaseError, JrnlResult, JsonExtractor},
+    schemas::user::User,
+    web::cursor::{Cursor, CursorPaginatedResponse, CursorParams},
+    AppState
+};
+use axum::{
+    routing::get,
+    extract::{Path, Query, State},
+    Json,
+    Router
+};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
