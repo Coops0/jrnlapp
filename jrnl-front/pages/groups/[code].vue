@@ -64,7 +64,7 @@ const dateWindowRange = computed(() => {
   let start = before.value;
   if (!start) {
     const f = days.value?.[0]?.day;
-    start = f ? new Date(f) : new Date();
+    start = f ? parseServerDate(f) : new Date();
   }
 
   const end = new Date(start);

@@ -1,27 +1,21 @@
 <template>
-  <div>
-    <h1>Groups</h1>
-    <div>
-      <div v-for="group in groups" :key="group.code">
-        <NuxtLink :to="{ name: 'groups-code', params: { code: group.code } }" :prefetch="true">
-          <div>{{ group.name }}</div>
-        </NuxtLink>
-      </div>
+  <div class="max-w-2xl mx-auto px-4 space-y-8">
+    <section v-if="groups?.length" class="grid gap-3">
+      <GroupsListCard
+          v-for="group in groups"
+          :key="group.code"
+          :name="group.name"
+          :code="group.code"
+      />
+    </section>
 
-      <div>
-        <input v-model="groupName" placeholder="Group name">
-        <button @click="createGroup">Create Group</button>
-      </div>
+    <section v-else class="py-8 text-center bg-colors-primary-900/20 rounded-lg">
+      <p class="text-colors-primary-400">you haven't joined any groups</p>
+    </section>
 
-      <div>
-        <input v-model="joinGroupCode" placeholder="Group code" @input="updateGroupSearchResults">
-
-        <div v-if="groupSearchResults">
-          <div>{{ groupSearchResults.name }}</div>
-          <div>{{ groupSearchResults.members }} members</div>
-          <button @click="joinGroup">Join Group</button>
-        </div>
-      </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <GroupsListCreateForm @group-created="refresh"/>
+      <GroupsListJoinForm @group-joined="refresh"/>
     </div>
   </div>
 </template>
@@ -33,41 +27,4 @@ const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 
 const { data: groups, refresh } = useLazyAsyncData('groups', () => groupService.getJoinedGroups());
-
-const groupName = ref('');
-const joinGroupCode = ref('');
-
-const groupSearchResults = ref<{ id: string; name: string; members: number; } | null>(null);
-
-const updateGroupSearchResults = useDebounceFn(async () => {
-  const c = joinGroupCode.value;
-  groupSearchResults.value = c.length ? await groupService.getGroup(joinGroupCode.value) : null;
-}, 250);
-
-async function joinGroup() {
-  const c = joinGroupCode.value;
-  if (!c.length) {
-    groupSearchResults.value = null;
-    return;
-  }
-
-  joinGroupCode.value = '';
-
-  await groupService.joinGroup(c);
-  await refresh();
-}
-
-async function createGroup() {
-  const n = groupName.value;
-  if (!n.length) {
-    return;
-  }
-
-  groupName.value = '';
-  const group = await groupService.createGroup(n);
-  // todo proper sorting
-
-  await navigateTo({ name: 'groups-code', params: { code: group.code } });
-}
-
 </script>

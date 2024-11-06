@@ -20,7 +20,7 @@ export class GroupService {
     }
 
     async joinGroup(code: string): Promise<void> {
-        return this.api('/groups/join', { method: 'POST', body: { code } });
+        return this.api(`/groups/${code}`, { method: 'POST' });
     }
 
     async getGroupMembers(code: string): Promise<(Pick<User, 'id' | 'name'> & { owner: boolean })[]> {

@@ -1,22 +1,29 @@
 <template>
   <NuxtLink
       :to="{ name: 'entry-id', params: { id } }"
-      class="w-64 h-64 rounded-xl"
-      :style="{'background-color': ratingLerp(rating, theme)}"
+      class="block w-full rounded-lg transition-transform duration-200 hover:scale-[1.01] group"
+      :style="{ 'background-color': color }"
   >
-    <p class="flex items-center justify-center h-full">{{ date }}</p>
+    <div class="flex items-center justify-between px-3 py-2">
+      <span class="text-colors-primary-50 text-sm">
+        {{ parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
+      </span>
+      <span class="text-colors-primary-50/80 text-xs">
+        {{ rating.toFixed(1) }}
+      </span>
+    </div>
   </NuxtLink>
 </template>
 
 <script lang="ts" setup>
-import { ratingLerp } from '~/util/index.util';
+import { parseServerDate } from '~/util/index.util';
 
-const { theme } = useTheme(null);
-
-defineProps<{
+const props = defineProps<{
   id: string;
-  rating: number;
   date: string;
+  rating: number;
+  color: string;
 }>();
 
+const parsedDate = computed(() => parseServerDate(props.date));
 </script>
