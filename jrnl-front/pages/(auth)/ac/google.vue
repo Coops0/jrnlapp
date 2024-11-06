@@ -41,6 +41,5 @@ watch(data, async d => {
 
   await navigateTo('/page');
 }, { immediate: true, deep: true });
-
 </script>
 

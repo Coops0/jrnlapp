@@ -1,5 +1,4 @@
-import { themes } from './assets/themes.js';
-
+const { themes } = require('./assets/themes.js');
 const { createThemes } = require('tw-colors');
 
 /** @type {import('tailwindcss').Config} */
@@ -11,10 +10,7 @@ export default {
 	],
 	theme: {
 		extend: {
-			fontFamily: {
-				code: ['Fira Code', 'monospace']
-			},
-			typography: (theme) => ({
+			typography: theme => ({
 				DEFAULT: {
 					css: {
 						color: theme('colors.text.500')

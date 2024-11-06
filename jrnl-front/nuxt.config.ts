@@ -2,13 +2,7 @@
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
     devtools: { enabled: true },
-    modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/fonts', '@nuxtjs/color-mode', '@nuxt/eslint'],
-    runtimeConfig: {
-        public: {
-            base: process.env.BASE_URL ?? 'http://localhost:3000',
-            apiBase: process.env.API_BASE_URL ?? 'http://localhost:4000',
-        }
-    },
+    modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxtjs/color-mode', '@nuxt/eslint'],
     colorMode: {
         preference: 'lunar',
         fallback: 'lunar',
@@ -19,22 +13,23 @@ export default defineNuxtConfig({
         classSuffix: '',
         storage: 'cookie',
         storageKey: 'theme-cache',
-        disableTransition: false
+        disableTransition: false,
+    },
+    runtimeConfig: {
+        public: {
+            base: process.env.BASE_URL ?? 'http://localhost:3000',
+            apiBase: process.env.API_BASE_URL ?? 'http://localhost:4000',
+        },
     },
     experimental: {
         sharedPrerenderData: true,
         asyncContext: true,
-        normalizeComponentNames: true
-    },
-    eslint: {
-        config: {
-            stylistic: true
-        }
+        normalizeComponentNames: true,
     },
     vite: {
         esbuild: {
             drop: ['debugger'],
             pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
         },
-    }
+    },
 });
