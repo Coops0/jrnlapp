@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
     <div v-if="paginator" class="flex flex-row gap-2 justify-evenly w-full">
-      <PastEntry
+      <EntriesListPastEntry
           v-for="entry in paginator.items"
           :id="entry.id"
           :key="entry.id"

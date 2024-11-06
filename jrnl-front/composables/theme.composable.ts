@@ -4,7 +4,7 @@ import { useUser } from '~/composables/user.composable';
 export const useTheme = (userService: UserService | null) => {
     const { user } = useUser(userService);
 
-    const theme = useState('theme', () => user.value?.theme || 'purple');
+    const theme = useState('theme', () => user.value?.theme || 'lunar');
     const activeTheme = useColorMode();
 
     watchImmediate(theme, p => {

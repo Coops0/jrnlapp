@@ -7,7 +7,6 @@
 
 <script lang="ts" setup>
 import { AuthService } from '~/services/auth.service';
-import { useUser } from '~/composables/user.composable';
 import { UserService } from '~/services/user.service';
 
 const route = useRoute();

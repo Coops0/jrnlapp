@@ -1,3 +1,5 @@
+import { themes } from '~/assets/themes';
+
 export function getTomorrow(): Date {
     const tomorrow = new Date();
     tomorrow.setHours(0, 0, 0);
@@ -11,8 +13,18 @@ export const isSameDay = (a: Date, b: Date = new Date()) =>
     a.getMonth() === b.getMonth() &&
     a.getFullYear() === b.getFullYear();
 
-export const ratingLerp = (rating: number): string =>
-    interpolate('#000000', '#ffffff', rating / 10);
+const THEME_GRADIENTS = Object.fromEntries(
+    Object.entries(themes)
+        .map(([key, value]) => {
+            const c = value.colors.primary;
+            return [key, [c[50], c[700]]];
+        })
+);
+
+export const ratingLerp = (rating: number, theme: string): string => {
+    const [c1, c2] = THEME_GRADIENTS[theme];
+    return interpolate(c1, c2, rating / 10);
+};
 
 // https://stackoverflow.com/a/76126221
 function interpolate(color1: string, color2: string, percent: number) {

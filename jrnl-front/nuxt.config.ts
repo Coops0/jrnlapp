@@ -5,29 +5,31 @@ export default defineNuxtConfig({
     modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/fonts', '@nuxtjs/color-mode'],
     runtimeConfig: {
         public: {
-            base: process.env.BASE_URL ? process.env.BASE_URL : 'http://localhost:3000',
-            apiBase: process.env.API_BASE_URL ? process.env.API_BASE_URL : 'http://localhost:4000',
+            base: process.env.BASE_URL ?? 'http://localhost:3000',
+            apiBase: process.env.API_BASE_URL ?? 'http://localhost:4000',
         }
     },
     colorMode: {
-        preference: 'purple',
-        fallback: 'purple',
+        preference: 'lunar',
+        fallback: 'lunar',
         hid: 'nuxt-color-mode-script',
         globalName: '__NUXT_COLOR_MODE__',
         componentName: 'ColorScheme',
         classPrefix: '',
         classSuffix: '',
         storage: 'cookie',
-        storageKey: 'theme-cache'
+        storageKey: 'theme-cache',
+        disableTransition: false
     },
     experimental: {
         sharedPrerenderData: true,
         asyncContext: true,
         normalizeComponentNames: true
+    },
+    vite: {
+        esbuild: {
+            drop: ['debugger'],
+            pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
+        },
     }
-    // vite: {
-    //     esbuild: {
-    //         drop:  ['console'],
-    //     }
-    // }
 });

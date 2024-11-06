@@ -5,7 +5,7 @@
           class="absolute h-full transition-all duration-100"
           :style="{
           width: `${percentage}%`,
-          backgroundColor: ratingLerp(modelValue)
+          backgroundColor: ratingLerp(modelValue ?? 0)
         }"
       />
     </div>
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-const value = defineModel<number>();
+const value = defineModel<number>({default: 0});
 
 const props = defineProps<{
   min?: number;
@@ -38,6 +38,8 @@ const props = defineProps<{
 
 const percentage = computed(() => {
   const range = (props.max ?? 100) - (props.min ?? 0);
-  return (((value.value ?? 5) - (props.min ?? 0)) / range) * 100;
+  const ratio = ((value.value ?? 5) - (props.min ?? 0)) / range;
+
+  return ratio * 100;
 });
 </script>

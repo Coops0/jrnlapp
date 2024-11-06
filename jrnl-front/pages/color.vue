@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-grow flex-row flex-wrap gap-2 justify-evenly w-full">
-    <div v-for="(color, name) in colors" :key="name" class="m-2" @click="setTheme(name)">
+    <div v-for="(colors, name) in themes" :key="name" class="m-2" @click="setTheme(name)">
       <div
           :class="{ 'ring-colors-text-500 ring-1 ring-offset-1': theme === name }"
-          :style="{ backgroundColor: color }"
+          :style="{ backgroundColor: colors.colors.primary[400] }"
           class="w-32 h-32 rounded-full cursor-pointer">
-        <p class="invert flex items-center justify-center h-full" :style="{ color }">{{ name }}</p>
+        <p class="flex items-center justify-center h-full" :style="{ color: colors.colors.text[400] }">{{ name }}</p>
 
       </div>
     </div>
@@ -14,17 +14,10 @@
 
 <script lang="ts" setup>
 import { UserService } from '~/services/user.service';
-import { useTheme } from '~/composables/theme.composable';
+import { themes } from '~/assets/themes';
 
 const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 
 const { theme, setTheme } = useTheme(userService);
-const colors = {
-  purple: '#3129d6',
-  plant: '#757d4f',
-  mocktail: '#290a5c',
-  lunar: '#324a67',
-  stone: 'black',
-} as const;
 </script>

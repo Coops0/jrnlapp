@@ -7,26 +7,26 @@
               class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity">
             {{ lastSaved.getFullYear() !== 1900 ? `last saved ${lastSavedRelativeString}` : '' }}
           </h5>
-          <TimeUntilTomorrow :tomorrow="tomorrow"/>
+          <TodayEntryTimeUntilTomorrow :tomorrow="tomorrow"/>
         </ClientOnly>
       </div>
     </div>
 
     <ClientOnly>
       <div class="flex flex-col flex-grow">
-        <TextEditor
+        <TodayEntryTextEditor
             v-model="entry.text"
             class="flex-grow h-full w-full"
         />
 
         <div class="flex-grow mt-auto px-4 py-3 bg-colors-primary-900/50">
           <div class="space-y-2 max-w-5xl mx-auto">
-            <Slider
+            <FormSlider
                 v-model="entry.emotion_scale"
                 :max="10"
                 :min="0"
                 :step="0.1"
-                :rating-lerp="ratingLerp"
+                :rating-lerp="ratingLerpBind"
             />
           </div>
         </div>
@@ -37,9 +37,6 @@
 
 <script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
-import { useTodayEntry } from '~/composables/today-entry.composable';
-import TimeUntilTomorrow from '~/components/TimeUntilTomorrow.vue';
-import Slider from '~/components/form/Slider.vue';
 import { ratingLerp } from '~/util/index.util';
 
 const { $localApi } = useNuxtApp();
@@ -47,6 +44,12 @@ const entryService = new EntryService($localApi);
 
 const { beginFetch, tomorrow, entry, lastSaved } = useTodayEntry(entryService);
 const lastSavedRelativeString = useTimeAgo(lastSaved, { updateInterval: 800, showSecond: true });
+
+const { theme } = useTheme(null);
+
+function ratingLerpBind(value: number) {
+  return ratingLerp(value, theme.value);
+}
 
 beginFetch();
 </script>
