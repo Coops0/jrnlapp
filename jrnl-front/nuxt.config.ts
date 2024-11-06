@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
     devtools: { enabled: true },
-    modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/fonts', '@nuxtjs/color-mode'],
+    modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/fonts', '@nuxtjs/color-mode', '@nuxt/eslint'],
     runtimeConfig: {
         public: {
             base: process.env.BASE_URL ?? 'http://localhost:3000',
@@ -25,6 +25,11 @@ export default defineNuxtConfig({
         sharedPrerenderData: true,
         asyncContext: true,
         normalizeComponentNames: true
+    },
+    eslint: {
+        config: {
+            stylistic: true
+        }
     },
     vite: {
         esbuild: {

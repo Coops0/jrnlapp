@@ -9,12 +9,12 @@
       </div>
 
       <div>
-        <input v-model="groupName" placeholder="Group name"/>
+        <input v-model="groupName" placeholder="Group name">
         <button @click="createGroup">Create Group</button>
       </div>
 
       <div>
-        <input v-model="joinGroupCode" placeholder="Group code" @input="updateGroupSearchResults"/>
+        <input v-model="joinGroupCode" placeholder="Group code" @input="updateGroupSearchResults">
 
         <div v-if="groupSearchResults">
           <div>{{ groupSearchResults.name }}</div>

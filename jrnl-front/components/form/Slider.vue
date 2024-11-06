@@ -16,18 +16,18 @@
     />
 
     <input
-        type="range"
         v-model.number="value"
+        type="range"
         :min="min"
         :max="max"
         :step="step"
         class="absolute w-full h-full opacity-0 cursor-pointer"
-    />
+    >
   </div>
 </template>
 
 <script lang="ts" setup>
-const value = defineModel<number>({default: 0});
+const value = defineModel<number>({ default: 0 });
 
 const props = defineProps<{
   min?: number;

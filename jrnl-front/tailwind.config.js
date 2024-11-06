@@ -1,4 +1,4 @@
-import { themes } from '~/assets/themes.js';
+import { themes } from './assets/themes.js';
 
 const { createThemes } = require('tw-colors');
 

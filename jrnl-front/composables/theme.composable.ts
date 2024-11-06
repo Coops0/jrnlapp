@@ -1,4 +1,4 @@
-import { UserService } from '~/services/user.service';
+import type { UserService } from '~/services/user.service';
 import { useUser } from '~/composables/user.composable';
 
 export const useTheme = (userService: UserService | null) => {

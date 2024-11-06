@@ -9,9 +9,10 @@
     <div v-else-if="entry">
       <div class="flex flex-row justify-evenly">
         <p class="text-2xl text-colors-text-200">{{ entry.date }}</p>
-        <div class="w-16 h-16 rounded-full" :style="{'background-color': ratingLerp(entry.emotion_scale, theme)}"></div>
+        <div class="w-16 h-16 rounded-full" :style="{'background-color': ratingLerp(entry.emotion_scale, theme)}" />
       </div>
-      <p class="prose prose-invert max-w-none" v-html="entry.text ?? 'no text'"></p>
+      {{ /* eslint-disable-next-line vue/no-v-html */ }}
+      <p class="prose prose-invert max-w-none" v-html="entry.text ?? 'no text'" />
     </div>
   </div>
 </template>

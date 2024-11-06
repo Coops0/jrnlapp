@@ -55,7 +55,7 @@ const groupService = new GroupService($localApi);
 const userService = new UserService($localApi);
 
 const { user } = useUser(userService);
-let { group, members, days, before } = useGroup(code, groupService);
+const { group, members, days, before } = useGroup(code, groupService);
 
 const isOwned = computed(() => members.value?.some(m => m.owner && m.id === user.value?.id));
 

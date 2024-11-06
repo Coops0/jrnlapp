@@ -1,6 +1,6 @@
 import { UserService } from '~/services/user.service';
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
+export default defineNuxtRouteMiddleware(async (to, _from) => {
     const { $localApi } = useNuxtApp();
     const userService = new UserService($localApi);
 

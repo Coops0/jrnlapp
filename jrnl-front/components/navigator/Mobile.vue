@@ -6,7 +6,7 @@
   >
     <div class="bg-colors-primary-900/95 backdrop-blur-sm">
       <div class="flex items-center justify-between px-4 py-2">
-        <button class="text-colors-primary-400 hover:text-colors-primary-200" ref="hideButton">
+        <button ref="hideButton" class="text-colors-primary-400 hover:text-colors-primary-200">
           {{ isHidden ? '' : 'v' }}
         </button>
         <Navigator :authenticated/>
@@ -20,13 +20,13 @@ import Navigator from '~/components/navigator/Navigator.vue';
 
 defineProps<{ authenticated: boolean }>();
 
+const hideButton = ref<HTMLButtonElement | null>(null);
+
 const isHidden = useCookie('mobile-nav-hidden', {
   default() {
     return false;
   }
 });
-
-const hideButton = ref<HTMLButtonElement | null>(null);
 
 function toggleNav(e: MouseEvent) {
   if (!isHidden.value) {

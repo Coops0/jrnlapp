@@ -20,7 +20,6 @@
 <script lang="ts" setup>
 
 import { EntryService, type StrippedEntry } from '~/services/entry.service';
-import PastEntry from '~/components/PastEntry.vue';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
