@@ -32,7 +32,7 @@ use tracing_subscriber::{
 
 #[derive(Clone)]
 pub struct AppState {
-    pub pool: PgPool,
+    pub pool: PgPool
 }
 
 #[tokio::main]

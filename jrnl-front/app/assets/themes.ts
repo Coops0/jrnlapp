@@ -1,4 +1,14 @@
-export const themes = {
+interface Theme {
+    colors: {
+        text: Record<string, string>;
+        background: Record<string, string>;
+        primary: Record<string, string>;
+        secondary: Record<string, string>;
+        accent: Record<string, string>;
+    }
+}
+
+export const themes: Record<string, Theme> = {
     plant: {
         colors: {
             text: {

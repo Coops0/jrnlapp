@@ -5,8 +5,9 @@
 </template>
 
 <script lang="ts" setup>
-// need to init to immediately load theme
-const _theme = useTheme(null);
+import { themes } from 'assets/themes';
+
+const { theme } = useTheme(null);
 
 useHead({
   title: 'jr.nl',
@@ -19,7 +20,7 @@ useHead({
       content: 'width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no'
     },
     { name: 'keywords', content: 'jrnl, jr.nl, journal' },
-    { name: 'theme-color', content: '#525252' },
+    { name: 'theme-color', content: themes[theme.value]?.colors?.primary[900] ?? '#111922' },
     { name: 'apple-mobile-web-app-title', content: 'jr.nl' },
     { name: 'mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-status-bar-style', content: 'black-transparent' },
@@ -28,6 +29,7 @@ useHead({
     { name: 'msapplication-starturl', content: '/' }
   ],
   // https://realfavicongenerator.net
+  // npx realfavicon generate
   // link: [
   //   { rel: 'icon', type: 'image/jpg', sizes: '16x16', href: '/favicon-16.jpg' },
   //   { rel: 'icon', type: 'image/jpg', sizes: '32x32', href: '/favicon-32.jpg' },

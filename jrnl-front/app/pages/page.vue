@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col relative flex-grow">
-    <div class="top-2 left-0 right-0 px-4 z-10 mb-2">
+  <div class="flex flex-col relative flex-grow px-2 md:px-4 lg:px-10">
+    <div class="top-2 left-0 right-0 z-10 mb-2">
       <div class="flex justify-between items-center max-w-5xl mx-auto text-sm">
         <h5
             class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity"
@@ -19,9 +19,10 @@
           :initial="entryCookie?.text"
           class="flex-grow h-full w-full"
       />
+      <!-- todo load text directly until text editor loads -->
 
       <div class="flex-grow mt-auto px-4 py-3 bg-colors-primary-900/50">
-        <div class="space-y-2 max-w-5xl mx-auto">
+        <div class="space-y-2 mx-auto">
           <FormSlider
               v-model="entry.emotion_scale"
               :max="10"
