@@ -1,5 +1,5 @@
 <template>
-  <div>one min im logging you out the jrnl</div>
+  <div class="text-colors-text-200">one min im logging you out the jrnl</div>
 </template>
 
 <script lang="ts" setup>

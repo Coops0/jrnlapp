@@ -28,7 +28,7 @@ export class GroupService {
     }
 
     async leaveGroup(code: string): Promise<void> {
-        return this.api(`/groups/${code}/leave`, { method: 'DELETE' });
+        return this.api(`/groups/${code}`, { method: 'DELETE' });
     }
 
     async kickMember(code: string, member_id: string): Promise<void> {

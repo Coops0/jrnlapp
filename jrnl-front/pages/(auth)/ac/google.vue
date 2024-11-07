@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="text-colors-text-200 text-center">
     hold up! {{ status }}
     <div v-if="error" class="text-red-500">{{ error }}</div>
   </div>

@@ -204,7 +204,7 @@ async fn leave_group(
         return Ok(StatusCode::OK);
     }
 
-    let members = sqlx::query_scalar::<_, i32>(
+    let members = sqlx::query_scalar::<_, i64>(
         // language=postgresql
         "
         SELECT COUNT(*) FROM group_memberships WHERE group_id = $1

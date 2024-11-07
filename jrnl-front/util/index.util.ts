@@ -46,9 +46,26 @@ function interpolate(color1: string, color2: string, percent: number) {
 // I don't even know
 // 2024-04-03
 export const parseServerDate = (d: string): Date => {
+    // noinspection SuspiciousTypeOfGuard
+    if (!d || typeof d !== 'string') {
+        // noinspection TypeScriptValidateTypes
+        return d as never;
+    }
+
     if (d.split('-').length === 3) {
         return new Date(d.replaceAll('-', ' '));
     } else {
         return new Date(d);
     }
 };
+
+export const addDays = (date: Date, days: number): Date => new Date(date.getTime() - (days * 24 * 60 * 60 * 1000));
+
+export function getNextSunday(date: Date): Date {
+    const d = new Date(date);
+
+    d.setDate(d.getDate() + (7 - d.getDay()) % 7);
+    d.setHours(0, 0, 0, 0);
+
+    return d;
+}
