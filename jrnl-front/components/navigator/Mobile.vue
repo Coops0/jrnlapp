@@ -9,15 +9,13 @@
         <button ref="hideButton" class="text-colors-primary-400 hover:text-colors-primary-200">
           {{ isHidden ? '' : 'v' }}
         </button>
-        <NavigatorLinks :authenticated/>
+        <NavigatorLinks/>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-defineProps<{ authenticated: boolean }>();
-
 const hideButton = ref<HTMLButtonElement | null>(null);
 
 const isHidden = useCookie('mobile-nav-hidden', { default: () => false });

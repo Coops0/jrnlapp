@@ -1,14 +1,14 @@
 <template>
   <div class="min-h-screen flex flex-col bg-colors-primary-900">
     <header class="md:block hidden">
-      <NavigatorDesktop v-if="authenticated" :authenticated :name="user?.name"/>
+      <NavigatorDesktop v-if="authenticated" :name="user?.name"/>
     </header>
 
     <main class="flex-grow flex w-full mx-auto px-4 py-6 mb-0">
       <slot/>
     </main>
 
-    <NavigatorMobile v-if="authenticated" :authenticated class="md:hidden"/>
+    <NavigatorMobile v-if="authenticated" class="md:hidden"/>
 
     <footer class="bg-colors-primary-900/50 hidden md:block">
       <div class="max-w-5xl mx-auto px-4 py-4 flex ml-4">
