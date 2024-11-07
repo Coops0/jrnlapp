@@ -49,9 +49,7 @@ const lastSavedRelativeString = useTimeAgo(lastSaved, { updateInterval: 800, sho
 
 const { theme } = useTheme(null);
 
-function ratingLerpBind(value: number) {
-  return ratingLerp(value, theme.value);
-}
+const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 
 beginFetch();
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div>redirecting</div>
+  <div class="text-colors-text-200">redirecting</div>
 </template>
 
 <script lang="ts" setup>
