@@ -1,6 +1,17 @@
 <template>
   <div class="w-full max-w-2xl mx-auto">
-    <div v-if="paginator" class="space-y-4">
+    <div v-if="status === 'pending'">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        <EntriesListPastEntry
+            id=""
+            :disabled="true"
+            :date="new Date().toString()"
+            :rating="5"
+            :color="ratingLerp(5, theme)"
+        />
+      </div>
+    </div>
+    <div v-else-if="paginator" class="space-y-4">
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
             v-for="entry in paginator.items"
@@ -20,10 +31,6 @@
         load more
       </button>
     </div>
-
-    <div v-else class="flex items-center justify-center h-24">
-      <p class="text-colors-primary-400 text-sm">loading your entries...</p>
-    </div>
   </div>
 </template>
 
@@ -37,7 +44,7 @@ const entryService = new EntryService($localApi);
 const { theme } = useTheme(null);
 
 const nextCursor = ref<string | null>(null);
-const { data: paginator } = useLazyAsyncData(
+const { data: paginator, status } = useLazyAsyncData(
     'entries',
     () => entryService.getEntriesPaginated(nextCursor.value || undefined, 50),
     {

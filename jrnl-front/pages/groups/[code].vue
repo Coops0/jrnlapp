@@ -17,6 +17,7 @@
         </button>
       </div>
     </div>
+
     <div v-else class="h-12 md:h-16 bg-colors-primary-900/40 rounded-lg"/>
 
     <section v-if="days" class="space-y-4">

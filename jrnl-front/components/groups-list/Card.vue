@@ -1,6 +1,7 @@
 <template>
   <NuxtLink
-      :to="{ name: 'groups-code', params: { code } }"
+      :disabled
+      :to="disabled ? '' : { name: 'groups-code', params: { code } }"
       :prefetch="true"
       class="block p-4 rounded-lg bg-colors-primary-900/40 hover:bg-colors-primary-800/60 transition-colors group"
   >
@@ -19,5 +20,6 @@
 defineProps<{
   name: string;
   code: string;
-}>()
+  disabled?: boolean;
+}>();
 </script>

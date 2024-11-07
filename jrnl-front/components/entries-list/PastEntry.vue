@@ -1,12 +1,14 @@
 <template>
   <NuxtLink
-      :to="{ name: 'entry-id', params: { id } }"
+      :disabled
+      :to="disabled ? '' : { name: 'entry-id', params: { id } }"
       class="block w-full rounded-lg transition-transform duration-200 hover:scale-[1.01] group"
       :style="{ 'background-color': color }"
   >
     <div class="flex items-center justify-between px-3 py-2">
       <span class="text-colors-primary-50 text-sm">
-        {{ parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
+        <span v-if="disabled">loading...</span>
+        <span v-else>{{ parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
       </span>
       <span class="text-colors-primary-50/80 text-xs">
         {{ rating.toFixed(1) }}
@@ -23,6 +25,7 @@ const props = defineProps<{
   date: string;
   rating: number;
   color: string;
+  disabled?: boolean;
 }>();
 
 const parsedDate = computed(() => parseServerDate(props.date));

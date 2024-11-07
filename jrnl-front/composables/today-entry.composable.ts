@@ -23,10 +23,10 @@ export const useTodayEntry = (entryService: EntryService) => {
             console.debug('saved debounce fn called');
             if (!entry.value) return;
 
-            await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+            const entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
             console.debug('saved entry');
 
-            storage.value = entry.value;
+            storage.value = entryResponse;
             lastSaved.value = new Date();
         },
         350,
