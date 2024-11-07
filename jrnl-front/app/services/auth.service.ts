@@ -1,4 +1,4 @@
-import type { $Fetch } from 'nitropack';
+import type { $Fetch } from 'nitro/types';
 import type { User } from '~/types/user.type';
 
 export class AuthService {

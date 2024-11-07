@@ -1,4 +1,4 @@
-import type { $Fetch } from 'nitropack';
+import type { $Fetch } from 'nitro/types';
 import type { Group } from '~/types/group.type';
 import type { GroupedDayData } from '~/types/weekly-data.type';
 import type { User } from '~/types/user.type';

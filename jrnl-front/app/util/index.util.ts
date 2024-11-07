@@ -13,7 +13,7 @@ export const isSameDay = (a: Date, b: Date = new Date()) =>
     a.getMonth() === b.getMonth() &&
     a.getFullYear() === b.getFullYear();
 
-const THEME_GRADIENTS = Object.fromEntries(
+const THEME_GRADIENTS: Record<string, [string, string]> = Object.fromEntries(
     Object.entries(themes)
         .map(([key, value]) => {
             const c = value.colors.primary;
@@ -22,8 +22,13 @@ const THEME_GRADIENTS = Object.fromEntries(
 );
 
 export const ratingLerp = (rating: number, theme: string): string => {
-    const [c1, c2] = THEME_GRADIENTS[theme];
-    return interpolate(c1, c2, rating / 10);
+    const g = THEME_GRADIENTS[theme];
+    if (!g) {
+        console.warn(`No theme found for ${theme}`);
+        return '#000000';
+    }
+
+    return interpolate(g[0], g[1], rating / 10);
 };
 
 // https://stackoverflow.com/a/76126221

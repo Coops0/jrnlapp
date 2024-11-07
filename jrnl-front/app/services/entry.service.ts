@@ -1,4 +1,4 @@
-import type { $Fetch } from 'nitropack';
+import type { $Fetch } from 'nitro/types';
 import type { Entry } from '~/types/entry.type';
 
 export interface PaginatedResponse<T> {

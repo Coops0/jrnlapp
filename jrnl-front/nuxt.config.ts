@@ -1,5 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+    future: {
+        compatibilityVersion: 4,
+    },
     compatibilityDate: '2024-04-03',
     devtools: { enabled: true },
     modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxtjs/color-mode', '@nuxt/eslint'],
@@ -19,11 +22,6 @@ export default defineNuxtConfig({
         public: {
             apiBase: process.env.API_BASE_URL ?? 'http://localhost:4000',
         },
-    },
-    experimental: {
-        sharedPrerenderData: true,
-        asyncContext: true,
-        normalizeComponentNames: true,
     },
     vite: process.env.NODE_ENV === 'production' ? {
         esbuild: {
