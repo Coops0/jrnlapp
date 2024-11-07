@@ -3,6 +3,7 @@
     <h3
         v-if="show"
         class="text-colors-primary-300 hover:text-colors-primary-200 cursor-pointer text-sm"
+        data-allow-mismatch
         @click="() => toggle()"
     >
       day ends in {{ timeUntilTomorrow }}
@@ -22,6 +23,11 @@ const props = defineProps<{ tomorrow: Date }>();
 
 const timeUntilTomorrow = useTimeAgo(props.tomorrow, { updateInterval: 800, showSecond: true });
 
-const show = useLocalStorage('show-time-until', true);
+const show = useCookie('show-time-until', {
+  default() {
+    return true;
+  }
+});
+
 const toggle = useToggle(show);
 </script>

@@ -8,7 +8,12 @@
     <div class="flex items-center justify-between px-3 py-2">
       <span class="text-colors-primary-50 text-sm">
         <span v-if="disabled">loading...</span>
-        <span v-else>{{ parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
+        <span v-else data-allow-mismatch="text">{{
+            parsedDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric'
+            })
+          }}</span>
       </span>
       <span class="text-colors-primary-50/80 text-xs">
         {{ rating.toFixed(1) }}

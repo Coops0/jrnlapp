@@ -8,7 +8,7 @@
 
       <div class="relative flex flex-col sm:flex-row items-center gap-4 p-6">
         <div class="flex-1">
-          <p class="text-colors-primary-200 text-sm">
+          <p data-allow-mismatch="text" class="text-colors-primary-200 text-sm">
             {{
               parsedDate?.toLocaleDateString('en-US', {
                 weekday: 'long',
