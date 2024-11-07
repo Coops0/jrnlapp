@@ -1,9 +1,5 @@
 export const useAuth = () => {
-    const cachedJwt = useCookie<string | null>('jwt', {
-        default() {
-            return null;
-        }
-    });
+    const cachedJwt = useCookie<string | null>('jwt', { default: () => null });
 
     const jwt = useState<string | null>('jwt', () => cachedJwt.value);
 

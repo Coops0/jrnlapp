@@ -9,24 +9,18 @@
         <button ref="hideButton" class="text-colors-primary-400 hover:text-colors-primary-200">
           {{ isHidden ? '' : 'v' }}
         </button>
-        <Navigator :authenticated/>
+        <NavigatorLinks :authenticated/>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Navigator from '~/components/navigator/Navigator.vue';
-
 defineProps<{ authenticated: boolean }>();
 
 const hideButton = ref<HTMLButtonElement | null>(null);
 
-const isHidden = useCookie('mobile-nav-hidden', {
-  default() {
-    return false;
-  }
-});
+const isHidden = useCookie('mobile-nav-hidden', { default: () => false });
 
 function toggleNav(e: MouseEvent) {
   if (!isHidden.value) {

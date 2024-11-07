@@ -1,10 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-colors-primary-900">
     <header class="md:block hidden">
-      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-        <NavigatorLogo :authenticated/>
-        <Navigator :authenticated :name="user?.name"/>
-      </div>
+      <NavigatorDesktop v-if="authenticated" :authenticated :name="user?.name"/>
     </header>
 
     <main class="flex-grow flex w-full mx-auto px-4 py-6 mb-0">
@@ -22,7 +19,6 @@
 </template>
 
 <script lang="ts" setup>
-import Navigator from '~/components/navigator/Navigator.vue';
 
 const { jwt } = useAuth();
 const { user } = useUser(null);

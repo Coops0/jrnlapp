@@ -23,11 +23,6 @@ const props = defineProps<{ tomorrow: Date }>();
 
 const timeUntilTomorrow = useTimeAgo(props.tomorrow, { updateInterval: 800, showSecond: true });
 
-const show = useCookie('show-time-until', {
-  default() {
-    return true;
-  }
-});
-
+const show = useCookie('show-time-until', { default: () => true });
 const toggle = useToggle(show);
 </script>
