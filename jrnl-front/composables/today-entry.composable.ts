@@ -1,6 +1,7 @@
 import type { Entry } from '~/types/entry.type';
 import type { EntryService } from '~/services/entry.service';
 import { getTomorrow, isSameDay, parseServerDate } from '~/util/index.util';
+import type { CookieRef } from '#app';
 
 const BLANK_ENTRY = (): Entry => ({
     text: '',
@@ -10,9 +11,7 @@ const BLANK_ENTRY = (): Entry => ({
     id: ''
 });
 
-export const useTodayEntry = (entryService: EntryService) => {
-    const storage = useCookie<Entry>('entry-today');
-
+export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Entry>) => {
     const entry = ref<Entry>(storage.value ?? BLANK_ENTRY());
 
     const lastSaved = ref(new Date(1900, 1, 1));

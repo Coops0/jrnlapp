@@ -17,7 +17,7 @@
     </div>
 
     <div v-else-if="paginator" class="space-y-4">
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" v-if="paginator.items.length">
         <EntriesListPastEntry
             v-for="entry in paginator.items"
             :id="entry.id"
@@ -26,6 +26,9 @@
             :date="entry.date"
             :rating="entry.emotion_scale"
         />
+      </div>
+      <div v-else class="p-4 rounded-lg bg-colors-primary-900/40">
+        <p class="text-colors-primary-400">you haven't logged anything yet</p>
       </div>
 
       <button
@@ -49,9 +52,13 @@ const entryService = new EntryService($localApi);
 const { theme } = useTheme(null);
 
 const nextCursor = ref<string | null>(null);
+const limit = ref(50);
+
+const additonalLoads = ref(0);
+
 const { data: paginator, status, error } = useLazyAsyncData(
     'entries',
-    () => entryService.getEntriesPaginated(nextCursor.value || undefined, 50),
+    () => entryService.getEntriesPaginated(nextCursor.value || undefined, limit.value),
     {
       watch: [nextCursor],
       transform(p) {
@@ -74,6 +81,10 @@ const { data: paginator, status, error } = useLazyAsyncData(
 
 function loadMore() {
   if (paginator.value?.has_more && paginator.value?.next_cursor) {
+    if (++additonalLoads.value > 3) {
+      limit.value = 100;
+    }
+    
     nextCursor.value = paginator.value.next_cursor;
   }
 }

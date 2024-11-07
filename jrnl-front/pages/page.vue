@@ -16,6 +16,7 @@
     <div class="flex flex-col flex-grow">
       <TodayEntryTextEditor
           v-model="entry.text"
+          :initial="entryCookie?.text"
           class="flex-grow h-full w-full"
       />
 
@@ -37,11 +38,15 @@
 <script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
 import { ratingLerp } from '~/util/index.util';
+import type { Entry } from '~/types/entry.type';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const { beginFetch, tomorrow, entry, lastSaved } = useTodayEntry(entryService);
+const entryCookie = useCookie<Entry>('entry-today');
+
+const { beginFetch, tomorrow, entry, lastSaved } = useTodayEntry(entryService, entryCookie);
+
 const lastSavedRelativeString = useTimeAgo(lastSaved, { updateInterval: 800, showSecond: true });
 
 const { theme } = useTheme(null);

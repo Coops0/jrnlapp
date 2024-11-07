@@ -6,7 +6,11 @@
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 
-const props = defineProps<{ modelValue?: string }>();
+const props = defineProps<{
+  modelValue?: string;
+  initial?: string | null;
+}>();
+
 const emit = defineEmits<{
   'update:modelValue': [content: string]
 }>();
@@ -19,7 +23,7 @@ watch(() => props.modelValue, value => {
 });
 
 const editor = useEditor({
-  content: props.modelValue ?? '',
+  content: (props.modelValue?.length ? props.modelValue : props.initial) ?? '',
   extensions: [StarterKit],
   editorProps: {
     attributes: {
