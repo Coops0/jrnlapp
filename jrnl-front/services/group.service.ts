@@ -3,6 +3,9 @@ import type { Group } from '~/types/group.type';
 import type { GroupedDayData } from '~/types/weekly-data.type';
 import type { User } from '~/types/user.type';
 
+type FetchedGroup = Pick<Group, 'id' | 'name' | 'owner_id'> & { members: number };
+export type FetchedGroupMember = Pick<User, 'id' | 'name'> & { owner: boolean };
+
 export class GroupService {
     constructor(private readonly api: $Fetch) {
     };
@@ -15,7 +18,7 @@ export class GroupService {
         return this.api('/groups');
     }
 
-    async getGroup(code: string): Promise<(Pick<Group, 'id' | 'name' | 'owner_id'> & { members: number }) | null> {
+    async getGroup(code: string): Promise<FetchedGroup | null> {
         return this.api(`/groups/${code}`);
     }
 
@@ -23,7 +26,7 @@ export class GroupService {
         return this.api(`/groups/${code}`, { method: 'POST' });
     }
 
-    async getGroupMembers(code: string): Promise<(Pick<User, 'id' | 'name'> & { owner: boolean })[]> {
+    async getGroupMembers(code: string): Promise<FetchedGroupMember[]> {
         return this.api(`/groups/${code}/members`);
     }
 

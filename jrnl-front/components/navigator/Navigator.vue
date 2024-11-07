@@ -34,7 +34,7 @@ const links = [
   { to: '/page', text: 'page' },
   { to: '/pages', text: 'pages' },
   { to: '/groups', text: 'groups' },
-  { to: '/color', text: 'theme' },
+  { to: '/theme', text: 'theme' },
   { to: '/logout', text: 'logout' },
 ];
 </script>

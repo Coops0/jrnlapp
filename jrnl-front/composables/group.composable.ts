@@ -1,7 +1,7 @@
 import type { GroupService } from '~/services/group.service';
 import { getNextSunday, parseServerDate } from '~/util/index.util';
 
-interface GroupInfo {
+export interface GroupInfo {
     name: string;
     id: string;
 }
