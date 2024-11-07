@@ -1,20 +1,46 @@
-FROM node:20-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-COPY . /app
-WORKDIR /app
+# https://thecrunch.space/blog/optimizing-nuxt-3-deployment-with-bun-a-docker-based-approach/
+# also with pnpm support
+FROM oven/bun:latest as base
+WORKDIR /usr/src/app
 
-FROM base AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+# Install pnpm
+RUN npm install -g pnpm
 
-FROM base AS build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run build
+# Install dependencies into a temp directory
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json /temp/dev/
+RUN cd /temp/dev && pnpm install
 
-FROM base
-COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=build /app/dist /app/dist
-EXPOSE 3000
-CMD [ "pnpm", "start" ]
+# Install production dependencies
+RUN mkdir -p /temp/prod
+COPY package.json /temp/prod/
+RUN cd /temp/prod && pnpm install --prod
 
+# Build stage
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules /usr/src/app/node_modules
+COPY . /usr/src/app
+
+# Set NODE_ENV to production and run the build
+ENV NODE_ENV=production
+RUN bun --bun run build
+
+# Final stage
+FROM base AS release
+WORKDIR /usr/src/app
+COPY --from=install /temp/prod/node_modules /usr/src/app/node_modules
+COPY --from=prerelease /usr/src/app/.output /usr/src/app/.output
+COPY package.json /usr/src/app/
+
+# Ensure the container runs as a non-root user
+USER bun
+
+# Expose the port your app runs on
+EXPOSE 3000/tcp
+
+# Get Host from environment variable
+ENV NUXT_HOST=0.0.0.0
+
+# Run with bun
+ENTRYPOINT ["sh", "-c", "bun run /usr/src/app/.output/server/index.mjs --host $NUXT_HOST"]
