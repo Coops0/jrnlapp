@@ -3,23 +3,25 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <h2 class="text-lg md:text-xl font-light text-colors-primary-200">moods by week</h2>
       <div class="flex items-center gap-2">
-        <button
-            class="p-2 rounded-lg hover:bg-colors-primary-800/60 transition-colors cursor-pointer"
+        <FormButton
+            size="sm"
+            variant="ghost"
             @click="() => emit('move', false)"
         >
-          <span class="text-colors-primary-400 text-lg">←</span>
-        </button>
+          <span class="text-colors-primary-400 text-lg">{{ '<' }}</span>
+        </FormButton>
         <span
             class="text-sm md:text-base text-colors-primary-400 min-w-[140px] text-center"
             data-allow-mismatch="text">
             {{ dateRangeString }}
           </span>
-        <button
-            class="p-2 rounded-lg hover:bg-colors-primary-800/60 transition-colors cursor-pointer"
-            @click="() => emit('move',true)"
+        <FormButton
+            size="sm"
+            variant="ghost"
+            @click="() => emit('move', false)"
         >
-          <span class="text-colors-primary-400 text-lg">→</span>
-        </button>
+          <span class="text-colors-primary-400 text-lg">{{ '>' }}</span>
+        </FormButton>
       </div>
     </div>
 

@@ -3,20 +3,19 @@
     <h2 class="text-lg font-light text-colors-primary-200">create a group</h2>
 
     <form class="space-y-3" @submit.prevent="createGroup">
-      <input
+      <FormTextInput
           v-model="groupName"
-          class="w-full px-3 py-2 rounded-md bg-colors-primary-800/60 text-colors-primary-100 placeholder:text-colors-primary-600 border border-colors-primary-700 focus:border-colors-primary-500 outline-none"
           placeholder="group name"
-          type="text"
-      >
+      />
 
-      <button
+      <FormButton
           :disabled="!groupName.length"
-          class="w-full px-4 py-2 rounded-md bg-colors-primary-700 hover:bg-colors-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-colors-primary-100 transition-colors"
-          type="submit"
+          variant="primary"
+          size="md"
+          full
       >
         create
-      </button>
+      </FormButton>
     </form>
   </div>
 </template>

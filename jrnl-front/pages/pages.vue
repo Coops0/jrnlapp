@@ -17,7 +17,7 @@
     </div>
 
     <div v-else-if="paginator" class="space-y-4">
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" v-if="paginator.items.length">
+      <div v-if="paginator.items.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
             v-for="entry in paginator.items"
             :id="entry.id"
@@ -31,13 +31,15 @@
         <p class="text-colors-primary-400">you haven't logged anything yet</p>
       </div>
 
-      <button
+      <FormButton
           v-if="paginator.has_more"
-          class="w-full p-2 text-center text-sm text-colors-primary-400 bg-colors-primary-900/40 hover:bg-colors-primary-800/60 rounded-lg transition-colors duration-200"
+          full
+          variant="secondary"
+          size="sm"
           @click="loadMore"
       >
         load more
-      </button>
+      </FormButton>
     </div>
   </div>
 </template>
@@ -84,7 +86,7 @@ function loadMore() {
     if (++additonalLoads.value > 3) {
       limit.value = 100;
     }
-    
+
     nextCursor.value = paginator.value.next_cursor;
   }
 }

@@ -24,13 +24,13 @@
           <span class="text-colors-primary-200 md:text-lg">{{ member.name.toLowerCase() }}</span>
         </div>
 
-        <button
+        <FormButton
             v-if="isOwned && member.id !== id"
-            class="px-3 py-1 rounded text-sm md:text-base text-colors-accent-400 hover:bg-colors-primary-800/60 transition-colors"
+            variant="danger"
+            size="sm"
             @click="emit('kick', index)"
-        >
-          kick
-        </button>
+        >x
+        </FormButton>
       </div>
     </div>
   </section>

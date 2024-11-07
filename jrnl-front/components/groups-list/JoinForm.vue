@@ -3,13 +3,11 @@
     <h2 class="text-lg font-light text-colors-primary-200">find your group</h2>
 
     <div class="space-y-3">
-      <input
+      <FormTextInput
           v-model="joinGroupCode"
-          class="w-full px-3 py-2 rounded-md bg-colors-primary-800/60 text-colors-primary-100 placeholder:text-colors-primary-600 border border-colors-primary-700 focus:border-colors-primary-500 outline-none"
           placeholder="group code"
-          type="text"
           @input="updateGroupSearchResults"
-      >
+      />
 
       <div v-if="status === 'pending'">
         <p class="text-colors-primary-400">loading...</p>
@@ -25,12 +23,14 @@
           </span>
         </div>
 
-        <button
-            class="w-full px-4 py-2 rounded-md bg-colors-primary-700 hover:bg-colors-primary-600 text-colors-primary-100 transition-colors"
+        <FormButton
+            variant="primary"
+            size="md"
+            full
             @click="joinGroup"
         >
           join
-        </button>
+        </FormButton>
       </div>
     </div>
   </div>

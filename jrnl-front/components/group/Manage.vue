@@ -8,12 +8,13 @@
         </p>
       </div>
 
-      <button
-          class="px-4 py-2 rounded-md text-sm md:text-base text-colors-accent-400 hover:bg-colors-primary-800/60 transition-colors"
+      <FormButton
+          variant="danger"
+          size="sm"
           @click="emit('leave')"
       >
         leave
-      </button>
+      </FormButton>
     </div>
   </div>
 </template>
