@@ -2,8 +2,8 @@
   <div>
     <div class="relative">
       <div
-          class="absolute inset-0 h-32 rounded-xl opacity-20 blur-xl transition-opacity"
           :style="{ 'background-color': ratingLerp(entry.emotion_scale, theme) }"
+          class="absolute inset-0 h-32 rounded-xl opacity-20 blur-xl transition-opacity"
       />
 
       <div class="relative flex flex-col sm:flex-row items-center gap-4 p-6">
@@ -22,8 +22,8 @@
 
         <div class="flex items-center gap-3">
           <div
-              class="w-5 h-5 rounded-full border-2 border-colors-primary-800/50"
               :style="{ 'background-color': ratingLerp(entry.emotion_scale, theme) }"
+              class="w-5 h-5 rounded-full border-2 border-colors-primary-800/50"
           />
           <span class="text-colors-primary-200 text-sm font-light">
               {{ entry.emotion_scale.toFixed(1) }}
@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { parseServerDate, ratingLerp } from '~/util/index.util';
 import type { Entry } from '~/types/entry.type';
 

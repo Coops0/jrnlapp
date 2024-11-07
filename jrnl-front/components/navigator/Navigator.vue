@@ -2,8 +2,8 @@
   <nav class="flex items-center gap-6">
     <template v-if="!authenticated">
       <NuxtLink
-          to="/login"
           class="text-colors-primary-400 hover:text-colors-primary-200 transition-colors"
+          to="/login"
       >
         login
       </NuxtLink>

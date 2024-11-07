@@ -5,15 +5,15 @@
     <form class="space-y-3" @submit.prevent="createGroup">
       <input
           v-model="groupName"
-          type="text"
-          placeholder="group name"
           class="w-full px-3 py-2 rounded-md bg-colors-primary-800/60 text-colors-primary-100 placeholder:text-colors-primary-600 border border-colors-primary-700 focus:border-colors-primary-500 outline-none"
+          placeholder="group name"
+          type="text"
       >
 
       <button
-          type="submit"
           :disabled="!groupName.length"
           class="w-full px-4 py-2 rounded-md bg-colors-primary-700 hover:bg-colors-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-colors-primary-100 transition-colors"
+          type="submit"
       >
         create
       </button>

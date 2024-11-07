@@ -1,9 +1,9 @@
 <template>
   <NuxtLink
       :disabled
+      :style="{ 'background-color': color }"
       :to="disabled ? '' : { name: 'entry-id', params: { id } }"
       class="block w-full rounded-lg transition-transform duration-200 hover:scale-[1.01] group"
-      :style="{ 'background-color': color }"
   >
     <div class="flex items-center justify-between px-3 py-2">
       <span class="text-colors-primary-50 text-sm">

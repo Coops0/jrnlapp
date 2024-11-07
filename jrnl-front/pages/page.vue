@@ -27,8 +27,8 @@
                 v-model="entry.emotion_scale"
                 :max="10"
                 :min="0"
-                :step="0.1"
                 :rating-lerp="ratingLerpBind"
+                :step="0.1"
             />
           </div>
         </div>
