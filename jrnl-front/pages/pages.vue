@@ -11,6 +11,11 @@
         />
       </div>
     </div>
+
+    <div v-else-if="error" class="p-4 rounded-lg bg-colors-primary-900/40">
+      <p class="text-colors-accent-400">unable to load entries: {{ error }}</p>
+    </div>
+
     <div v-else-if="paginator" class="space-y-4">
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
@@ -44,7 +49,7 @@ const entryService = new EntryService($localApi);
 const { theme } = useTheme(null);
 
 const nextCursor = ref<string | null>(null);
-const { data: paginator, status } = useLazyAsyncData(
+const { data: paginator, status, error } = useLazyAsyncData(
     'entries',
     () => entryService.getEntriesPaginated(nextCursor.value || undefined, 50),
     {

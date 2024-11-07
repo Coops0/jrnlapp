@@ -6,7 +6,6 @@
           :style="{ backgroundColor: colors.colors.primary[400] }"
           class="w-32 h-32 rounded-full cursor-pointer">
         <p class="flex items-center justify-center h-full" :style="{ color: colors.colors.text[50] }">{{ name }}</p>
-
       </div>
     </div>
   </div>

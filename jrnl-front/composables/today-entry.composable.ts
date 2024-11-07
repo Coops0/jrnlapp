@@ -23,7 +23,14 @@ export const useTodayEntry = (entryService: EntryService) => {
             console.debug('saved debounce fn called');
             if (!entry.value) return;
 
-            const entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+            let entryResponse: Entry;
+            try {
+                entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+            } catch (e) {
+                alert('failed to save entry');
+                console.error(e);
+                return;
+            }
             console.debug('saved entry');
 
             storage.value = entryResponse;

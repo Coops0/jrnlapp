@@ -5,7 +5,9 @@
         <ClientOnly>
           <h5
               class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity">
-            {{ lastSaved.getFullYear() !== 1900 ? `last saved ${lastSavedRelativeString}` : '' }}
+            <span v-if="lastSaved.getFullYear() === 1900">last saved: never</span>
+            <span v-else-if="lastSavedRelativeString.includes('in')">last saved ...</span>
+            <span v-else>last saved {{ lastSavedRelativeString }}</span>
           </h5>
           <TodayEntryTimeUntilTomorrow :tomorrow="tomorrow"/>
         </ClientOnly>
