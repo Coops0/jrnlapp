@@ -1,0 +1,41 @@
+services:
+  jrnl-front:
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      - API_BASE_URL=https://my.jrnl.fm
+      - NODE_ENV=production
+    build:
+      context: ./jrnl-front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+
+  jrnl-back:
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+    build:
+      context: ./jrnl-back
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+      - "5432:5432"
+    volumes:
+      - jrnl-back-cache:/app/cache
+
+volumes:
+  jrnl-back-cache:
