@@ -17,10 +17,13 @@ use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     PgPool,
 };
-use std::env;
+use std::{env, time::Duration};
 use tokio::join;
 use tower::ServiceBuilder;
-use tower_http::cors::{AllowCredentials, AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
+use tower_http::{
+    cors::{AllowCredentials, AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
+    timeout::TimeoutLayer,
+};
 use tracing::info;
 use tracing_subscriber::{
     filter::LevelFilter,
@@ -57,6 +60,7 @@ async fn main() -> anyhow::Result<()> {
 
     let state = AppState { pool };
 
+
     let app = Router::new()
         .nest("/user", controllers::user::users_controller())
         .nest("/entries", controllers::entry::entries_controller())
@@ -73,7 +77,8 @@ async fn main() -> anyhow::Result<()> {
                         .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
                         .allow_credentials(AllowCredentials::yes()),
                 )
-                .layer(DefaultBodyLimit::max(8192)),
+                .layer(DefaultBodyLimit::max(1024 * 12))
+                .layer(TimeoutLayer::new(Duration::from_secs(10)))
         )
         .with_state(state);
 
