@@ -4,10 +4,10 @@
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
             id=""
-            :disabled="true"
-            :date="new Date().toString()"
-            :rating="5"
             :color="ratingLerp(5, theme)"
+            :date="new Date().toString()"
+            :disabled="true"
+            :rating="5"
         />
       </div>
     </div>
@@ -22,9 +22,9 @@
             v-for="entry in paginator.items"
             :id="entry.id"
             :key="entry.id"
+            :color="ratingLerp(entry.emotion_scale, theme)"
             :date="entry.date"
             :rating="entry.emotion_scale"
-            :color="ratingLerp(entry.emotion_scale, theme)"
         />
       </div>
 

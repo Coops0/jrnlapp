@@ -65,16 +65,14 @@
           <div
               v-for="day in days"
               :key="day.day"
-              class="absolute w-1/7 h-full transition-all duration-300"
               :style="{
             left: `${getDayPosition(parseServerDate(day.day))}%`,
           }"
+              class="absolute w-1/7 h-full transition-all duration-300"
           >
             <div
                 v-for="(scale, idx) in day.scales"
                 :key="`${day.day}-${idx}`"
-                :title="scale.toString()"
-                class="absolute w-3 md:w-4 h-3 md:h-4 rounded-full transition-all duration-300"
                 :style="{
               backgroundColor: ratingLerp(scale, theme),
               bottom: `${(scale / 10) * 100}%`,
@@ -82,6 +80,8 @@
               transform: 'translateX(-50%)',
               opacity: 0.8
             }"
+                :title="scale.toString()"
+                class="absolute w-3 md:w-4 h-3 md:h-4 rounded-full transition-all duration-300"
             >
               <div
                   class="absolute inset-0 rounded-full hover:ring-2 ring-colors-primary-200 transition-all"
@@ -103,11 +103,11 @@
         <div
             v-for="(member, index) in members"
             :key="member.id"
-            class="flex items-center justify-between p-3 md:p-4 rounded-lg bg-colors-primary-900/40"
             :class="{
               'border-2 border-colors-accent-400': member.id === user?.id,
               'border-2 border-colors-primary-700': member.owner,
             }"
+            class="flex items-center justify-between p-3 md:p-4 rounded-lg bg-colors-primary-900/40"
         >
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-colors-primary-700 flex items-center justify-center">
