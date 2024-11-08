@@ -20,6 +20,9 @@ onMounted(async () => {
   } finally {
     logout();
     user.value = null;
+    useCookie('theme-cache').value = null;
+    useCookie('entry-today').value = null;
+
     await navigateTo('/');
   }
 });

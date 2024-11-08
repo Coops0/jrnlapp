@@ -28,11 +28,19 @@
       </div>
     </div>
 
+    <div>
+      <ComponentErrorBoundary>
+   <test></test>
+      </ComponentErrorBoundary>
+    </div>
+
   </div>
 </template>
 
 <script lang="ts" setup>
+
 const { jwt } = useAuth();
 
 definePageMeta({ redirectUnautheticated: false });
+
 </script>

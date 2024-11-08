@@ -7,7 +7,7 @@ services:
         max_attempts: 3
         window: 120s
     environment:
-      - API_BASE_URL=https://my.jrnl.fm
+      - NUXT_PUBLIC_API_BASE=https://my.jrnl.fm
       - NODE_ENV=production
     build:
       context: ./jrnl-front

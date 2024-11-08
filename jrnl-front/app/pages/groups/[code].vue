@@ -1,14 +1,19 @@
 <template>
   <div class="w-full max-w-6xl mx-auto px-4 space-y-8">
-    <GroupManage v-if="group" :group :is-owned="isOwned ?? false" @leave="leave"/>
+    <ComponentErrorBoundary>
+      <GroupManage v-if="group" :group :is-owned="isOwned ?? false" @leave="leave"/>
+      <div v-else class="h-12 md:h-16 bg-colors-primary-900/40 rounded-lg"/>
+    </ComponentErrorBoundary>
 
-    <div v-else class="h-12 md:h-16 bg-colors-primary-900/40 rounded-lg"/>
+    <ComponentErrorBoundary>
+      <MoodsByWeek v-if="days" :before :days :theme @move="move"/>
+      <div v-else class="h-64 md:h-96 bg-colors-primary-900/40 rounded-lg"/>
+    </ComponentErrorBoundary>
 
-    <MoodsByWeek v-if="days" :before :days :theme @move="move"/>
-    <div v-else class="h-64 md:h-96 bg-colors-primary-900/40 rounded-lg"/>
-
-    <GroupMembers v-if="members" :id="user?.id ?? ''" :is-owned="isOwned" :members="members" @kick="kick"/>
-    <div v-else class="h-48 bg-colors-primary-900/40 rounded-lg"/>
+    <ComponentErrorBoundary>
+      <GroupMembers v-if="members" :id="user?.id ?? ''" :is-owned="isOwned" :members="members" @kick="kick"/>
+      <div v-else class="h-48 bg-colors-primary-900/40 rounded-lg"/>
+    </ComponentErrorBoundary>
   </div>
 </template>
 

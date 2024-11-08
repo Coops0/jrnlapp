@@ -14,6 +14,7 @@
 
     <div v-else-if="error" class="p-4 rounded-lg bg-colors-primary-900/40">
       <p class="text-colors-accent-400">unable to load entries: {{ error }}</p>
+      <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
     </div>
 
     <div v-else-if="paginator" class="space-y-4">
@@ -58,7 +59,7 @@ const limit = ref(50);
 
 const additonalLoads = ref(0);
 
-const { data: paginator, status, error } = useLazyAsyncData(
+const { data: paginator, status, error, refresh } = useLazyAsyncData(
     'entries',
     () => entryService.getEntriesPaginated(nextCursor.value || undefined, limit.value),
     {

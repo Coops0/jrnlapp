@@ -8,12 +8,8 @@
           placeholder="group code"
           @input="updateGroupSearchResults"
       />
-
-      <div v-if="status === 'pending'">
-        <p class="text-colors-primary-400">loading...</p>
-      </div>
       <div
-          v-else-if="groupSearchResults"
+          v-if="groupSearchResults"
           class="p-3 rounded-md bg-colors-primary-800/60 space-y-2"
       >
         <div class="flex items-center justify-between">
@@ -48,7 +44,7 @@ const emit = defineEmits<{
   'group-joined': []
 }>();
 
-const { data: groupSearchResults, refresh, status, clear } = useAsyncData(
+const { data: groupSearchResults, refresh, clear } = useAsyncData(
     'group-search-results',
     () => groupService.getGroup(joinGroupCode.value),
     {

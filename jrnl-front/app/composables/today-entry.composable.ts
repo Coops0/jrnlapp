@@ -69,8 +69,11 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         try {
             entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
         } catch (e) {
-            alert('failed to save entry');
-            throw e;
+            throw createError({
+                message: 'failed to save entry',
+                data: entry.value,
+                cause: e,
+            });
         }
 
         lastSavedEntry.value = JSON.stringify(entry.value);

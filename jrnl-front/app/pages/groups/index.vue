@@ -21,8 +21,12 @@
     </section>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <GroupsListCreateForm @group-created="refresh"/>
-      <GroupsListJoinForm @group-joined="refresh"/>
+      <ComponentErrorBoundary>
+        <GroupsListCreateForm @group-created="refresh"/>
+      </ComponentErrorBoundary>
+      <ComponentErrorBoundary>
+        <GroupsListJoinForm @group-joined="refresh"/>
+      </ComponentErrorBoundary>
     </div>
   </div>
 </template>

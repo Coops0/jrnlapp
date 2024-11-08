@@ -16,6 +16,7 @@
 
     <div v-else-if="error" class="p-4 rounded-lg bg-colors-primary-900/40">
       <p class="text-colors-accent-400">unable to load entry: {{ error }}</p>
+      <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
     </div>
 
     <div v-else-if="entry" class="space-y-8">
@@ -40,7 +41,7 @@ const entryService = new EntryService($localApi);
 
 const { theme } = useTheme(null);
 
-const { data: entry, error, status } = useLazyAsyncData(
+const { data: entry, error, status, refresh } = useLazyAsyncData(
     `entry-${id}`,
     () => entryService.getEntry(id as string)
 );

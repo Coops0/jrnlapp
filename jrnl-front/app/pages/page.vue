@@ -12,22 +12,24 @@
       </div>
     </div>
     <div class="flex flex-col flex-grow">
-      <TodayEntryTextEditor
-          v-model="entry.text"
-          :initial="entryCookie?.text"
-          class="flex-grow h-full w-full"
-      />
-      <div class="flex-grow mt-auto px-4 py-3">
-        <div class="space-y-2 mx-auto">
-          <FormSlider
-              v-model="entry.emotion_scale"
-              :max="10"
-              :min="0"
-              :rating-lerp="ratingLerpBind"
-              :step="0.1"
-          />
+      <ComponentErrorBoundary>
+        <TodayEntryTextEditor
+            v-model="entry.text"
+            :initial="entryCookie?.text"
+            class="flex-grow h-full w-full"
+        />
+        <div class="flex-grow mt-auto px-4 py-3">
+          <div class="space-y-2 mx-auto">
+            <FormSlider
+                v-model="entry.emotion_scale"
+                :max="10"
+                :min="0"
+                :rating-lerp="ratingLerpBind"
+                :step="0.1"
+            />
+          </div>
         </div>
-      </div>
+      </ComponentErrorBoundary>
     </div>
   </div>
 </template>

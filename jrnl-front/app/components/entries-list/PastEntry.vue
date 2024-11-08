@@ -3,6 +3,8 @@
       :disabled
       :style="{ 'background-color': color }"
       :to="disabled ? '' : { name: 'entry-id', params: { id } }"
+      prefetch
+      :prefetch-on="{ interaction: true }"
       class="block w-full rounded-lg transition-transform duration-200 hover:scale-[1.01] group"
   >
     <div class="flex items-center justify-between px-3 py-2">
