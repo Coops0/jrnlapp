@@ -9,8 +9,8 @@
       </div>
 
       <FormButton
-          variant="danger"
           size="sm"
+          variant="danger"
           @click="emit('leave')"
       >
         leave
@@ -19,7 +19,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { GroupInfo } from '~/composables/group.composable';
 
 defineProps<{

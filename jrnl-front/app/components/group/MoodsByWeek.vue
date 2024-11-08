@@ -13,12 +13,12 @@
         <span class="text-sm md:text-base text-colors-primary-400 min-w-[140px] text-center">
              <NuxtTime
                  :datetime="before"
-                 month="numeric"
-                 day="2-digit"/> -
+                 day="2-digit"
+                 month="numeric"/> -
               <NuxtTime
                   :datetime="addDays(before, 6)"
-                  month="numeric"
                   day="2-digit"
+                  month="numeric"
               />
         </span>
         <FormButton
@@ -34,8 +34,8 @@
     <div class="relative h-64 md:h-96 bg-colors-primary-900/40 rounded-lg overflow-hidden">
       <div class="absolute inset-x-8 bottom-0 flex justify-between">
         <div
-            v-for="(day, index) in WEEK_DAYS"
-            :key="index"
+            v-for="day in WEEK_DAYS"
+            :key="day"
             class="flex flex-col items-center w-full"
         >
           <div class="h-full w-px border-l border-colors-primary-800/30"/>
@@ -51,19 +51,19 @@
       </div>
 
       <div
-          v-for="day in days"
-          :key="day.day"
+          v-for="dayGroup in days"
+          :key="dayGroup.day"
           :style="{
-            left: `${getDayPosition(parseServerDate(day.day))}%`,
+            left: getDayPosition(parseServerDate(dayGroup.day)) + '%'
           }"
           class="absolute w-1/7 h-full transition-all duration-300"
       >
         <div
-            v-for="(scale, idx) in day.scales"
-            :key="`${day.day}-${idx}`"
+            v-for="(scale, idx) in dayGroup.scales"
+            :key="`${dayGroup.day}-${idx}`"
             :style="{
               backgroundColor: ratingLerp(scale, theme),
-              bottom: `${(scale / 10) * 100}%`,
+              bottom: ((scale / 10) * 100) + '%',
               left: '50%',
               transform: 'translateX(-50%)',
               opacity: 0.8
@@ -80,7 +80,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { GroupedDayData } from '~/types/weekly-data.type';
 import { addDays, parseServerDate, ratingLerp } from '~/util/index.util';
 
@@ -91,10 +91,9 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  move: [foward: boolean]
+  move: [foward: boolean];
 }>();
 
 const WEEK_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
-
 const getDayPosition = (date: Date) => (date.getDay() / 6) * 100;
 </script>

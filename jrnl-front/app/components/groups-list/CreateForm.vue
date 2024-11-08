@@ -10,9 +10,9 @@
 
       <FormButton
           :disabled="!groupName.length"
-          variant="primary"
-          size="md"
           full
+          size="md"
+          variant="primary"
       >
         create
       </FormButton>

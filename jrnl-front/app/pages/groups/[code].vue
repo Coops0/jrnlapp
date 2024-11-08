@@ -4,10 +4,10 @@
 
     <div v-else class="h-12 md:h-16 bg-colors-primary-900/40 rounded-lg"/>
 
-    <MoodsByWeek v-if="days" :days :theme :before @move="move"/>
+    <MoodsByWeek v-if="days" :before :days :theme @move="move"/>
     <div v-else class="h-64 md:h-96 bg-colors-primary-900/40 rounded-lg"/>
 
-    <GroupMembers v-if="members" :id="user?.id ?? ''" :members="members" :is-owned="isOwned" @kick="kick"/>
+    <GroupMembers v-if="members" :id="user?.id ?? ''" :is-owned="isOwned" :members="members" @kick="kick"/>
     <div v-else class="h-48 bg-colors-primary-900/40 rounded-lg"/>
   </div>
 </template>

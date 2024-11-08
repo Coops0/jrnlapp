@@ -18,7 +18,7 @@
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-colors-primary-700 flex items-center justify-center">
               <span class="text-sm md:text-base text-colors-primary-200">
-                {{ member.name[0].toUpperCase() }}
+                {{ member.name[0]?.toUpperCase() }}
               </span>
           </div>
           <span class="text-colors-primary-200 md:text-lg">{{ member.name.toLowerCase() }}</span>
@@ -26,8 +26,8 @@
 
         <FormButton
             v-if="isOwned && member.id !== id"
-            variant="danger"
             size="sm"
+            variant="danger"
             @click="emit('kick', index)"
         >x
         </FormButton>
@@ -36,7 +36,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { FetchedGroupMember } from '~/services/group.service';
 
 defineProps<{

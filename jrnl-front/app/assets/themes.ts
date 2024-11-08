@@ -5,7 +5,7 @@ interface Theme {
         primary: Record<string, string>;
         secondary: Record<string, string>;
         accent: Record<string, string>;
-    }
+    };
 }
 
 export const themes: Record<string, Theme> = {

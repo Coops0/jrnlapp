@@ -34,8 +34,8 @@
       <FormButton
           v-if="paginator.has_more"
           full
-          variant="secondary"
           size="sm"
+          variant="secondary"
           @click="loadMore"
       >
         load more

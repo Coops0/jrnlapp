@@ -1,6 +1,5 @@
 <template>
   <button
-      :type="type"
       :class="[
       'transition-all duration-200 rounded-lg font-medium',
       'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -9,8 +8,9 @@
       { 'w-full': full },
       className
     ]"
-      v-bind="$attrs"
       :disabled
+      :type="type"
+      v-bind="$attrs"
   >
 
     <span>

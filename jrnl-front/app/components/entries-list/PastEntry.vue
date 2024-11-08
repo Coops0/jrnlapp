@@ -8,7 +8,7 @@
     <div class="flex items-center justify-between px-3 py-2">
       <span class="text-colors-primary-50 text-sm">
         <span v-if="disabled">loading...</span>
-        <NuxtTime v-else :datetime="parsedDate" month="short" day="numeric"/>
+        <NuxtTime v-else :datetime="parsedDate" day="numeric" month="short"/>
       </span>
       <span class="text-colors-primary-50/80 text-xs">
         {{ rating.toFixed(1) }}

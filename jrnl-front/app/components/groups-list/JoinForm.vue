@@ -24,9 +24,9 @@
         </div>
 
         <FormButton
-            variant="primary"
-            size="md"
             full
+            size="md"
+            variant="primary"
             @click="joinGroup"
         >
           join

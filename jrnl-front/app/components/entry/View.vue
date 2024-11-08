@@ -10,8 +10,8 @@
         <div class="flex-1">
           <NuxtTime
               v-if="parsedDate"
-              :datetime="parsedDate" weekday="long" year="numeric" month="long" day="numeric"
-              class="text-colors-primary-200 text-sm"
+              :datetime="parsedDate" class="text-colors-primary-200 text-sm" day="numeric" month="long" weekday="long"
+              year="numeric"
           />
         </div>
 
