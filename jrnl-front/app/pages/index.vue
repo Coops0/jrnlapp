@@ -27,13 +27,6 @@
         </NuxtLink>
       </div>
     </div>
-
-    <div>
-      <ComponentErrorBoundary>
-   <test></test>
-      </ComponentErrorBoundary>
-    </div>
-
   </div>
 </template>
 
@@ -42,5 +35,4 @@
 const { jwt } = useAuth();
 
 definePageMeta({ redirectUnautheticated: false });
-
 </script>

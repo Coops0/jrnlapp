@@ -20,7 +20,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
     const saveEntryTimeoutId = ref<NodeJS.Timeout | null>(null);
 
-    const lastSavedEntry = ref<string | null>(null);
+    const lastSavedEntry = ref<Entry | null>(null);
     const cancelledSaves = ref(0);
 
     async function save() {
@@ -39,7 +39,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             return;
         }
 
-        if (lastSavedEntry.value && lastSavedEntry.value === JSON.stringify(entry.value)) {
+        if (lastSavedEntry.value && JSON.stringify(lastSavedEntry.value) === JSON.stringify(entry.value)) {
             cancelledSaves.value++;
             return;
         }
@@ -76,7 +76,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             });
         }
 
-        lastSavedEntry.value = JSON.stringify(entry.value);
+        lastSavedEntry.value = entry.value;
         console.debug('saved entry');
 
         storage.value = entryResponse;
@@ -90,7 +90,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     } = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
         immediate: false,
         async transform(today) {
-            lastSavedEntry.value = JSON.stringify(today);
+            lastSavedEntry.value = today;
 
             if (today === null) {
                 console.debug('fetch entry returned null, defaulting to blank');
@@ -169,6 +169,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         entry,
         lastSaved,
         beginFetch: fetchToday,
-        tomorrow
+        tomorrow,
+        lastSavedEntry
     };
 };

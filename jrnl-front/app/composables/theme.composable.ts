@@ -4,11 +4,19 @@ import { useUser } from '~/composables/user.composable';
 export const useTheme = (userService: UserService | null) => {
     const { user } = useUser(userService);
     const theme = useState('theme', () => user.value?.theme || 'lunar');
+    const themeCacheCookie = useCookie('theme-cache', {
+        watch: false,
+        path: '',
+        priority: 'high'
+    });
 
     const activeTheme = useColorMode();
 
     const setThemeLocal = (name: string) => {
         if (name !== activeTheme.value) {
+            themeCacheCookie.value = name;
+
+            activeTheme.forced = true;
             // activeTheme.value = name;
             activeTheme.preference = name;
         }
