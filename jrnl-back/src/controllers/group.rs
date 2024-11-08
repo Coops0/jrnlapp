@@ -2,18 +2,18 @@ use crate::{
     error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor},
     schemas::group::Group,
     schemas::user::User,
-    AppState
+    AppState,
 };
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     routing::{delete, get, post},
     Json,
-    Router
+    Router,
 };
 use base64::{
     engine::general_purpose::STANDARD,
-    Engine
+    Engine,
 };
 use chrono::{Duration, NaiveDate};
 use serde::{Deserialize, Serialize};
@@ -43,6 +43,19 @@ async fn create_group(
     State(AppState { pool }): State<AppState>,
     JsonExtractor(CreateGroupPayload { name }): JsonExtractor<CreateGroupPayload>,
 ) -> JrnlResult<Json<Group>> {
+    let existing_owned_groups = sqlx::query_scalar::<_, i64>(
+        // language=postgresql
+        "SELECT COUNT(*) FROM groups WHERE owner_id = $1",
+    )
+        .bind(user.id)
+        .fetch_one(&pool)
+        .await
+        .map_err(DatabaseError)?;
+
+    if existing_owned_groups >= 10 {
+        return Err(JrnlError::CannotCreateMoreGroups);
+    }
+
     let code = Group::generate_code();
     sqlx::query_as::<_, Group>(
         // language=postgresql
@@ -90,6 +103,21 @@ async fn join_group(
     user: User,
     State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<StatusCode> {
+    let joined_groups = sqlx::query_scalar::<_, i64>(
+        // language=postgresql
+        "
+        SELECT COUNT(*) FROM group_memberships WHERE user_id = $1
+        ",
+    )
+        .bind(user.id)
+        .fetch_one(&pool)
+        .await
+        .map_err(DatabaseError)?;
+
+    if joined_groups >= 20 {
+        return Err(JrnlError::CannotJoinMoreGroups);
+    }
+
     sqlx::query(
         // language=postgresql
         "
@@ -286,7 +314,7 @@ fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(deserializer: D) -> R
     let Some(encoded_date) = Option::<String>::deserialize(deserializer)? else {
         return Ok(None)
     };
-    
+
     let decoded_bytes = STANDARD.decode(encoded_date).map_err(serde::de::Error::custom)?;
     let date_string = String::from_utf8(decoded_bytes).map_err(serde::de::Error::custom)?;
 
