@@ -14,9 +14,9 @@ export const useUser = (userService: UserService | null) => {
         user.value = await userService.getMe();
     };
 
-    watchDeep(user, u => {
+    watch(user, u => {
         localUser.value = u;
-    });
+    }, { deep: true });
 
     return { refresh, user };
 };

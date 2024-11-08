@@ -4,11 +4,9 @@
       <div class="flex justify-between items-center max-w-5xl mx-auto text-sm">
         <h5
             class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity"
-            data-allow-mismatch
         >
           <span v-if="lastSaved.getFullYear() === 1900">last saved: never</span>
-          <span v-else-if="lastSavedRelativeString.includes('in')">last saved ...</span>
-          <span v-else>last saved {{ lastSavedRelativeString }}</span>
+          <span v-else>last saved: <NuxtTime :datetime="lastSaved" relative/></span>
         </h5>
         <TodayEntryTimeUntilTomorrow :tomorrow="tomorrow"/>
       </div>
@@ -19,9 +17,7 @@
           :initial="entryCookie?.text"
           class="flex-grow h-full w-full"
       />
-      <!-- todo load text directly until text editor loads -->
-
-      <div class="flex-grow mt-auto px-4 py-3 bg-colors-primary-900/50">
+      <div class="flex-grow mt-auto px-4 py-3">
         <div class="space-y-2 mx-auto">
           <FormSlider
               v-model="entry.emotion_scale"
@@ -47,8 +43,6 @@ const entryService = new EntryService($localApi);
 const entryCookie = useCookie<Entry>('entry-today');
 
 const { beginFetch, tomorrow, entry, lastSaved } = useTodayEntry(entryService, entryCookie);
-
-const lastSavedRelativeString = useTimeAgo(lastSaved, { updateInterval: 800, showSecond: true });
 
 const { theme } = useTheme(null);
 

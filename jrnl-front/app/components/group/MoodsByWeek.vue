@@ -10,15 +10,21 @@
         >
           <span class="text-colors-primary-400 text-lg">{{ '<' }}</span>
         </FormButton>
-        <span
-            class="text-sm md:text-base text-colors-primary-400 min-w-[140px] text-center"
-            data-allow-mismatch="text">
-            {{ dateRangeString }}
-          </span>
+        <span class="text-sm md:text-base text-colors-primary-400 min-w-[140px] text-center">
+             <NuxtTime
+                 :datetime="before"
+                 month="numeric"
+                 day="2-digit"/> -
+              <NuxtTime
+                  :datetime="addDays(before, 6)"
+                  month="numeric"
+                  day="2-digit"
+              />
+        </span>
         <FormButton
             size="sm"
             variant="ghost"
-            @click="() => emit('move', false)"
+            @click="() => emit('move', true)"
         >
           <span class="text-colors-primary-400 text-lg">{{ '>' }}</span>
         </FormButton>
@@ -78,7 +84,7 @@
 import type { GroupedDayData } from '~/types/weekly-data.type';
 import { addDays, parseServerDate, ratingLerp } from '~/util/index.util';
 
-const props = defineProps<{
+defineProps<{
   days: GroupedDayData[];
   theme: string;
   before: Date;
@@ -89,15 +95,6 @@ const emit = defineEmits<{
 }>();
 
 const WEEK_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
-
-const dateRangeString = computed(() => {
-  const end = props.before;
-  const start = addDays(end, -6);
-
-  const s = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const e = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${s} - ${e}`;
-});
 
 const getDayPosition = (date: Date) => (date.getDay() / 6) * 100;
 </script>

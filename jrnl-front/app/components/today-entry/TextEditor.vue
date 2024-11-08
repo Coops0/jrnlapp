@@ -1,5 +1,9 @@
 <template>
-  <editor-content :editor="editor"/>
+  <div>
+    <EditorContent v-if="editor" :editor/>
+    <!-- eslint-disable vue/no-v-html -->
+    <div v-else :class="editorClasses" v-html="modelValue?.length ? modelValue : initial"/>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +19,8 @@ const emit = defineEmits<{
   'update:modelValue': [content: string]
 }>();
 
+const editorClasses = 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 m-5 focus:outline-none max-w-none h-full';
+
 watch(() => props.modelValue, value => {
   const e = editor.value;
   if (e && e.getHTML() !== value) {
@@ -27,7 +33,7 @@ const editor = useEditor({
   extensions: [StarterKit],
   editorProps: {
     attributes: {
-      class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none max-w-none prose-invert h-full',
+      class: editorClasses,
     }
   },
   autofocus: true,
@@ -38,5 +44,13 @@ const editor = useEditor({
     }
     emit('update:modelValue', e.getHTML());
   },
+});
+
+onBeforeUnmount(() => {
+  try {
+    editor.value?.destroy();
+  } catch {
+    /* empty */
+  }
 });
 </script>

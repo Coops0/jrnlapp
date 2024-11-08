@@ -8,16 +8,11 @@
 
       <div class="relative flex flex-col sm:flex-row items-center gap-4 p-6">
         <div class="flex-1">
-          <p data-allow-mismatch="text" class="text-colors-primary-200 text-sm">
-            {{
-              parsedDate?.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })
-            }}
-          </p>
+          <NuxtTime
+              v-if="parsedDate"
+              :datetime="parsedDate" weekday="long" year="numeric" month="long" day="numeric"
+              class="text-colors-primary-200 text-sm"
+          />
         </div>
 
         <div class="flex items-center gap-3">
@@ -35,7 +30,7 @@
     <!-- eslint-disable vue/no-v-html -->
     <div
         v-if="entry.text"
-        class="prose prose-invert prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 max-w-none px-4"
+        class="prose prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 max-w-none px-4"
         v-html="entry.text"
     />
 

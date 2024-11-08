@@ -57,13 +57,13 @@ const { data: groupSearchResults, refresh, status, clear } = useAsyncData(
     }
 );
 
-const updateGroupSearchResults = useDebounceFn(async () => {
+async function updateGroupSearchResults() {
   if (joinGroupCode.value) {
     await refresh();
   } else {
     clear();
   }
-}, 250);
+}
 
 async function joinGroup() {
   const code = joinGroupCode.value;

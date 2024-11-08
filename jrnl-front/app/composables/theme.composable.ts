@@ -24,13 +24,13 @@ export const useTheme = (userService: UserService | null) => {
 
     watch(theme, setThemeLocal);
 
-    watchImmediate(user, p => {
+    watch(user, p => {
         if (p?.theme && p.theme !== theme.value) {
             console.debug('useTheme: user theme changed, setting theme to', p.theme);
             theme.value = p.theme;
             setThemeLocal(p.theme);
         }
-    }, { deep: true });
+    }, { immediate: true, deep: true });
 
     async function setTheme(name: string) {
         if (name === theme.value) {
@@ -43,11 +43,9 @@ export const useTheme = (userService: UserService | null) => {
             throw new Error('userService is required for useTheme.setTheme');
         }
 
-        await debouncedUpdate();
+        await userService!.updateMe({ theme: theme.value });
         user.value!.theme = name;
     }
-
-    const debouncedUpdate = useDebounceFn(() => userService!.updateMe({ theme: theme.value }), 150);
 
     return {
         theme: readonly(theme),

@@ -1,26 +1,15 @@
-import type { Config } from 'tailwindcss';
 import typography from '@tailwindcss/typography';
 import { createThemes } from 'tw-colors';
 // noinspection ES6PreferShortImport
 import { themes } from './app/assets/themes';
 
 
-export default <Partial<Config>>{
+export default {
     content: [],
     plugins: [
+        // @ts-expect-error - type definitions aren't valid between these 2
         createThemes(themes),
         typography
-    ],
-    theme: {
-        extend: {
-            typography: (theme: ((key: string) => string)) => ({
-                DEFAULT: {
-                    css: {
-                        color: theme('colors.text.500')
-                    }
-                }
-            })
-        }
-    }
+    ]
 };
 

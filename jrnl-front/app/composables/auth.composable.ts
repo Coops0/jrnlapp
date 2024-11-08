@@ -8,10 +8,10 @@ export const useAuth = () => {
         cachedJwt.value = null;
     };
 
-    watchDeep(jwt, j => {
+    watch(jwt, j => {
         console.debug('saving cached jwt to cookie', j);
         cachedJwt.value = j;
-    });
+    }, { deep: true });
 
     return { jwt, logout };
 };

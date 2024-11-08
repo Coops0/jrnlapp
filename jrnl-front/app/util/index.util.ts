@@ -17,7 +17,7 @@ const THEME_GRADIENTS: Record<string, [string, string]> = Object.fromEntries(
     Object.entries(themes)
         .map(([key, value]) => {
             const c = value.colors.primary;
-            return [key, [c[50], c[700]]];
+            return [key, [c[50]!, c[700]!]];
         })
 );
 

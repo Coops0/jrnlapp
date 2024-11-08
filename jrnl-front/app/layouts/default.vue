@@ -10,21 +10,17 @@
 
     <NavigatorMobile v-if="authenticated" class="md:hidden"/>
 
-    <footer class="bg-colors-primary-900/50 hidden md:block">
+    <footer class="hidden md:block">
       <div class="max-w-5xl mx-auto px-4 py-4 flex ml-4">
-        <p class="text-sm text-colors-primary-400" data-allow-mismatch>jrnl.fm app /// {{
-            d.toLocaleDateString().replaceAll('/', ' ')
-          }}</p>
+        <p class="text-sm text-colors-primary-400">jrnl.fm app</p>
       </div>
     </footer>
   </div>
 </template>
 
 <script lang="ts" setup>
-
 const { jwt } = useAuth();
 const { user } = useUser(null);
 
 const authenticated = computed(() => !!jwt.value?.length);
-const d = new Date();
 </script>
