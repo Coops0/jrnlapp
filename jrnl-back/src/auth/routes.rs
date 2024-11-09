@@ -1,3 +1,4 @@
+use crate::auth::providers::{verify_apple_id_token, AppleCallbackPayload, StrippedVerificationClaims};
 use crate::{
     auth::{
         jwt,
@@ -7,6 +8,7 @@ use crate::{
     schemas::user::User,
     AppState,
 };
+use anyhow::{anyhow, Context};
 use axum::{extract::State, http::StatusCode, response::{IntoResponse, Redirect}, routing::{get, post}, Form, Json, Router};
 use oauth2::{
     reqwest::async_http_client,
@@ -19,12 +21,14 @@ use oauth2::{
 };
 use serde::Deserialize;
 use serde_json::json;
+use sqlx::PgPool;
+use uuid::Uuid;
 
 pub fn auth_controller() -> Router<AppState> {
     Router::new()
         .route("/google", get(google_url))
         .route("/google/callback", post(google_callback))
-        .route("/apple", get(apple_url))
+        .route("/apple", post(init_apple_session))
         .route("/apple/callback", post(apple_callback))
         .route("/logout", get(logout))
 }
@@ -46,7 +50,7 @@ async fn google_url(State(AppState { pool, .. }): State<AppState>) -> JrnlResult
     sqlx::query(
         // language=postgresql
         "
-        INSERT INTO temp_auth_sessions (csrf_token, pkce_verifier, expires_at)
+        INSERT INTO temp_auth_sessions (csrf_token, nonce, expires_at)
         VALUES ($1, $2, NOW() + INTERVAL '30 minutes')
         ",
     )
@@ -72,7 +76,7 @@ async fn google_callback(
     let (pkce_verifier, ) = sqlx::query_as::<_, (String,)>(
         // language=postgresql
         "
-        SELECT pkce_verifier FROM temp_auth_sessions
+        SELECT nonce FROM temp_auth_sessions
         WHERE csrf_token = $1 AND expires_at > NOW() LIMIT 1
         ",
     )
@@ -112,43 +116,117 @@ async fn google_callback(
     Ok(Json(json!({ "token": jwt, "user": user })))
 }
 
-async fn apple_url() -> JrnlResult<impl IntoResponse> {
-    // https://appleid.apple.com/auth/keys
-    Ok(StatusCode::OK)
-}
-
 #[derive(Deserialize)]
-struct AppleCallbackPayload {
-    /// A single-use authentication code that expires after five minutes. To learn how to validate this code to obtain user tokens, see Generate and validate tokens.
-    /// <https://developer.apple.com/documentation/sign_in_with_apple/generate_and_validate_tokens>
+struct AppleSession {
     code: String,
-    /// A JSON web token (JWT) containing the user’s identification information. For more information, see Retrieve the user’s information from Apple ID servers.
-    /// <https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple#3383773>
-    id_token: String,
-    /// An arbitrary string passed by the init function, representing the current state of the authorization request. This value is also used to mitigate cross-site request forgery attacks, by comparing against the state value contained in the authorization response.
     state: String,
-    /// A JSON string containing the data requested in the scope property. The returned data is in the following format:
-    user: Option<String>
 }
 
-#[derive(Deserialize)]
-struct AppleCallbackUser {
-    email: String,
-    name: AppleCallbackUserName,
+async fn init_apple_session(State(AppState { pool, .. }): State<AppState>) -> JrnlResult<impl IntoResponse> {
+    let verifier = CsrfToken::new_random();
+    let nonce = Uuid::new_v4().to_string();
+
+    sqlx::query(
+        // language=postgresql
+        "
+        INSERT INTO temp_auth_sessions (csrf_token, nonce, expires_at)
+        VALUES ($1, $2, NOW() + INTERVAL '30 minutes')
+        ",
+    )
+        .bind(verifier.secret())
+        .bind(&nonce)
+        .execute(&pool)
+        .await
+        .map_err(DatabaseError)?;
+
+    Ok(AppleSession { code: nonce, state: verifier.secret().to_owned() })
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct AppleCallbackUserName {
-    first_name: String,
-    last_name: String,
+async fn apple_callback(
+    State(AppState { pool, .. }): State<AppState>,
+    Form(AppleCallbackPayload { id_token, user, state, .. }): Form<AppleCallbackPayload>,
+) -> JrnlResult<impl IntoResponse> {
+    let (nonce, ) = sqlx::query_as::<_, (String,)>(
+        // language=postgresql
+        "
+        SELECT nonce FROM temp_auth_sessions
+        WHERE csrf_token = $1 AND expires_at > NOW() LIMIT 1
+        ",
+    )
+        .bind(&state)
+        .fetch_one(&pool)
+        .await
+        .map_err(AuthenticationError::BadCallbackState)?;
+
+    let claims = verify_apple_id_token(&id_token, &nonce).await?;
+    let name = user.map(|u| format!("{} {}", u.name.first_name, u.name.last_name));
+
+    let existing_user = sqlx::query_as::<_, User>(
+        // language=postgresql
+        "
+       SELECT * FROM users WHERE email = $1 OR apple_subject = $2 LIMIT 1
+        ",
+    )
+        .bind(&claims.email)
+        .bind(&claims.sub)
+        .fetch_optional(&pool)
+        .await
+        .map_err(DatabaseError)?;
+
+
+    let user = match existing_user {
+        Some(user) => {
+            if user.apple_subject.is_none() {
+                migrate_google_account(&user, &claims, &pool, name).await?;
+            }
+
+            user
+        }
+        None => {
+            let name = name.context("missing name for initial signup")?;
+
+            sqlx::query_as::<_, User>(
+                // language=postgresql
+                "INSERT INTO users (name, email, apple_subject) VALUES ($1, $2, $3) RETURNING *",
+            )
+                .bind(&name)
+                .bind(&claims.email)
+                .fetch_one(&pool)
+                .await
+                .map_err(DatabaseError)?
+        }
+    };
+
+    // todo response needs to go back to frontend since client is redirected here i think
+    let jwt = jwt::encode_jwt(user.id)?;
+    Ok(Json(json!({ "token": jwt, "user": user })))
 }
 
+async fn migrate_google_account(
+    user: &User,
+    claims: &StrippedVerificationClaims,
+    pool: &PgPool,
+    name: Option<String>,
+) -> JrnlResult<()> {
+    if user.email != claims.email {
+        return Err(anyhow!("email mismatch").into());
+    }
 
-async fn apple_callback(Form(payload): Form<AppleCallbackPayload>) -> JrnlResult<impl IntoResponse> {
-    
-    // https://developer.apple.com/sign-in-with-apple/get-started/
-    Ok(StatusCode::OK)
+    sqlx::query(
+        // language=postgresql
+        "
+                UPDATE users
+                SET apple_subject = $1, name = COALESCE($2, name)
+                WHERE id = $3
+                ",
+    )
+        .bind(&claims.sub)
+        .bind(&name) // if first sign in thru apple, update name
+        .bind(&user.id)
+        .execute(pool)
+        .await
+        .map(|_| ())
+        .map_err(|e| DatabaseError(e).into())
 }
 
 async fn logout() -> JrnlResult<StatusCode> {

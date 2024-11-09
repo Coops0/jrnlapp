@@ -9,6 +9,7 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub theme: Option<String>,
+    pub apple_subject: Option<String>,
     pub timezone: String,
 }
 

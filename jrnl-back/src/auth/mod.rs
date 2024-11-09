@@ -9,7 +9,7 @@ mod providers;
 pub mod routes;
 
 pub async fn clean_expired_sessions(pool: PgPool) {
-    let mut ticker = interval(Duration::from_secs(60 * 60));
+    let mut ticker = interval(Duration::from_secs(60 * 15));
     loop {
         ticker.tick().await;
 

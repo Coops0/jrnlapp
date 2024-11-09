@@ -57,11 +57,19 @@ export const parseServerDate = (d: string): Date => {
         return d as never;
     }
 
+    let obj;
     if (d.split('-').length === 3) {
-        return new Date(d.replaceAll('-', '/'));
+        obj = new Date(d.replaceAll('-', '/'));
     } else {
-        return new Date(d);
+        obj = new Date(d);
     }
+
+    if (!obj || isNaN(obj.getTime())) {
+        console.warn(`invalid date ${d}`);
+        return new Date();
+    }
+
+    return obj;
 };
 
 export const addDays = (date: Date, days: number): Date => new Date(date.getTime() - (days * 24 * 60 * 60 * 1000));

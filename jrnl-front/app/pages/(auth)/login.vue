@@ -2,57 +2,64 @@
   <div>
 
     <NuxtLink class="text-colors-text-200" @click="google">google</NuxtLink>
-    <div @click="apple">
-      <div id="appleid-signin" data-color="black" data-border="true" data-type="sign in"/>
-    </div>
+    <div id="appleid-signin" data-color="white" data-border="true" data-type="continue"/>
   </div>
 </template>
 
 <script lang="ts" setup>
-const { public: { apiBase } } = useRuntimeConfig();
+import { UserService } from '~/services/user.service';
+
+const { public: { apiBase, appleClientId } } = useRuntimeConfig();
+const { $localApi } = useNuxtApp();
 
 definePageMeta({ redirectUnautheticated: false });
 
-useScript('https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js');
+const userService = new UserService($localApi);
 
-// useHead({
-//   meta: [
-//     { name: 'appleid-signin-client-id', content: 'fm.jrnl.jrnlappid' },
-//     { name: 'appleid-signin-scope', content: 'name email' },
-//     { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback` },
-//     { name: 'appleid-signin-state', content: new Date().toString() },
-//     // { name: 'appleid-signin-nonce', content: 'nonce' },
-//     { name: 'appleid-signin-use-popup', content: 'true' }
-//   ]
-// });
+const { jwt } = useAuth();
+const { user } = useUser(userService);
+
+useScript({
+  src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
+});
+
+useHead({
+  meta: [
+    { name: 'appleid-signin-client-id', content: appleClientId },
+    { name: 'appleid-signin-scope', content: 'name email' },
+    { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback` },
+    { name: 'appleid-signin-state', content: crypto.randomUUID() },
+    { name: 'appleid-signin-use-popup', content: 'true' }
+  ]
+});
+
+onMounted(() => {
+  document.addEventListener('AppleIDSignInOnSuccess', onAppleSignInSuccess);
+  document.addEventListener('AppleIDSignInOnFailure', onAppleSignInFailure);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('AppleIDSignInOnSuccess', onAppleSignInSuccess);
+  document.removeEventListener('AppleIDSignInOnFailure', onAppleSignInFailure);
+});
 
 
-async function appleSignin() {
-  const { state, nonce } = /* todo gen state/nonce from server */ { state: 'state', nonce: 'nonce' };
+// eslint-disable-next-line
+async function onAppleSignInSuccess(event: any) {
+  let d;
 
-  AppleID.auth.init({
-    clientId: 'fm.jrnl.jrnlappid',
-    scope: 'name email',
-    redirectURI: `${apiBase}/auth/apple/callback`,
-    state: state,
-    nonce: nonce,
-    usePopup: true
-  });
-
-  let data;
+  console.log(event);
   try {
-    data = await AppleID.auth.signIn();
-    // Handle successful response.
+    // @ts-expect-error apple sdk not typed
+    d = authService.signInWithApple(event.detail.data);
   } catch (why) {
     console.error(why);
-    alert('apple failed');
+    alert('server failed');
     return;
   }
 
-  const d = authService.signInWithApple(data);
-
   jwt.value = d.token;
-  userComposable.user.value = d.user;
+  user.value = d.user;
 
   try {
     await userService.updateMe({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
@@ -61,6 +68,12 @@ async function appleSignin() {
   }
 
   await navigateTo('/current');
+}
+
+// eslint-disable-next-line
+async function onAppleSignInFailure(event: any) {
+  alert('error signing in !');
+  console.log(event.detail.error);
 }
 
 const google = async () => await navigateTo(`${apiBase}/auth/google`, { external: true });

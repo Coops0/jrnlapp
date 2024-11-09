@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     },
     compatibilityDate: '2024-04-03',
     devtools: { enabled: true },
-    modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode', '@nuxt/eslint', 'nuxt-time'],
+    modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode', '@nuxt/eslint', 'nuxt-time', '@nuxt/scripts'],
     colorMode: {
         preference: 'lunar_placeholder',
         fallback: 'lunar_placeholder',
@@ -21,8 +21,9 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             // overridden with NUXT_PUBLIC_API_BASE
-            apiBase: 'http://localhost:4000',
-            base: 'http://localhost:3000'
+            // apiBase: 'http://localhost:4000',
+            apiBase: 'https://my.jrnl.fm',
+            appleClientId: 'fm.jrnl.jrnlapp',
         },
     },
     vite: process.env.NODE_ENV === 'production' ? {

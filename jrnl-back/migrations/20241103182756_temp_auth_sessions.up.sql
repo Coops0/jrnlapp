@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS temp_auth_sessions
 (
     csrf_token    TEXT PRIMARY KEY NOT NULL,
-    pkce_verifier TEXT             NOT NULL,
+    nonce TEXT             NOT NULL,
     expires_at    TIMESTAMPTZ      NOT NULL
 );
 
