@@ -8,6 +8,7 @@ services:
         window: 120s
     environment:
       - NUXT_PUBLIC_API_BASE=https://my.jrnl.fm
+      - NUXT_PUBLIC_BASE=https://jrnl.fm
       - NODE_ENV=production
     build:
       context: ./jrnl-front

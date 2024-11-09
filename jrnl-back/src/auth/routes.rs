@@ -7,14 +7,7 @@ use crate::{
     schemas::user::User,
     AppState,
 };
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::{IntoResponse, Redirect},
-    routing::{get, post},
-    Json,
-    Router,
-};
+use axum::{extract::State, http::StatusCode, response::{IntoResponse, Redirect}, routing::{get, post}, Form, Json, Router};
 use oauth2::{
     reqwest::async_http_client,
     AuthorizationCode,
@@ -124,7 +117,36 @@ async fn apple_url() -> JrnlResult<impl IntoResponse> {
     Ok(StatusCode::OK)
 }
 
-async fn apple_callback() -> JrnlResult<impl IntoResponse> {
+#[derive(Deserialize)]
+struct AppleCallbackPayload {
+    /// A single-use authentication code that expires after five minutes. To learn how to validate this code to obtain user tokens, see Generate and validate tokens.
+    /// <https://developer.apple.com/documentation/sign_in_with_apple/generate_and_validate_tokens>
+    code: String,
+    /// A JSON web token (JWT) containing the user’s identification information. For more information, see Retrieve the user’s information from Apple ID servers.
+    /// <https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple#3383773>
+    id_token: String,
+    /// An arbitrary string passed by the init function, representing the current state of the authorization request. This value is also used to mitigate cross-site request forgery attacks, by comparing against the state value contained in the authorization response.
+    state: String,
+    /// A JSON string containing the data requested in the scope property. The returned data is in the following format:
+    user: Option<String>
+}
+
+#[derive(Deserialize)]
+struct AppleCallbackUser {
+    email: String,
+    name: AppleCallbackUserName,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AppleCallbackUserName {
+    first_name: String,
+    last_name: String,
+}
+
+
+async fn apple_callback(Form(payload): Form<AppleCallbackPayload>) -> JrnlResult<impl IntoResponse> {
+    
     // https://developer.apple.com/sign-in-with-apple/get-started/
     Ok(StatusCode::OK)
 }

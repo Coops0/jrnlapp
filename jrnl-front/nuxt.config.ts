@@ -21,7 +21,8 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             // overridden with NUXT_PUBLIC_API_BASE
-            apiBase: 'http://localhost:4000'
+            apiBase: 'http://localhost:4000',
+            base: 'http://localhost:3000'
         },
     },
     vite: process.env.NODE_ENV === 'production' ? {
