@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware(async (to, _from) => {
     console.debug(`middleware: jwt ${!!jwt.value}, user id ${user.value?.id}, requiresAuth ${requiresAuth}`);
     if (!requiresAuth) {
         if (jwt.value) {
-            return navigateTo('/page');
+            return navigateTo('/current');
         } else {
             return;
         }

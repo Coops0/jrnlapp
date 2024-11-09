@@ -2,7 +2,7 @@
   <NuxtLink
       :disabled
       :style="{ 'background-color': color }"
-      :to="disabled ? '' : { name: 'entry-id', params: { id } }"
+      :to="disabled ? '' : { name: 'past-id', params: { id } }"
       prefetch
       :prefetch-on="{ interaction: true }"
       class="block w-full rounded-lg transition-transform duration-200 hover:scale-[1.01] group"
@@ -10,7 +10,7 @@
     <div class="flex items-center justify-between px-3 py-2">
       <span class="text-colors-primary-50 text-sm">
         <span v-if="disabled">loading...</span>
-        <NuxtTime v-else :datetime="parsedDate" day="numeric" month="short"/>
+        <NuxtTime :datetime="date" day="numeric" month="short"/>
       </span>
       <span class="text-colors-primary-50/80 text-xs">
         {{ rating.toFixed(1) }}
@@ -20,15 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-import { parseServerDate } from '~/util/index.util';
-
-const props = defineProps<{
+defineProps<{
   id: string;
-  date: string;
+  date: Date;
   rating: number;
   color: string;
   disabled?: boolean;
 }>();
-
-const parsedDate = computed(() => parseServerDate(props.date));
 </script>

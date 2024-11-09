@@ -117,3 +117,18 @@ pub async fn fetch_google_profile(token: &str) -> anyhow::Result<(String, String
 
     Ok((name, email))
 }
+
+
+pub fn apple_provider() -> anyhow::Result<BasicClient> {
+    let base = env::var("FRONTEND_URL")?;
+
+    let client = BasicClient::new(
+        ClientId::new(env::var("APPLE_CLIENT_ID")?),
+        Some(ClientSecret::new(env::var("APPLE_CLIENT_SECRET")?)),
+        AuthUrl::new("https://appleid.apple.com/auth/authorize".parse()?)?,
+        Some(TokenUrl::new("https://appleid.apple.com/auth/token".parse()?)?),
+    )
+    .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/apple"))?);
+
+    Ok(client)
+}

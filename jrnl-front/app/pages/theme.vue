@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-grow flex-row flex-wrap gap-2 justify-evenly w-full">
-    <div v-for="(colors, name) in themes" :key="name" class="m-2" @click="setTheme(name)">
+    <div v-for="[name, colors] in themesWithoutPlaceholder" :key="name" class="m-2" @click="setTheme(name)">
       <div
           :class="{ 'ring-colors-text-500 ring-1 ring-offset-1': theme === name }"
           :style="{ backgroundColor: colors.colors.primary[400] }"
@@ -19,4 +19,7 @@ const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 
 const { theme, setTheme } = useTheme(userService);
+const themesWithoutPlaceholder = computed(() => Object.entries(themes)
+    .filter(([name]) => name !== 'lunar_placeholder')
+);
 </script>

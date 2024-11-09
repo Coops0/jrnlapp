@@ -12,7 +12,7 @@
 
     <footer class="hidden md:block">
       <div class="max-w-5xl mx-auto px-4 py-4 flex ml-4">
-        <p class="text-sm text-colors-primary-400">jrnl.fm app</p>
+        <p class="text-sm text-colors-primary-400">jrnl.fm</p>
       </div>
     </footer>
   </div>

@@ -5,6 +5,7 @@ export const useUser = (userService: UserService | null) => {
     const localUser = useCookie<User | null>('cached-user');
 
     const user = useState<User | null>('user', () => localUser.value);
+    const hasRefreshedRemotely = ref(false);
 
     const refresh = async () => {
         if (!userService) {
@@ -12,11 +13,12 @@ export const useUser = (userService: UserService | null) => {
         }
 
         user.value = await userService.getMe();
+        hasRefreshedRemotely.value = true;
     };
 
     watch(user, u => {
         localUser.value = u;
     }, { deep: true });
 
-    return { refresh, user };
+    return { refresh, user, hasRefreshedRemotely };
 };

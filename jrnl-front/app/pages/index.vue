@@ -14,7 +14,7 @@
         <NuxtLink
             v-if="!!jwt"
             class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-full bg-colors-primary-600/80 hover:bg-colors-primary-500/80 text-colors-primary-100 transition-all duration-200 backdrop-blur-sm group"
-            to="/page"
+            to="/current"
         >
           open your journal
         </NuxtLink>

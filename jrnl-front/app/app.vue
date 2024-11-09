@@ -9,6 +9,8 @@ import { themes } from 'assets/themes';
 
 const { theme } = useTheme(null);
 
+const themeColor = computed(() => themes[theme.value]?.colors?.primary[900] ?? '#111922');
+
 useHead({
   title: 'jr.nl',
   meta: [
@@ -20,7 +22,7 @@ useHead({
       content: 'width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no'
     },
     { name: 'keywords', content: 'jrnl, jr.nl, journal' },
-    { name: 'theme-color', content: themes[theme.value]?.colors?.primary[900] ?? '#111922' },
+    { name: 'theme-color', content: themeColor },
     { name: 'apple-mobile-web-app-title', content: 'jr.nl' },
     { name: 'mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-status-bar-style', content: 'black-transparent' },

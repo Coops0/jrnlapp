@@ -5,8 +5,8 @@
         <EntriesListPastEntry
             id=""
             :color="ratingLerp(5, theme)"
-            :date="new Date().toString()"
-            :disabled="true"
+            :date="new Date()"
+            disabled
             :rating="5"
         />
       </div>
@@ -57,7 +57,9 @@ const { theme } = useTheme(null);
 const nextCursor = ref<string | null>(null);
 const limit = ref(50);
 
-const additonalLoads = ref(0);
+const additionalLoads = ref(0);
+
+type StrippedEntryWithDate = Omit<StrippedEntry, 'date'> & { date: Date };
 
 const { data: paginator, status, error, refresh } = useLazyAsyncData(
     'entries',
@@ -65,18 +67,21 @@ const { data: paginator, status, error, refresh } = useLazyAsyncData(
     {
       watch: [nextCursor],
       transform(p) {
-        const entries: StrippedEntry[] = [...(paginator.value?.items ?? [])];
+        const entries: StrippedEntryWithDate[] = [...(paginator.value?.items ?? [])];
 
         for (const entry of (p?.items ?? [])) {
-          if (!entries.find((e: StrippedEntry) => e.id === entry.id)) {
-            entries.push(entry);
+          if (!entries.find((e: StrippedEntryWithDate) => e.id === entry.id)) {
+            entries.push({
+              ...entry,
+              date: parseServerDate(entry.date)
+            } as StrippedEntryWithDate);
           }
         }
 
         return {
           ...p,
           // don't show today entry
-          items: entries.filter(e => !isSameDay(parseServerDate(e.date)))
+          items: entries.filter(e => !isSameDay(e.date))
         };
       }
     }
@@ -84,7 +89,7 @@ const { data: paginator, status, error, refresh } = useLazyAsyncData(
 
 function loadMore() {
   if (paginator.value?.has_more && paginator.value?.next_cursor) {
-    if (++additonalLoads.value > 3) {
+    if (++additionalLoads.value > 3) {
       limit.value = 100;
     }
 

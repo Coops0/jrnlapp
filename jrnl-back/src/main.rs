@@ -24,7 +24,7 @@ use tower_http::{
     cors::{AllowCredentials, AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
     timeout::TimeoutLayer,
 };
-use tracing::info;
+use tracing::{info, warn};
 use tracing_subscriber::{
     filter::LevelFilter,
     EnvFilter,
@@ -32,7 +32,7 @@ use tracing_subscriber::{
 
 #[derive(Clone)]
 pub struct AppState {
-    pub pool: PgPool
+    pub pool: PgPool,
 }
 
 #[tokio::main]
@@ -53,13 +53,15 @@ async fn main() -> anyhow::Result<()> {
     let pool = PgPoolOptions::new()
         .connect_lazy_with(env::var("DATABASE_URL")?.parse::<PgConnectOptions>()?);
 
-    sqlx::migrate!().run(&pool).await?;
-    info!("migrations ran successfully / db connection valid");
+    if let Err(why) = sqlx::migrate!().run(&pool).await {
+        warn!("migrations failed: {:?}", why);
+    } else {
+        info!("migrations ran successfully / db connection valid");
+    }
 
     let session_clean_task = tokio::task::spawn(clean_expired_sessions(pool.clone()));
 
     let state = AppState { pool };
-
 
     let app = Router::new()
         .nest("/user", controllers::user::users_controller())

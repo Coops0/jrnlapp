@@ -18,8 +18,8 @@
 defineProps<{ name?: string; }>();
 
 const links = [
-  { to: '/page', text: 'page' },
-  { to: '/pages', text: 'pages' },
+  { to: '/current', text: 'current' },
+  { to: '/past', text: 'past' },
   { to: '/groups', text: 'groups' },
   { to: '/theme', text: 'theme' },
   { to: '/logout', text: 'logout' },

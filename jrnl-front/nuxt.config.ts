@@ -7,8 +7,8 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode', '@nuxt/eslint', 'nuxt-time'],
     colorMode: {
-        preference: 'lunar',
-        fallback: 'lunar',
+        preference: 'lunar_placeholder',
+        fallback: 'lunar_placeholder',
         hid: 'nuxt-color-mode-script',
         globalName: '__NUXT_COLOR_MODE__',
         componentName: 'ColorScheme',

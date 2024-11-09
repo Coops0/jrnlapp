@@ -36,5 +36,4 @@ function clearCookiesAndRefresh() {
 }
 
 const clear = () => clearError({ redirect: '/' });
-
 </script>

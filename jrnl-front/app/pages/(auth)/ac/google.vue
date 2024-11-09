@@ -39,7 +39,7 @@ watch(data, async d => {
     console.warn(e);
   }
 
-  await navigateTo('/page');
+  await navigateTo('/current');
 }, { immediate: true, deep: true });
 </script>
 

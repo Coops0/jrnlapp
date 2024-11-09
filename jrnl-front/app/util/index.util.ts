@@ -58,7 +58,7 @@ export const parseServerDate = (d: string): Date => {
     }
 
     if (d.split('-').length === 3) {
-        return new Date(d.replaceAll('-', ' '));
+        return new Date(d.replaceAll('-', '/'));
     } else {
         return new Date(d);
     }

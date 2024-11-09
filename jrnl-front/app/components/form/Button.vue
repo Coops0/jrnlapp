@@ -46,6 +46,7 @@ const sizeClasses = {
   md: 'px-4 py-2 text-base',
   lg: 'px-6 py-3 text-lg'
 };
+
 const variantClasses = {
   primary: 'bg-colors-primary-700 hover:bg-colors-primary-600 text-colors-primary-100',
   secondary: 'bg-colors-primary-900/40 hover:bg-colors-primary-800/60 text-colors-primary-400',

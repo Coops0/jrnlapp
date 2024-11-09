@@ -1,19 +1,19 @@
 use crate::{
-    error::{AuthenticationError, DatabaseError, JrnlResult, JsonExtractor},
     auth::{
+        jwt,
         providers::{fetch_google_profile, google_provider},
-        jwt
     },
+    error::{AuthenticationError, DatabaseError, JrnlResult, JsonExtractor},
     schemas::user::User,
-    AppState
+    AppState,
 };
 use axum::{
-    http::StatusCode,
     extract::State,
+    http::StatusCode,
     response::{IntoResponse, Redirect},
     routing::{get, post},
     Json,
-    Router
+    Router,
 };
 use oauth2::{
     reqwest::async_http_client,
@@ -22,7 +22,7 @@ use oauth2::{
     PkceCodeChallenge,
     PkceCodeVerifier,
     Scope,
-    TokenResponse
+    TokenResponse,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -31,6 +31,8 @@ pub fn auth_controller() -> Router<AppState> {
     Router::new()
         .route("/google", get(google_url))
         .route("/google/callback", post(google_callback))
+        .route("/apple", get(apple_url))
+        .route("/apple/callback", post(apple_callback))
         .route("/logout", get(logout))
 }
 
@@ -55,11 +57,11 @@ async fn google_url(State(AppState { pool }): State<AppState>) -> JrnlResult<imp
         VALUES ($1, $2, NOW() + INTERVAL '30 minutes')
         ",
     )
-    .bind(csrf_token.secret())
-    .bind(pkce_verifier.secret())
-    .execute(&pool)
-    .await
-    .map_err(DatabaseError)?;
+        .bind(csrf_token.secret())
+        .bind(pkce_verifier.secret())
+        .execute(&pool)
+        .await
+        .map_err(DatabaseError)?;
 
     Ok(Redirect::temporary(auth_url.as_str()))
 }
@@ -74,17 +76,17 @@ async fn google_callback(
     State(AppState { pool }): State<AppState>,
     JsonExtractor(CallbackPayload { code, state }): JsonExtractor<CallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
-    let (pkce_verifier,) = sqlx::query_as::<_, (String,)>(
+    let (pkce_verifier, ) = sqlx::query_as::<_, (String,)>(
         // language=postgresql
         "
         SELECT pkce_verifier FROM temp_auth_sessions
         WHERE csrf_token = $1 AND expires_at > NOW() LIMIT 1
         ",
     )
-    .bind(&state)
-    .fetch_one(&pool)
-    .await
-    .map_err(AuthenticationError::BadCallbackState)?;
+        .bind(&state)
+        .fetch_one(&pool)
+        .await
+        .map_err(AuthenticationError::BadCallbackState)?;
 
     let provider = google_provider()?;
     let google_token = provider
@@ -106,15 +108,25 @@ async fn google_callback(
         RETURNING *
         ",
     )
-    .bind(name)
-    .bind(email)
-    .fetch_one(&pool)
-    .await
-    .map_err(DatabaseError)?;
+        .bind(name)
+        .bind(email)
+        .fetch_one(&pool)
+        .await
+        .map_err(DatabaseError)?;
 
     let jwt = jwt::encode_jwt(user.id)?;
 
     Ok(Json(json!({ "token": jwt, "user": user })))
+}
+
+async fn apple_url() -> JrnlResult<impl IntoResponse> {
+    // https://appleid.apple.com/auth/keys
+    Ok(StatusCode::OK)
+}
+
+async fn apple_callback() -> JrnlResult<impl IntoResponse> {
+    // https://developer.apple.com/sign-in-with-apple/get-started/
+    Ok(StatusCode::OK)
 }
 
 async fn logout() -> JrnlResult<StatusCode> {

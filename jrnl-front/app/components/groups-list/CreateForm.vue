@@ -9,10 +9,11 @@
       />
 
       <FormButton
-          :disabled="!groupName.length"
+          :disabled="!groupName.length || isCreatingLoading"
           full
           size="md"
           variant="primary"
+          @click="createGroup"
       >
         create
       </FormButton>
@@ -31,12 +32,20 @@ const emit = defineEmits<{
   'group-created': []
 }>();
 
+const isCreatingLoading = ref(false);
+
 async function createGroup() {
   if (!groupName.value.length) {
     return;
   }
 
-  const group = await groupService.createGroup(groupName.value);
+  isCreatingLoading.value = true;
+  let group;
+  try {
+    group = await groupService.createGroup(groupName.value);
+  } finally {
+    isCreatingLoading.value = false;
+  }
   groupName.value = '';
   emit('group-created');
 

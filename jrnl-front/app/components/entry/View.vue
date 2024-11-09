@@ -3,7 +3,7 @@
     <div class="relative">
       <div
           :style="{ 'background-color': ratingLerp(entry.emotion_scale, theme) }"
-          class="absolute inset-0 h-32 rounded-xl opacity-20 blur-xl transition-opacity"
+          class="absolute inset-0 h-32 rounded-xl opacity-20 blur-xl"
       />
 
       <div class="relative flex flex-col sm:flex-row items-center gap-4 p-6">
