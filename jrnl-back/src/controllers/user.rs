@@ -47,7 +47,7 @@ fn deserialize_tz<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<T
 
 async fn update_self_user(
     user: User,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
     JsonExtractor(payload): JsonExtractor<UpdateSelfPayload>,
 ) -> JrnlResult<Json<User>> {
     sqlx::query_as::<_, User>(

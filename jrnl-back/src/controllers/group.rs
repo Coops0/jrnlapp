@@ -40,7 +40,7 @@ struct CreateGroupPayload {
 
 async fn create_group(
     user: User,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
     JsonExtractor(CreateGroupPayload { name }): JsonExtractor<CreateGroupPayload>,
 ) -> JrnlResult<Json<Group>> {
     let existing_owned_groups = sqlx::query_scalar::<_, i64>(
@@ -154,7 +154,7 @@ struct TrimmedUserWithOwner {
 async fn get_group_members(
     user: User,
     Path(code): Path<String>,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<Json<Vec<TrimmedUserWithOwner>>> {
     let group = sqlx::query_as::<_, Group>(
         // language=postgresql
@@ -204,7 +204,7 @@ async fn get_group_members(
 async fn leave_group(
     user: User,
     Path(code): Path<String>,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<StatusCode> {
     let group = sqlx::query_as::<_, Group>(
         // language=postgresql
@@ -268,7 +268,7 @@ async fn leave_group(
 async fn kick_member(
     user: User,
     Path((code, target_user_id)): Path<(String, Uuid)>,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<StatusCode> {
     if user.id == target_user_id {
         return Err(JrnlError::CannotKickSelf);
@@ -327,7 +327,7 @@ async fn get_days_data_paginated(
     user: User,
     Query(params): Query<GetDaysDataParams>,
     Path(code): Path<String>,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<Json<Vec<DayData>>> {
     let day_limit = params.day_limit.unwrap_or(7).clamp(1, 30);
     let before_date = params
@@ -409,7 +409,7 @@ struct SelfGroup {
 
 async fn joined_groups(
     user: User,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<Json<Vec<SelfGroup>>> {
     sqlx::query_as::<_, SelfGroup>(
         // language=postgresql

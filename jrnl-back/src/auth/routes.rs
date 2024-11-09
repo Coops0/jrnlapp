@@ -36,7 +36,7 @@ pub fn auth_controller() -> Router<AppState> {
         .route("/logout", get(logout))
 }
 
-async fn google_url(State(AppState { pool }): State<AppState>) -> JrnlResult<impl IntoResponse> {
+async fn google_url(State(AppState { pool, .. }): State<AppState>) -> JrnlResult<impl IntoResponse> {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
     let (auth_url, csrf_token) = google_provider()
@@ -73,7 +73,7 @@ struct CallbackPayload {
 }
 
 async fn google_callback(
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
     JsonExtractor(CallbackPayload { code, state }): JsonExtractor<CallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
     let (pkce_verifier, ) = sqlx::query_as::<_, (String,)>(

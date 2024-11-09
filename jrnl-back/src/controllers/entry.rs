@@ -7,6 +7,7 @@ use crate::{
     web::cursor::{Cursor, CursorPaginatedResponse, CursorParams},
     AppState,
 };
+use aes_gcm::{Aes256Gcm, Key};
 use axum::{
     extract::{Path, Query, State},
     routing::get,
@@ -34,7 +35,7 @@ struct StrippedEntry {
     id: Uuid,
 }
 
-async fn encrypt_active_entries(user: User, pool: &PgPool) -> anyhow::Result<()> {
+async fn encrypt_active_entries(user: &User, pool: &PgPool, master_key: Key<Aes256Gcm>) -> anyhow::Result<()> {
     let today_date = user.current_date_by_timezone();
 
     let mut transaction = pool.begin().await?;
@@ -54,7 +55,7 @@ async fn encrypt_active_entries(user: User, pool: &PgPool) -> anyhow::Result<()>
 
     let encrypted_entries = match spawn_blocking(move || -> anyhow::Result<_> {
         let encrypted_entries = entries.into_iter()
-            .map(|entry| entry.encrypt(/* todo master encryption key */0))
+            .map(|entry| ActiveEntry::encrypt(&entry, &master_key))
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         Ok(encrypted_entries)
@@ -98,12 +99,14 @@ async fn encrypt_active_entries(user: User, pool: &PgPool) -> anyhow::Result<()>
 async fn get_trimmed_entries_paginated(
     user: User,
     Query(params): Query<CursorParams>,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, master_key }): State<AppState>,
 ) -> JrnlResult<Json<CursorPaginatedResponse<StrippedEntry>>> {
     let limit = params.limit.unwrap_or(20).clamp(1, 100);
     let limit_plus_one = i64::from(limit) + 1;
 
     let cursor = params.cursor.unwrap_or_default();
+
+    encrypt_active_entries(&user, &pool, master_key).await?;
 
     let mut entries = sqlx::query_as::<_, StrippedEntry>(
         // language=postgresql
@@ -146,7 +149,7 @@ async fn get_trimmed_entries_paginated(
 async fn get_entry(
     user: User,
     Path(id): Path<Uuid>,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, master_key }): State<AppState>,
 ) -> JrnlResult<Json<Option<DecryptedEntry>>> {
     let Some(encrypted_entry) = sqlx::query_as::<_, EncryptedEntry>(
         // language=postgresql
@@ -159,7 +162,10 @@ async fn get_entry(
         return Ok(Json(None));
     };
 
-    let decrypted_entry = encrypted_entry.decrypt(/* todo master encryption key */0)?;
+    let decrypted_entry = spawn_blocking(move || encrypted_entry.decrypt(&master_key))
+        .await
+        .map_err(Into::<anyhow::Error>::into)??;
+
     Ok(Json(Some(decrypted_entry)))
 }
 
@@ -180,7 +186,7 @@ async fn get_overall_average(
 
 async fn get_today_entry(
     user: User,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
 ) -> JrnlResult<Json<Option<ActiveEntry>>> {
     sqlx::query_as::<_, ActiveEntry>(
         // language=postgresql
@@ -220,10 +226,10 @@ fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(
 
 async fn update_today_entry(
     user: User,
-    State(AppState { pool }): State<AppState>,
+    State(AppState { pool, .. }): State<AppState>,
     JsonExtractor(payload): JsonExtractor<UpdateEntryPayload>,
-) -> JrnlResult<Json<EncryptedEntry>> {
-    sqlx::query_as::<_, EncryptedEntry>(
+) -> JrnlResult<Json<ActiveEntry>> {
+    sqlx::query_as::<_, ActiveEntry>(
         // language=postgresql
         "
             INSERT INTO active_entries (author, date, emotion_scale, text) VALUES ($1, $2, $3, $4)

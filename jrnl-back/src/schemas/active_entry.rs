@@ -17,7 +17,9 @@ pub struct ActiveEntry {
 }
 
 impl ActiveEntry {
-    pub fn encrypt(mut self, master_cipher: Aes256Gcm) -> anyhow::Result<EncryptedEntry> {
+    pub fn encrypt(&self, master_key: &Key<Aes256Gcm>) -> anyhow::Result<EncryptedEntry> {
+        let master_cipher = Aes256Gcm::new(master_key);
+
         let key = Aes256Gcm::generate_key(OsRng);
         let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
 
@@ -28,9 +30,9 @@ impl ActiveEntry {
 
         let encrypted_content = content_key_cipher.encrypt(
             &nonce,
-            self.text.take().unwrap_or_default().as_bytes(),
+            self.text.as_deref().unwrap_or_default().as_bytes(),
         ).map_err(|e| anyhow!(e))?;
-        
+
 
         Ok(EncryptedEntry {
             id: self.id,

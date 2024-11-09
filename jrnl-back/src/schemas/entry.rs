@@ -4,7 +4,6 @@ use anyhow::anyhow;
 use chrono::NaiveDate;
 use serde::Serialize;
 use sqlx::FromRow;
-use tokio::task::spawn_blocking;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow)]
@@ -28,17 +27,17 @@ pub struct DecryptedEntry {
 }
 
 impl EncryptedEntry {
-    pub async fn decrypt(self, master_cipher: Aes256Gcm) -> anyhow::Result<DecryptedEntry> {
-        let decrypted_content_bytes = spawn_blocking(move || -> anyhow::Result<Vec<u8>> {
-            let nonce = Nonce::from_slice(&self.nonce[..]);
-            let decrypted_content_key = master_cipher.decrypt(nonce, &self.content_key[..]).map_err(|e| anyhow!(e))?;
+    pub fn decrypt(&self, master_key: &Key<Aes256Gcm>) -> anyhow::Result<DecryptedEntry> {
+        let master_cipher = Aes256Gcm::new(master_key);
+        
+        let nonce = Nonce::from_slice(&self.nonce[..]);
+        let decrypted_content_key = master_cipher.decrypt(nonce, &self.content_key[..]).map_err(|e| anyhow!(e))?;
 
-            let content_key_cipher = Aes256Gcm::new(
-                Key::<Aes256Gcm>::from_slice(&decrypted_content_key)
-            );
+        let content_key_cipher = Aes256Gcm::new(
+            Key::<Aes256Gcm>::from_slice(&decrypted_content_key)
+        );
 
-            content_key_cipher.decrypt(nonce, &self.encrypted_content[..]).map_err(|e| anyhow!(e))
-        }).await??;
+        let decrypted_content_bytes = content_key_cipher.decrypt(nonce, &self.encrypted_content[..]).map_err(|e| anyhow!(e))?;
 
         let decrypted_content = String::from_utf8(decrypted_content_bytes)?;
         let text = if decrypted_content.is_empty() {

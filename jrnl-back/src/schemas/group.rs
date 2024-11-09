@@ -6,7 +6,6 @@ use std::cell::LazyCell;
 use uuid::Uuid;
 
 const WORDS_STRING_LIST: &str = include_str!("../../static/all_words_cleaned.txt");
-#[allow(clippy::declare_interior_mutable_const)]
 const WORDS_ARRAY: LazyCell<Vec<&str>> = LazyCell::new(|| WORDS_STRING_LIST.lines().collect());
 
 #[derive(Serialize, FromRow, Debug, Clone)]
@@ -26,7 +25,6 @@ impl Group {
     pub fn generate_code() -> String {
         let mut rng = rand::thread_rng();
 
-        #[allow(clippy::borrow_interior_mutable_const)]
         let words = WORDS_ARRAY
             .choose_multiple(&mut rng, 2)
             .map(ToString::to_string)

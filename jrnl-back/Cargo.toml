@@ -57,6 +57,9 @@ perf = "deny"
 style = "deny"
 pedantic = "warn"
 nursery = "warn"
+module-name-repetitions = { level = "allow", priority = 30 }
+declare-interior-mutable-const = { level = "allow", priority = 30 }
+borrow-interior-mutable-const = { level = "allow", priority = 30 }
 
 [lints.rust]
 warnings = "warn"

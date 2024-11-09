@@ -4,7 +4,6 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Deserializer, Serialize};
 use uuid::Uuid;
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub struct Cursor {
     pub date: NaiveDate,
@@ -53,14 +52,12 @@ impl Serialize for Cursor {
     }
 }
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Deserialize)]
 pub struct CursorParams {
     pub cursor: Option<Cursor>,
     pub limit: Option<u32>,
 }
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Serialize)]
 pub struct CursorPaginatedResponse<T> {
     pub items: Vec<T>,

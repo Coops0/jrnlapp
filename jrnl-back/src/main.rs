@@ -8,6 +8,7 @@ use crate::{
     auth::clean_expired_sessions,
     schemas::user::User,
 };
+use aes_gcm::{Aes256Gcm, Key};
 use axum::{
     extract::DefaultBodyLimit,
     http::header::{AUTHORIZATION, CONTENT_TYPE},
@@ -33,6 +34,7 @@ use tracing_subscriber::{
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
+    pub master_key: Key<Aes256Gcm>,
 }
 
 #[tokio::main]
@@ -61,7 +63,10 @@ async fn main() -> anyhow::Result<()> {
 
     let session_clean_task = tokio::task::spawn(clean_expired_sessions(pool.clone()));
 
-    let state = AppState { pool };
+    let master_key_env = env::var("MASTER_ENCRYPTION_KEY")?;
+    let master_key = Key::<Aes256Gcm>::from_slice(master_key_env.as_bytes());
+
+    let state = AppState { pool, master_key: *master_key };
 
     let app = Router::new()
         .nest("/user", controllers::user::users_controller())

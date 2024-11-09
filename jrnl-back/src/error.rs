@@ -7,7 +7,6 @@ use thiserror_status::ErrorStatus;
 
 pub type JrnlResult<T> = Result<T, JrnlError>;
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Error, ErrorStatus)]
 pub enum JrnlError {
     #[error("bad json body {0}")]
@@ -48,7 +47,6 @@ pub enum JrnlError {
     Other(#[from] anyhow::Error),
 }
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Error)]
 pub enum AuthenticationError {
     #[error("failed to generate provider session {0}")]
@@ -70,7 +68,6 @@ pub enum AuthenticationError {
     ProfileNotFound,
 }
 
-#[allow(clippy::module_name_repetitions)]
 pub struct DatabaseError(pub sqlx::Error);
 
 #[allow(deprecated)]
