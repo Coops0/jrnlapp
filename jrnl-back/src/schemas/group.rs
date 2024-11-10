@@ -16,11 +16,6 @@ pub struct Group {
     pub owner_id: Uuid,
 }
 
-// pub struct GroupMembership {
-//     pub group_id: Uuid,
-//     pub user_id: Uuid,
-// }
-
 impl Group {
     pub fn generate_code() -> String {
         let mut rng = rand::thread_rng();

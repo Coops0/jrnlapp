@@ -31,7 +31,7 @@ pub fn derive_error_status(input: proc_macro::TokenStream) -> proc_macro::TokenS
             }
         }
     })
-    .into()
+        .into()
 }
 
 fn impl_enum_variant(variant: &Variant) -> TokenStream {

@@ -17,7 +17,7 @@ pub fn google_provider() -> anyhow::Result<BasicClient> {
             "https://www.googleapis.com/oauth2/v3/token".parse()?,
         )?),
     )
-    .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
+        .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
 
     Ok(client)
 }

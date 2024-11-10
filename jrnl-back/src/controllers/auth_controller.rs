@@ -112,11 +112,11 @@ async fn apple_callback(
     auth_service: AuthService,
     user_service: UserService,
     Form(AppleCallbackPayload {
-        id_token,
-        user,
-        state,
-        ..
-    }): Form<AppleCallbackPayload>,
+             id_token,
+             user,
+             state,
+             ..
+         }): Form<AppleCallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
     let nonce = auth_service
         .get_temp_auth_session(&state)

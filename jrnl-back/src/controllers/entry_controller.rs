@@ -43,7 +43,7 @@ async fn encrypt_active_entries(
 
         Ok(encrypted_entries)
     })
-    .await?
+        .await?
     {
         Ok(entries) => entries,
         Err(e) => {

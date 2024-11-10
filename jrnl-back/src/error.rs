@@ -123,7 +123,7 @@ pub struct JsonExtractor<T>(pub T);
 #[async_trait]
 impl<S: Send + Sync, T> FromRequest<S> for JsonExtractor<T>
 where
-    axum::Json<T>: FromRequest<S, Rejection = JsonRejection>,
+    axum::Json<T>: FromRequest<S, Rejection=JsonRejection>,
 {
     type Rejection = JrnlError;
 
