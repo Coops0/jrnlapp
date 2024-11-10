@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-colors-primary-900">
+  <div class="min-h-screen flex flex-col">
     <header class="w-full">
         <div v-if="authenticated" class="mx-auto px-4 py-3 w-full">
           <NavigatorLogo/>
@@ -21,7 +21,6 @@
 </template>
 
 <script lang="ts" setup>
-
 const { jwt } = useAuth();
 const authenticated = computed(() => !!jwt.value?.length);
 </script>
