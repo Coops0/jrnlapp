@@ -10,13 +10,9 @@ use axum::{
     extract::{Path, Query},
     http::StatusCode,
     routing::{delete, get, post},
-    Json,
-    Router,
+    Json, Router,
 };
-use base64::{
-    engine::general_purpose::STANDARD,
-    Engine,
-};
+use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::{Duration, NaiveDate};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -44,7 +40,8 @@ async fn create_group(
     group_service: GroupService,
     JsonExtractor(CreateGroupPayload { name }): JsonExtractor<CreateGroupPayload>,
 ) -> JrnlResult<Json<Group>> {
-    let existing_owned_groups = group_service.get_owned_groups_count(&user)
+    let existing_owned_groups = group_service
+        .get_owned_groups_count(&user)
         .await
         .map_err(DatabaseError)?;
 
@@ -52,7 +49,8 @@ async fn create_group(
         return Err(JrnlError::CannotCreateMoreGroups);
     }
 
-    group_service.create_group(&user, &name)
+    group_service
+        .create_group(&user, &name)
         .await
         .map(Json)
         .map_err(Into::into)
@@ -62,7 +60,8 @@ async fn get_group(
     Path(code): Path<String>,
     group_service: GroupService,
 ) -> JrnlResult<Json<Option<GetGroupAndMembersBody>>> {
-    group_service.get_group_and_members_maybe_by_code(&code)
+    group_service
+        .get_group_and_members_maybe_by_code(&code)
         .await
         .map(Json)
         .map_err(Into::into)
@@ -73,7 +72,8 @@ async fn join_group(
     user: User,
     group_service: GroupService,
 ) -> JrnlResult<StatusCode> {
-    let joined_groups = group_service.get_joined_groups_count(&user)
+    let joined_groups = group_service
+        .get_joined_groups_count(&user)
         .await
         .map_err(DatabaseError)?;
 
@@ -81,7 +81,8 @@ async fn join_group(
         return Err(JrnlError::CannotJoinMoreGroups);
     }
 
-    group_service.join_group(&code, &user)
+    group_service
+        .join_group(&code, &user)
         .await
         .map(|_| StatusCode::OK)
         .map_err(|why| match &why {
@@ -102,11 +103,13 @@ async fn get_group_members(
     Path(code): Path<String>,
     group_service: GroupService,
 ) -> JrnlResult<Json<Vec<TrimmedUserWithOwner>>> {
-    let group = group_service.get_joined_group_by_code(&user, &code)
+    let group = group_service
+        .get_joined_group_by_code(&user, &code)
         .await
         .map_err(DatabaseError)?;
 
-    let members = group_service.get_group_members(&group)
+    let members = group_service
+        .get_group_members(&group)
         .await
         .map_err(DatabaseError)?;
 
@@ -127,7 +130,8 @@ async fn leave_group(
     Path(code): Path<String>,
     group_service: GroupService,
 ) -> JrnlResult<StatusCode> {
-    let group = group_service.get_group_by_code(&code)
+    let group = group_service
+        .get_group_by_code(&code)
         .await
         .map_err(DatabaseError)?;
 
@@ -156,7 +160,8 @@ async fn kick_member(
         return Err(JrnlError::CannotKickSelf);
     }
 
-    group_service.kick_group_by_code_member(&code, &user, &target_user_id)
+    group_service
+        .kick_group_by_code_member(&code, &user, &target_user_id)
         .await
         .map(|_| StatusCode::OK)
         .map_err(Into::into)
@@ -175,12 +180,16 @@ struct GetDaysDataParams {
     before: Option<NaiveDate>,
 }
 
-fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<NaiveDate>, D::Error> {
+fn deserialize_base_date<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<NaiveDate>, D::Error> {
     let Some(encoded_date) = Option::<String>::deserialize(deserializer)? else {
-        return Ok(None)
+        return Ok(None);
     };
 
-    let decoded_bytes = STANDARD.decode(encoded_date).map_err(serde::de::Error::custom)?;
+    let decoded_bytes = STANDARD
+        .decode(encoded_date)
+        .map_err(serde::de::Error::custom)?;
     let date_string = String::from_utf8(decoded_bytes).map_err(serde::de::Error::custom)?;
 
     NaiveDate::parse_from_str(&date_string, "%m/%d/%Y")
@@ -200,11 +209,13 @@ async fn get_days_data_paginated(
         .before
         .unwrap_or_else(|| chrono::Utc::now().naive_utc().date());
 
-    let group = group_service.get_joined_group_by_code(&user, &code)
+    let group = group_service
+        .get_joined_group_by_code(&user, &code)
         .await
         .map_err(DatabaseError)?;
 
-    let group_member_ids = group_service.get_group_members(&group)
+    let group_member_ids = group_service
+        .get_group_members(&group)
         .await
         .map_err(DatabaseError)?
         .into_iter()
@@ -212,7 +223,8 @@ async fn get_days_data_paginated(
         .collect::<Vec<_>>();
 
     let start_date = before_date - Duration::days(day_limit - 1);
-    let all_entries = entry_service.get_multiple_users_entries_between_dates(&group_member_ids, &start_date, &before_date)
+    let all_entries = entry_service
+        .get_multiple_users_entries_between_dates(&group_member_ids, &start_date, &before_date)
         .await
         .map_err(DatabaseError)?;
 
@@ -233,7 +245,8 @@ async fn joined_groups(
     user: User,
     group_service: GroupService,
 ) -> JrnlResult<Json<Vec<SelfGroup>>> {
-    group_service.get_joined_groups(&user)
+    group_service
+        .get_joined_groups(&user)
         .await
         .map(Json)
         .map_err(Into::into)

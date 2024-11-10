@@ -6,7 +6,11 @@ pub struct AuthService(PgPool);
 impl_service!(AuthService);
 
 impl AuthService {
-    pub async fn create_temp_auth_session(&self, csrf_token: &str, nonce: &str) -> Result<PgQueryResult, Error> {
+    pub async fn create_temp_auth_session(
+        &self,
+        csrf_token: &str,
+        nonce: &str,
+    ) -> Result<PgQueryResult, Error> {
         sqlx::query(
             // language=postgresql
             "
@@ -14,10 +18,10 @@ impl AuthService {
             VALUES ($1, $2, NOW() + INTERVAL '30 minutes')
             ",
         )
-            .bind(csrf_token)
-            .bind(nonce)
-            .execute(&self.0)
-            .await
+        .bind(csrf_token)
+        .bind(nonce)
+        .execute(&self.0)
+        .await
     }
 
     pub async fn get_temp_auth_session(&self, csrf: &str) -> Result<String, Error> {
@@ -28,9 +32,9 @@ impl AuthService {
         WHERE csrf_token = $1 AND expires_at > NOW() LIMIT 1
         ",
         )
-            .bind(csrf)
-            .fetch_one(&self.0)
-            .await
-            .map(|(nonce, )| nonce)
+        .bind(csrf)
+        .fetch_one(&self.0)
+        .await
+        .map(|(nonce,)| nonce)
     }
 }

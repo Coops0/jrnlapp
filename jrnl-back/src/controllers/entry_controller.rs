@@ -1,11 +1,6 @@
-use crate::error::JrnlError;
 use crate::{
-    error::{DatabaseError, JrnlResult, JsonExtractor},
-    schemas::{
-        active_entry::ActiveEntry,
-        entry::DecryptedEntry,
-        user::User,
-    },
+    error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor},
+    schemas::{active_entry::ActiveEntry, entry::DecryptedEntry, user::User},
     services::entry_service::{EntryService, StrippedEntry},
     web::cursor::{Cursor, CursorPaginatedResponse, CursorParams},
     AppState,
@@ -14,8 +9,7 @@ use aes_gcm::{Aes256Gcm, Key};
 use axum::{
     extract::{Path, Query, State},
     routing::get,
-    Json,
-    Router,
+    Json, Router,
 };
 use serde::Deserialize;
 use tokio::task::spawn_blocking;
@@ -29,19 +23,28 @@ pub fn entries_controller() -> Router<AppState> {
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
 
-async fn encrypt_active_entries(user: &User, entry_service: &EntryService, master_key: Key<Aes256Gcm>) -> anyhow::Result<()> {
-    let (mut transaction, entries) = entry_service.create_entry_migration_transaction(user).await?;
+async fn encrypt_active_entries(
+    user: &User,
+    entry_service: &EntryService,
+    master_key: Key<Aes256Gcm>,
+) -> anyhow::Result<()> {
+    let (mut transaction, entries) = entry_service
+        .create_entry_migration_transaction(user)
+        .await?;
     if entries.is_empty() {
         return Ok(());
     }
     let encrypted_entries = match spawn_blocking(move || -> anyhow::Result<_> {
-        let encrypted_entries = entries.into_iter()
+        let encrypted_entries = entries
+            .into_iter()
             .map(|entry| ActiveEntry::encrypt(&entry, &master_key))
             .collect::<anyhow::Result<Vec<_>>>()
             .map_err(JrnlError::EntryEncryptionFailed)?;
 
         Ok(encrypted_entries)
-    }).await? {
+    })
+    .await?
+    {
         Ok(entries) => entries,
         Err(e) => {
             error!("Failed to encrypt entries: {:?}", e);
@@ -53,7 +56,8 @@ async fn encrypt_active_entries(user: &User, entry_service: &EntryService, maste
     for entry in encrypted_entries {
         let Err(why) = EntryService::create_encrypted_entry_query(&entry)
             .execute(&mut *transaction)
-            .await else {
+            .await
+        else {
             continue;
         };
 
@@ -62,9 +66,7 @@ async fn encrypt_active_entries(user: &User, entry_service: &EntryService, maste
         return Err(why.into());
     }
 
-    transaction.commit()
-        .await
-        .map_err(Into::into)
+    transaction.commit().await.map_err(Into::into)
 }
 
 async fn get_trimmed_entries_paginated(
@@ -78,7 +80,8 @@ async fn get_trimmed_entries_paginated(
     let cursor = params.cursor.unwrap_or_default();
     encrypt_active_entries(&user, &entry_service, master_key).await?;
 
-    let mut entries = entry_service.get_paginated_trimmed_entries(&user, &cursor, i64::from(limit))
+    let mut entries = entry_service
+        .get_paginated_trimmed_entries(&user, &cursor, i64::from(limit))
         .await
         .map_err(DatabaseError)?;
 
@@ -120,8 +123,12 @@ async fn get_entry(
     Ok(Json(Some(decrypted_entry)))
 }
 
-async fn get_today_entry(user: User, entry_service: EntryService) -> JrnlResult<Json<Option<ActiveEntry>>> {
-    entry_service.get_user_daily_entry_maybe(&user)
+async fn get_today_entry(
+    user: User,
+    entry_service: EntryService,
+) -> JrnlResult<Json<Option<ActiveEntry>>> {
+    entry_service
+        .get_user_daily_entry_maybe(&user)
         .await
         .map(Json)
         .map_err(Into::into)
@@ -135,7 +142,9 @@ struct UpdateEntryPayload {
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
+fn sanitize_html_string<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error> {
     let Ok(s) = String::deserialize(deserializer) else {
         return Ok(None);
     };
@@ -154,7 +163,8 @@ async fn update_today_entry(
     entry_service: EntryService,
     JsonExtractor(payload): JsonExtractor<UpdateEntryPayload>,
 ) -> JrnlResult<Json<ActiveEntry>> {
-    entry_service.update_or_create_daily_entry(&user, payload.emotion_scale, payload.text)
+    entry_service
+        .update_or_create_daily_entry(&user, payload.emotion_scale, payload.text)
         .await
         .map(Json)
         .map_err(Into::into)

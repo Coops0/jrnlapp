@@ -17,13 +17,18 @@ impl UserService {
         RETURNING *
         ",
         )
-            .bind(name)
-            .bind(email)
-            .fetch_one(&self.0)
-            .await
+        .bind(name)
+        .bind(email)
+        .fetch_one(&self.0)
+        .await
     }
 
-    pub async fn create_user_from_apple(&self, name: &str, email: &str, apple_id: &str) -> Result<User, Error> {
+    pub async fn create_user_from_apple(
+        &self,
+        name: &str,
+        email: &str,
+        apple_id: &str,
+    ) -> Result<User, Error> {
         sqlx::query_as(
             // language=postgresql
             "
@@ -32,22 +37,26 @@ impl UserService {
         RETURNING *
         ",
         )
-            .bind(name)
-            .bind(email)
-            .bind(apple_id)
-            .fetch_one(&self.0)
-            .await
+        .bind(name)
+        .bind(email)
+        .bind(apple_id)
+        .fetch_one(&self.0)
+        .await
     }
 
-    pub async fn get_user_by_email_or_apple_id(&self, email: &str, apple_id: &str) -> Result<Option<User>, Error> {
+    pub async fn get_user_by_email_or_apple_id(
+        &self,
+        email: &str,
+        apple_id: &str,
+    ) -> Result<Option<User>, Error> {
         sqlx::query_as(
             // language=postgresql
-            "SELECT * FROM users WHERE email = $1 OR apple_subject = $2 LIMIT 1"
+            "SELECT * FROM users WHERE email = $1 OR apple_subject = $2 LIMIT 1",
         )
-            .bind(email)
-            .bind(apple_id)
-            .fetch_optional(&self.0)
-            .await
+        .bind(email)
+        .bind(apple_id)
+        .fetch_optional(&self.0)
+        .await
     }
 
     pub async fn migrate_google_account_to_apple(
@@ -64,14 +73,19 @@ impl UserService {
                 WHERE id = $3
                 ",
         )
-            .bind(apple_subject)
-            .bind(name) // if first sign in thru apple, update name
-            .bind(user.id)
-            .execute(&self.0)
-            .await
+        .bind(apple_subject)
+        .bind(name) // if first sign in thru apple, update name
+        .bind(user.id)
+        .execute(&self.0)
+        .await
     }
 
-    pub async fn update_user(&self, user: &User, theme: &Option<String>, tz: &Option<String>) -> Result<User, Error> {
+    pub async fn update_user(
+        &self,
+        user: &User,
+        theme: &Option<String>,
+        tz: &Option<String>,
+    ) -> Result<User, Error> {
         sqlx::query_as(
             // language=postgresql
             "UPDATE users SET
@@ -80,20 +94,20 @@ impl UserService {
             WHERE id = $3 RETURNING *
         ",
         )
-            .bind(theme)
-            .bind(tz)
-            .bind(user.id)
-            .fetch_one(&self.0)
-            .await
+        .bind(theme)
+        .bind(tz)
+        .bind(user.id)
+        .fetch_one(&self.0)
+        .await
     }
 
     pub async fn get_user_by_id(&self, id: &Uuid) -> Result<User, Error> {
         sqlx::query_as(
             // language=postgresql
-            "SELECT * FROM users WHERE id = $1 LIMIT 1"
+            "SELECT * FROM users WHERE id = $1 LIMIT 1",
         )
-            .bind(id)
-            .fetch_one(&self.0)
-            .await
+        .bind(id)
+        .fetch_one(&self.0)
+        .await
     }
 }

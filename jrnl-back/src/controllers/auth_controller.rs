@@ -10,15 +10,15 @@ use crate::{
     error::{GoogleAuthenticationError, JrnlResult, JsonExtractor},
     AppState,
 };
-use axum::{http::StatusCode, response::{IntoResponse, Redirect}, routing::{get, post}, Form, Json, Router};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Redirect},
+    routing::{get, post},
+    Form, Json, Router,
+};
 use oauth2::{
-    reqwest::async_http_client,
-    AuthorizationCode,
-    CsrfToken,
-    PkceCodeChallenge,
-    PkceCodeVerifier,
-    Scope,
-    TokenResponse,
+    reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
+    Scope, TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -47,10 +47,9 @@ async fn google_url(auth_service: AuthService) -> JrnlResult<impl IntoResponse> 
         .set_pkce_challenge(pkce_challenge)
         .url();
 
-    auth_service.create_temp_auth_session(
-        csrf_token.secret(),
-        pkce_verifier.secret(),
-    ).await?;
+    auth_service
+        .create_temp_auth_session(csrf_token.secret(), pkce_verifier.secret())
+        .await?;
 
     Ok(Redirect::temporary(auth_url.as_str()))
 }
@@ -66,7 +65,9 @@ async fn google_callback(
     user_service: UserService,
     JsonExtractor(CallbackPayload { code, state }): JsonExtractor<CallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
-    let pkce_verifier = auth_service.get_temp_auth_session(&state).await
+    let pkce_verifier = auth_service
+        .get_temp_auth_session(&state)
+        .await
         .map_err(GoogleAuthenticationError::BadCallbackState)?;
 
     let provider = google_provider()?;
@@ -97,20 +98,29 @@ async fn init_apple_session(auth_service: AuthService) -> JrnlResult<Json<AppleS
     let verifier = CsrfToken::new_random();
     let nonce = Uuid::new_v4().to_string();
 
-    auth_service.create_temp_auth_session(
-        verifier.secret(),
-        &nonce,
-    ).await?;
+    auth_service
+        .create_temp_auth_session(verifier.secret(), &nonce)
+        .await?;
 
-    Ok(Json(AppleSession { code: nonce, state: verifier.secret().to_owned() }))
+    Ok(Json(AppleSession {
+        code: nonce,
+        state: verifier.secret().to_owned(),
+    }))
 }
 
 async fn apple_callback(
     auth_service: AuthService,
     user_service: UserService,
-    Form(AppleCallbackPayload { id_token, user, state, .. }): Form<AppleCallbackPayload>,
+    Form(AppleCallbackPayload {
+        id_token,
+        user,
+        state,
+        ..
+    }): Form<AppleCallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
-    let nonce = auth_service.get_temp_auth_session(&state).await
+    let nonce = auth_service
+        .get_temp_auth_session(&state)
+        .await
         .map_err(|_| AppleAuthenticationError::BadCallbackState)?;
 
     let claims = verify_apple_id_token(&id_token, &nonce)
@@ -119,32 +129,35 @@ async fn apple_callback(
 
     let name = user.map(|u| format!("{} {}", u.name.first_name, u.name.last_name));
 
-    let user = match user_service.get_user_by_email_or_apple_id(&claims.email, &claims.sub).await? {
+    let user = match user_service
+        .get_user_by_email_or_apple_id(&claims.email, &claims.sub)
+        .await?
+    {
         Some(user) => {
             if user.apple_subject.is_none() {
-                user_service.migrate_google_account_to_apple(
-                    &user,
-                    &claims.sub,
-                    name.as_deref(),
-                )
+                user_service
+                    .migrate_google_account_to_apple(&user, &claims.sub, name.as_deref())
                     .await
                     .map_err(AppleAuthenticationError::FailedGoogleMigration)?;
             }
 
             user
         }
-        None => user_service.create_user_from_apple(
-            &name.ok_or(AppleAuthenticationError::NoNameOnSignup)?,
-            &claims.email,
-            &claims.sub,
-        ).await?,
+        None => {
+            user_service
+                .create_user_from_apple(
+                    &name.ok_or(AppleAuthenticationError::NoNameOnSignup)?,
+                    &claims.email,
+                    &claims.sub,
+                )
+                .await?
+        }
     };
 
     // todo response needs to go back to frontend since client is redirected here i think
     let jwt = jwt::encode_user_jwt(user.id)?;
     Ok(Json(json!({ "token": jwt, "user": user })))
 }
-
 
 async fn logout() -> JrnlResult<StatusCode> {
     Ok(StatusCode::OK)

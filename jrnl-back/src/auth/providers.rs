@@ -1,14 +1,7 @@
 use anyhow::Context;
 use axum::http::header::AUTHORIZATION;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
-use oauth2::{
-    basic::BasicClient,
-    AuthUrl,
-    ClientId,
-    ClientSecret,
-    RedirectUrl,
-    TokenUrl,
-};
+use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use reqwest::Client;
 use serde::Deserialize;
 use std::env;
@@ -24,7 +17,7 @@ pub fn google_provider() -> anyhow::Result<BasicClient> {
             "https://www.googleapis.com/oauth2/v3/token".parse()?,
         )?),
     )
-        .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
+    .set_redirect_uri(RedirectUrl::new(format!("{base}/ac/google"))?);
 
     Ok(client)
 }
@@ -134,7 +127,9 @@ pub struct AppleCallbackPayload {
     pub user: Option<AppleCallbackUser>,
 }
 
-fn deserialize_maybe_user<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<AppleCallbackUser>, D::Error> {
+fn deserialize_maybe_user<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<AppleCallbackUser>, D::Error> {
     let Ok(s) = String::deserialize(deserializer) else {
         return Ok(None);
     };
@@ -205,7 +200,10 @@ pub struct StrippedVerificationClaims {
     pub email: String,
 }
 
-pub async fn verify_apple_id_token(id_token: &str, nonce: &str) -> anyhow::Result<StrippedVerificationClaims> {
+pub async fn verify_apple_id_token(
+    id_token: &str,
+    nonce: &str,
+) -> anyhow::Result<StrippedVerificationClaims> {
     // To verify the identity token, your app server must:
     // Verify the JWS E256 signature using the server’s public key
     // Verify the nonce for the authentication
@@ -224,7 +222,9 @@ pub async fn verify_apple_id_token(id_token: &str, nonce: &str) -> anyhow::Resul
     let header = jsonwebtoken::decode_header(id_token)?;
     let kid = header.kid.context("missing kid")?;
 
-    let key = keys_response.keys.into_iter()
+    let key = keys_response
+        .keys
+        .into_iter()
         .find(|key| key.kid == kid)
         .context("no key found")?;
 
@@ -234,19 +234,21 @@ pub async fn verify_apple_id_token(id_token: &str, nonce: &str) -> anyhow::Resul
     validation.set_issuer(&["https://appleid.apple.com"]);
     validation.set_audience(&[&env::var("APPLE_CLIENT_ID")?]);
 
-    let token_data = jsonwebtoken::decode::<AppleIdTokenClaims>(
-        id_token,
-        &decoding_key,
-        &validation,
-    )?;
+    let token_data =
+        jsonwebtoken::decode::<AppleIdTokenClaims>(id_token, &decoding_key, &validation)?;
 
     if token_data.claims.nonce != Some(nonce.to_string()) {
         anyhow::bail!("nonce mismatch");
     }
 
-    if token_data.claims.iss != "https://appleid.apple.com" || token_data.claims.aud != env::var("APPLE_CLIENT_ID")? {
+    if token_data.claims.iss != "https://appleid.apple.com"
+        || token_data.claims.aud != env::var("APPLE_CLIENT_ID")?
+    {
         anyhow::bail!("bad token claim");
     }
 
-    Ok(StrippedVerificationClaims { sub: token_data.claims.sub, email: token_data.claims.email })
+    Ok(StrippedVerificationClaims {
+        sub: token_data.claims.sub,
+        email: token_data.claims.email,
+    })
 }

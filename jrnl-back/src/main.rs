@@ -2,13 +2,10 @@ mod auth;
 mod controllers;
 mod error;
 mod schemas;
-mod web;
 mod services;
+mod web;
 
-use crate::{
-    auth::clean_expired_sessions,
-    schemas::user::User,
-};
+use crate::{auth::clean_expired_sessions, schemas::user::User};
 use aes_gcm::{Aes256Gcm, Key};
 use axum::{
     extract::DefaultBodyLimit,
@@ -27,10 +24,7 @@ use tower_http::{
     timeout::TimeoutLayer,
 };
 use tracing::{info, warn};
-use tracing_subscriber::{
-    filter::LevelFilter,
-    EnvFilter,
-};
+use tracing_subscriber::{filter::LevelFilter, EnvFilter};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -67,12 +61,21 @@ async fn main() -> anyhow::Result<()> {
     let master_key_env = env::var("MASTER_ENCRYPTION_KEY")?;
     let master_key = Key::<Aes256Gcm>::from_slice(master_key_env.as_bytes());
 
-    let state = AppState { pool, master_key: *master_key };
+    let state = AppState {
+        pool,
+        master_key: *master_key,
+    };
 
     let app = Router::new()
         .nest("/user", controllers::user_controller::users_controller())
-        .nest("/entries", controllers::entry_controller::entries_controller())
-        .nest("/groups", controllers::group_controller::groups_controller())
+        .nest(
+            "/entries",
+            controllers::entry_controller::entries_controller(),
+        )
+        .nest(
+            "/groups",
+            controllers::group_controller::groups_controller(),
+        )
         // don't run middleware only for auth route
         .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
         .nest("/auth", controllers::auth_controller::auth_controller())
@@ -86,7 +89,7 @@ async fn main() -> anyhow::Result<()> {
                         .allow_credentials(AllowCredentials::yes()),
                 )
                 .layer(DefaultBodyLimit::max(1024 * 12))
-                .layer(TimeoutLayer::new(Duration::from_secs(10)))
+                .layer(TimeoutLayer::new(Duration::from_secs(10))),
         )
         .with_state(state);
 
@@ -95,10 +98,7 @@ async fn main() -> anyhow::Result<()> {
 
     let axum_server = axum::serve(listener, app);
 
-    let _ = join!(
-        axum_server,
-        session_clean_task
-    );
+    let _ = join!(axum_server, session_clean_task);
 
     unreachable!();
 }

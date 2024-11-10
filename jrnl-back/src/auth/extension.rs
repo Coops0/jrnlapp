@@ -20,10 +20,10 @@ impl<S> FromRequestParts<S> for Claims {
             .and_then(|header| header.strip_prefix("Bearer "))
             .ok_or(JrnlError::BadAuthenticationHeader)?;
 
-        let claims = decode_user_jwt(auth_header)
-            .map_err(|_| JrnlError::InvalidToken)?;
+        let claims = decode_user_jwt(auth_header).map_err(|_| JrnlError::InvalidToken)?;
 
-        let parsed_exp = usize::try_from(Utc::now().timestamp()).map_err(Into::<anyhow::Error>::into)?;
+        let parsed_exp =
+            usize::try_from(Utc::now().timestamp()).map_err(Into::<anyhow::Error>::into)?;
         if claims.exp < parsed_exp {
             return Err(JrnlError::ExpiredToken);
         }
@@ -43,8 +43,9 @@ impl FromRequestParts<AppState> for User {
         let Claims { sub, .. } = Claims::from_request_parts(parts, state).await?;
         let user_service = UserService::from_request_parts(parts, state).await.unwrap();
 
-
-        user_service.get_user_by_id(&sub).await
+        user_service
+            .get_user_by_id(&sub)
+            .await
             .map_err(|_| JrnlError::ProfileNotFound)
     }
 }

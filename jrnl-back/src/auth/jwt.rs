@@ -1,10 +1,7 @@
 use chrono::Utc;
 use jsonwebtoken::{encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use std::{
-    cell::LazyCell,
-    env
-};
+use std::{cell::LazyCell, env};
 use uuid::Uuid;
 
 const JWT_KEYS: LazyCell<(EncodingKey, DecodingKey)> = LazyCell::new(|| {

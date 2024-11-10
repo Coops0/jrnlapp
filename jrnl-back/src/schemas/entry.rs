@@ -1,5 +1,4 @@
-use aes_gcm::aead::Aead;
-use aes_gcm::{Aes256Gcm, Key, KeyInit, Nonce};
+use aes_gcm::{aead::Aead, Aes256Gcm, Key, KeyInit, Nonce};
 use anyhow::anyhow;
 use chrono::NaiveDate;
 use serde::Serialize;
@@ -35,9 +34,8 @@ impl EncryptedEntry {
             .decrypt(nonce, &self.content_key[..])
             .map_err(|_| anyhow!("failed to decrypt content key"))?;
 
-        let content_key_cipher = Aes256Gcm::new(
-            Key::<Aes256Gcm>::from_slice(&decrypted_content_key)
-        );
+        let content_key_cipher =
+            Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(&decrypted_content_key));
 
         let decrypted_content_bytes = content_key_cipher
             .decrypt(nonce, &self.encrypted_content[..])

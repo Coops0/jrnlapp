@@ -1,9 +1,9 @@
-use chrono::NaiveDate;
 use crate::impl_service;
 use crate::schemas::active_entry::ActiveEntry;
 use crate::schemas::entry::EncryptedEntry;
 use crate::schemas::user::User;
 use crate::web::cursor::Cursor;
+use chrono::NaiveDate;
 use serde::Serialize;
 use sqlx::postgres::PgArguments;
 use sqlx::query::Query;
@@ -27,8 +27,10 @@ pub struct DayDataRow {
 }
 
 impl EntryService {
-    pub async fn create_entry_migration_transaction(&self, user: &User)
-                                                    -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
+    pub async fn create_entry_migration_transaction(
+        &self,
+        user: &User,
+    ) -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
         let today_date = user.current_date_by_timezone();
 
         let mut transaction = self.0.begin().await?;
@@ -37,10 +39,10 @@ impl EntryService {
             // language=postgresql
             "DELETE FROM active_entries WHERE author = $1 AND NOT date = $2 RETURNING *",
         )
-            .bind(user.id)
-            .bind(today_date)
-            .fetch_all(&mut *transaction)
-            .await?;
+        .bind(user.id)
+        .bind(today_date)
+        .fetch_all(&mut *transaction)
+        .await?;
 
         Ok((transaction, entries))
     }
@@ -79,37 +81,49 @@ impl EntryService {
             LIMIT $4
             ",
         )
-            .bind(user.id)
-            .bind(cursor.date)
-            .bind(cursor.id)
-            .bind(limit + 1)
-            .fetch_all(&self.0)
-            .await
+        .bind(user.id)
+        .bind(cursor.date)
+        .bind(cursor.id)
+        .bind(limit + 1)
+        .fetch_all(&self.0)
+        .await
     }
 
-    pub async fn get_entry_maybe(&self, user: &User, id: &Uuid) -> Result<Option<EncryptedEntry>, Error> {
+    pub async fn get_entry_maybe(
+        &self,
+        user: &User,
+        id: &Uuid,
+    ) -> Result<Option<EncryptedEntry>, Error> {
         sqlx::query_as(
             // language=postgresql
             "SELECT * FROM entries WHERE author = $1 AND id = $2 LIMIT 1",
         )
-            .bind(user.id)
-            .bind(id)
-            .fetch_optional(&self.0)
-            .await
+        .bind(user.id)
+        .bind(id)
+        .fetch_optional(&self.0)
+        .await
     }
 
-    pub async fn get_user_daily_entry_maybe(&self, user: &User) -> Result<Option<ActiveEntry>, Error> {
+    pub async fn get_user_daily_entry_maybe(
+        &self,
+        user: &User,
+    ) -> Result<Option<ActiveEntry>, Error> {
         sqlx::query_as(
             // language=postgresql
             "SELECT * FROM active_entries WHERE author = $1 AND date = $2 LIMIT 1",
         )
-            .bind(user.id)
-            .bind(user.current_date_by_timezone())
-            .fetch_optional(&self.0)
-            .await
+        .bind(user.id)
+        .bind(user.current_date_by_timezone())
+        .fetch_optional(&self.0)
+        .await
     }
 
-    pub async fn update_or_create_daily_entry(&self, user: &User, emotion_scale: f32, text: Option<String>) -> Result<ActiveEntry, Error> {
+    pub async fn update_or_create_daily_entry(
+        &self,
+        user: &User,
+        emotion_scale: f32,
+        text: Option<String>,
+    ) -> Result<ActiveEntry, Error> {
         sqlx::query_as(
             // language=postgresql
             "
@@ -117,21 +131,21 @@ impl EntryService {
             ON CONFLICT (author, date)
             DO UPDATE SET emotion_scale = $3, text = $4
             RETURNING *
-        "
+        ",
         )
-            .bind(user.id)
-            .bind(user.current_date_by_timezone())
-            .bind(emotion_scale)
-            .bind(text)
-            .fetch_one(&self.0)
-            .await
+        .bind(user.id)
+        .bind(user.current_date_by_timezone())
+        .bind(emotion_scale)
+        .bind(text)
+        .fetch_one(&self.0)
+        .await
     }
 
     pub async fn get_multiple_users_entries_between_dates(
-        &self, 
+        &self,
         group_member_ids: &[Uuid],
         start_date: &NaiveDate,
-        before_date: &NaiveDate
+        before_date: &NaiveDate,
     ) -> Result<Vec<DayDataRow>, Error> {
         sqlx::query_as(
             // language=postgresql
@@ -144,10 +158,10 @@ impl EntryService {
         LIMIT 500
         ",
         )
-            .bind(group_member_ids)
-            .bind(start_date)
-            .bind(before_date)
-            .fetch_all(&self.0)
-            .await
+        .bind(group_member_ids)
+        .bind(start_date)
+        .bind(before_date)
+        .fetch_all(&self.0)
+        .await
     }
 }

@@ -1,9 +1,9 @@
 #![allow(clippy::crate_in_macro_def)]
 
-pub mod entry_service;
 pub mod auth_service;
-pub mod user_service;
+pub mod entry_service;
 pub mod group_service;
+pub mod user_service;
 
 #[macro_export]
 macro_rules! impl_service {
@@ -18,12 +18,12 @@ macro_rules! impl_service {
         impl axum::extract::FromRequestParts<crate::AppState> for $service {
             type Rejection = ();
 
-            async fn from_request_parts(_req: &mut axum::http::request::Parts, state: &crate::AppState) -> Result<Self, Self::Rejection> {
-                Ok(
-                    Self::new(sqlx::PgPool::clone(&state.pool))
-                )
+            async fn from_request_parts(
+                _req: &mut axum::http::request::Parts,
+                state: &crate::AppState,
+            ) -> Result<Self, Self::Rejection> {
+                Ok(Self::new(sqlx::PgPool::clone(&state.pool)))
             }
         }
     };
 }
-
