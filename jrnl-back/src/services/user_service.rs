@@ -95,8 +95,8 @@ impl UserService {
                 WHERE id = $3 RETURNING *
             ",
         )
-            .bind(theme)
             .bind(tz)
+            .bind(theme)
             .bind(user.id)
             .fetch_one(&self.0)
             .await

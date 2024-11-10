@@ -3,7 +3,6 @@ import { createThemes } from 'tw-colors';
 // noinspection ES6PreferShortImport
 import { themes } from './app/assets/themes';
 
-
 export default {
     content: [],
     plugins: [

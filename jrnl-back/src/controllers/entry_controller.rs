@@ -31,9 +31,11 @@ async fn encrypt_active_entries(
     let (mut transaction, entries) = entry_service
         .create_entry_migration_transaction(user)
         .await?;
+
     if entries.is_empty() {
         return Ok(());
     }
+
     let encrypted_entries = match spawn_blocking(move || -> anyhow::Result<_> {
         let encrypted_entries = entries
             .into_iter()
@@ -42,9 +44,7 @@ async fn encrypt_active_entries(
             .map_err(JrnlError::EntryEncryptionFailed)?;
 
         Ok(encrypted_entries)
-    })
-        .await?
-    {
+    }).await? {
         Ok(entries) => entries,
         Err(e) => {
             error!("Failed to encrypt entries: {:?}", e);

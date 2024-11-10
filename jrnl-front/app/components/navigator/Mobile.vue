@@ -18,7 +18,10 @@
 <script lang="ts" setup>
 const hideButton = ref<HTMLButtonElement | null>(null);
 
-const isHidden = useCookie('mobile-nav-hidden', { default: () => false });
+const isHidden = useCookie('mobile-nav-hidden', {
+  default: () => false,
+  maxAge: 60 * 60 * 24 * 30
+});
 
 function toggleNav(e: MouseEvent) {
   if (!isHidden.value) {

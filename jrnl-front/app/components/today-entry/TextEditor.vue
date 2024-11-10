@@ -19,7 +19,7 @@ const emit = defineEmits<{
   'update:modelValue': [content: string]
 }>();
 
-const editorClasses = 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 m-5 focus:outline-none max-w-none h-full';
+const editorClasses = 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 m-5 !outline-0 max-w-full h-full';
 
 watch(() => props.modelValue, value => {
   const e = editor.value;

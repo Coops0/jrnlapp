@@ -5,7 +5,9 @@
     </header>
 
     <main class="flex-grow flex w-full mx-auto px-4 py-6 mb-0">
-      <slot/>
+      <ComponentErrorBoundary>
+        <slot/>
+      </ComponentErrorBoundary>
     </main>
 
     <NavigatorMobile v-if="authenticated" class="md:hidden"/>

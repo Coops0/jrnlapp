@@ -40,6 +40,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         }
 
         if (lastSavedEntry.value && JSON.stringify(lastSavedEntry.value) === JSON.stringify(entry.value)) {
+            console.log('cancelling save, no changes');
             cancelledSaves.value++;
             return;
         }
@@ -76,12 +77,11 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             });
         }
 
-        lastSavedEntry.value = entry.value;
+        lastSavedEntry.value = { ...entry.value };
         console.debug('saved entry');
 
         storage.value = entryResponse;
         lastSaved.value = new Date();
-        lastSaved.value.setSeconds(lastSaved.value.getSeconds() - 1);
     }
 
     const {
@@ -90,7 +90,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     } = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
         immediate: false,
         async transform(today) {
-            lastSavedEntry.value = today;
+            lastSavedEntry.value = today && { ...today };
 
             if (today === null) {
                 console.debug('fetch entry returned null, defaulting to blank');
@@ -163,7 +163,6 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             clearTimeout(saveEntryTimeoutId.value);
         }
     });
-
 
     return {
         entry,

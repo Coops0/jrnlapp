@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <div v-else-if="error" class="p-4 rounded-lg bg-colors-primary-900/40">
+    <div v-else-if="error" class="p-4 rounded-lg">
       <p class="text-colors-accent-400">unable to load entries: {{ error }}</p>
       <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
     </div>
@@ -48,6 +48,7 @@
 <script lang="ts" setup>
 import { EntryService, type StrippedEntry } from '~/services/entry.service';
 import { isSameDay, parseServerDate, ratingLerp } from '~/util/index.util';
+import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
@@ -96,4 +97,6 @@ function loadMore() {
     nextCursor.value = paginator.value.next_cursor;
   }
 }
+
+watchErrorAndThrow(error);
 </script>

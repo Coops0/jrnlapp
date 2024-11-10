@@ -16,4 +16,8 @@ export class AuthService {
             body: { state, code }
         });
     }
+
+    async getAppleSessionDetails(): Promise<{ code: string, state: string }> {
+        return this.api('/auth/apple');
+    }
 }

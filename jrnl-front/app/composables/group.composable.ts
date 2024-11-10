@@ -10,7 +10,7 @@ export const useGroup = (
     code: string,
     groupService: GroupService
 ) => {
-    const { data: group } = useLazyAsyncData(`group-${code}`, () => groupService.getGroup(code), {
+    const { data: group, error: groupInfoError } = useLazyAsyncData(`group-${code}`, () => groupService.getGroup(code), {
         transform(g) {
             return g && { name: g.name, id: g.id } as GroupInfo;
         }
@@ -31,6 +31,7 @@ export const useGroup = (
         });
 
     return {
+        groupInfoError,
         group,
         members,
         days,

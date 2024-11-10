@@ -7,14 +7,14 @@
             author: '',
             date: new Date().toString(),
             text: 'loading...',
-            id: '',
+            id: ''
           }"
           :parsed-date="new Date()"
           :theme
       />
     </div>
 
-    <div v-else-if="error" class="p-4 rounded-lg bg-colors-primary-900/40">
+    <div v-else-if="error" class="p-4 rounded-lg">
       <p class="text-colors-accent-400">unable to load entry: {{ error }}</p>
       <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
     </div>

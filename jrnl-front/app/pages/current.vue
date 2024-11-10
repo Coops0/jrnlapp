@@ -39,11 +39,12 @@ const entryService = new EntryService($localApi);
 
 const { theme } = useTheme(null);
 
-const entryCookie = useCookie<Entry>('entry-today');
+const entryCookie = useCookie<Entry>('entry-today', {
+  maxAge: 60 * 60 * 24 * 30
+});
 
 const { beginFetch, tomorrow, entry, lastSaved, lastSavedEntry } = useTodayEntry(entryService, entryCookie);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
-
 beginFetch();
 </script>

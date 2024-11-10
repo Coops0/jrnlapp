@@ -21,7 +21,11 @@
 <script lang="ts" setup>
 defineProps<{ tomorrow: Date }>();
 
-const show = useCookie('show-time-until', { default: () => true });
+const show = useCookie('show-time-until', {
+  default: () => true,
+  maxAge: 60 * 60 * 24 * 30
+});
+
 const toggle = () => {
   show.value = !show.value;
 };

@@ -23,7 +23,7 @@
             class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-full bg-colors-primary-800/80 hover:bg-colors-primary-700/80 text-colors-primary-100 transition-all duration-200 backdrop-blur-sm group"
             to="/login"
         >
-          login w google
+          login
         </NuxtLink>
       </div>
     </div>

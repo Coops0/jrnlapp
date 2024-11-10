@@ -16,7 +16,7 @@
       />
     </section>
 
-    <section v-else class="py-8 text-center bg-colors-primary-900/20 rounded-lg">
+    <section v-else class="py-8 text-center rounded-lg">
       <p class="text-colors-primary-400">you haven't joined any groups</p>
     </section>
 
@@ -33,9 +33,11 @@
 
 <script lang="ts" setup>
 import { GroupService } from '~/services/group.service';
+import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
 
 const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 
-const { data: groups, refresh, status } = useLazyAsyncData('groups', () => groupService.getJoinedGroups());
+const { data: groups, refresh, status, error } = useLazyAsyncData('groups', () => groupService.getJoinedGroups());
+watchErrorAndThrow(error);
 </script>

@@ -26,7 +26,7 @@ export default defineNuxtConfig({
             appleClientId: 'fm.jrnl.jrnlapp',
         },
     },
-    vite: process.env.NODE_ENV === 'production' ? {
+    vite: false && process.env.NODE_ENV === 'production' ? {
         esbuild: {
             drop: ['debugger'],
             pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],

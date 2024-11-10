@@ -30,7 +30,7 @@
     <!-- eslint-disable vue/no-v-html -->
     <div
         v-if="entry.text"
-        class="prose prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 max-w-none px-4"
+        class="prose prose-p:text-colors-primary-200 prose-headings:text-colors-primary-100 max-w-full px-4"
         v-html="entry.text"
     />
 

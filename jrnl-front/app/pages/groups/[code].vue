@@ -22,6 +22,7 @@ import { GroupService } from '~/services/group.service';
 import { addDays } from '~/util/index.util';
 import { UserService } from '~/services/user.service';
 import MoodsByWeek from '~/components/group/MoodsByWeek.vue';
+import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
 
 const route = useRoute();
 const code = route.params.code as string;
@@ -32,7 +33,8 @@ const userService = new UserService($localApi);
 
 const { theme } = useTheme(null);
 const { user } = useUser(userService);
-const { group, members, days, before } = useGroup(code, groupService);
+const { group, members, days, before, groupInfoError } = useGroup(code, groupService);
+watchErrorAndThrow(groupInfoError);
 
 const isOwned = computed(() =>
     members.value?.some(m => m.owner && m.id === user.value?.id) ?? false

@@ -10,25 +10,29 @@ use crate::{
     error::{GoogleAuthenticationError, JrnlResult, JsonExtractor},
     AppState,
 };
+use anyhow::Context;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Redirect},
     routing::{get, post},
     Form, Json, Router,
 };
+use base64::engine::general_purpose::STANDARD;
+use base64::Engine;
 use oauth2::{
     reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
     Scope, TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::env;
 use uuid::Uuid;
 
 pub fn auth_controller() -> Router<AppState> {
     Router::new()
         .route("/google", get(google_url))
         .route("/google/callback", post(google_callback))
-        .route("/apple", post(init_apple_session))
+        .route("/apple", get(init_apple_session))
         .route("/apple/callback", post(apple_callback))
         .route("/logout", get(logout))
 }
@@ -108,7 +112,7 @@ async fn init_apple_session(auth_service: AuthService) -> JrnlResult<Json<AppleS
     }))
 }
 
-async fn apple_callback(
+async fn apple_callback_inner(
     auth_service: AuthService,
     user_service: UserService,
     Form(AppleCallbackPayload {
@@ -116,8 +120,7 @@ async fn apple_callback(
              user,
              state,
              ..
-         }): Form<AppleCallbackPayload>,
-) -> JrnlResult<impl IntoResponse> {
+         }): Form<AppleCallbackPayload>) -> JrnlResult<serde_json::Value> {
     let nonce = auth_service
         .get_temp_auth_session(&state)
         .await
@@ -143,20 +146,38 @@ async fn apple_callback(
 
             user
         }
-        None => {
-            user_service
-                .create_user_from_apple(
-                    &name.ok_or(AppleAuthenticationError::NoNameOnSignup)?,
-                    &claims.email,
-                    &claims.sub,
-                )
-                .await?
-        }
+        None => user_service
+            .create_user_from_apple(
+                &name.ok_or(AppleAuthenticationError::NoNameOnSignup)?,
+                &claims.email,
+                &claims.sub,
+            )
+            .await?,
     };
 
-    // todo response needs to go back to frontend since client is redirected here i think
     let jwt = jwt::encode_user_jwt(user.id)?;
-    Ok(Json(json!({ "token": jwt, "user": user })))
+    Ok(json!({ "token": jwt, "user": user }))
+}
+
+// no actual error should ever be triggered in the jrnlresult, they should just be serialized and passed
+async fn apple_callback(
+    auth_service: AuthService,
+    user_service: UserService,
+    Form(payload): Form<AppleCallbackPayload>,
+) -> JrnlResult<Redirect> {
+    let response = apple_callback_inner(auth_service, user_service, Form(payload)).await;
+
+    let json_value = response.unwrap_or_else(|err| json!({ "error": err.to_string() }));
+    let encoded_string = STANDARD.encode(
+        serde_json::to_string(&json_value).context("failed to serialize response")?.as_bytes(),
+    );
+
+    let redirect_uri = format!(
+        "{}/ac/apple?r={encoded_string}",
+        env::var("FRONTEND_URL").context("missing frontend url?")?,
+    );
+
+    Ok(Redirect::temporary(&redirect_uri))
 }
 
 async fn logout() -> JrnlResult<StatusCode> {

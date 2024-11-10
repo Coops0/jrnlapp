@@ -1,5 +1,8 @@
 export const useAuth = () => {
-    const cachedJwt = useCookie<string | null>('jwt', { default: () => null });
+    const cachedJwt = useCookie<string | null>('jwt', {
+        default: () => null,
+        maxAge: 60 * 60 * 24 * 30
+    });
 
     const jwt = useState<string | null>('jwt', () => cachedJwt.value);
 
