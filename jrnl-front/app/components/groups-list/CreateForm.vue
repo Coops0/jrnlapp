@@ -4,7 +4,7 @@
 
     <form class="space-y-3" @submit.prevent="createGroup">
       <FormTextInput
-          v-model="groupName"
+          v-model.trim="groupName"
           placeholder="group name"
       />
 

@@ -34,7 +34,7 @@ function check(): number {
     return 0;
   }
 
-  const diff = Math.abs(new Date().getTime() - (props.lastSaved?.getTime() ?? (1000 * 2)));
+  const diff = Math.abs(Date.now() - (props.lastSaved?.getTime() ?? (1000 * 2)));
 
   if (JSON.stringify(props.entry) === JSON.stringify(props.lastSavedEntry)) {
     if (diff < 1200) {

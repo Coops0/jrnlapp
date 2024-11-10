@@ -40,7 +40,7 @@ const entryService = new EntryService($localApi);
 const { theme } = useTheme(null);
 
 const entryCookie = useCookie<Entry>('entry-today', {
-  maxAge: 60 * 60 * 24 * 30
+  maxAge: 60 * 60 * 24
 });
 
 const { beginFetch, tomorrow, entry, lastSaved, lastSavedEntry } = useTodayEntry(entryService, entryCookie);

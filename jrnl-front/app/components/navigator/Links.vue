@@ -15,9 +15,7 @@
 defineProps<{ name?: string; }>();
 
 const links = [
-  { to: '/current', text: 'current' },
   { to: '/past', text: 'past' },
-  { to: '/groups', text: 'groups' },
-  { to: '/logout', text: 'logout' },
+  { to: '/groups', text: 'groups' }
 ];
 </script>

@@ -2,9 +2,9 @@
   <div>
     <button
         class="text-colors-primary-500 hover:text-colors-primary-700 transition-colors"
-        @click="() => isOpen = !isOpen"
+        @click="toggle"
     >
-      t
+      🖍️
     </button>
 
     <Transition
@@ -17,16 +17,20 @@
     >
       <div
           v-if="isOpen"
-          class="absolute right-0 mb-2 bottom-5 w-40 z-10 rounded-lg bg-colors-primary-900/95 backdrop-blur-sm border border-colors-primary-700 shadow-xl"
+          ref="popupWindow"
+          class="absolute right-0 mb-2 bottom-5 w-40 z-10 rounded-lg backdrop-blur-md shadow-xl"
+          tabindex="-1"
+          @focusout="unfocus"
       >
         <div class="p-3">
           <div class="grid grid-cols-2 gap-2">
             <button
                 v-for="[name, colors] in themesWithoutPlaceholder"
                 :key="name"
+                :title="name"
                 :style="{ backgroundColor: colors.colors.primary[400] }"
                 class="group relative flex items-center justify-center h-14 rounded-lg transition-all duration-200 hover:scale-105"
-                :class="{ 'ring-2 ring-colors-accent-400': theme === name }"
+                :class="{ 'ring-2 ring-colors-secondary-400': theme === name }"
                 @click="() => selectTheme(name)"
             >
               <span
@@ -38,7 +42,7 @@
 
               <span
                   v-if="theme === name"
-                  class="absolute top-2 right-2 w-2 h-2 rounded-full bg-colors-accent-400"
+                  class="absolute top-2 right-2 w-2 h-2 rounded-full bg-colors-secondary-600"
               />
             </button>
           </div>
@@ -56,8 +60,8 @@ const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 const { theme, setTheme } = useTheme(userService);
 
-// todo close if click outside
 const isOpen = ref(false);
+const popupWindow = ref<HTMLElement | null>(null);
 
 const themesWithoutPlaceholder = computed(() =>
     Object.entries(themes).filter(([name]) => name !== 'lunar_placeholder')
@@ -66,5 +70,29 @@ const themesWithoutPlaceholder = computed(() =>
 function selectTheme(name: string) {
   isOpen.value = false;
   setTheme(name);
+}
+
+const focusNextFrame = ref(false);
+
+function toggle() {
+  if (isOpen.value) {
+    isOpen.value = false;
+    return;
+  }
+
+  isOpen.value = true;
+  focusNextFrame.value = true;
+}
+
+watch(popupWindow, (el) => {
+  if (el && focusNextFrame.value) {
+    el.focus();
+    focusNextFrame.value = false;
+  }
+});
+
+
+function unfocus() {
+  isOpen.value = false;
 }
 </script>

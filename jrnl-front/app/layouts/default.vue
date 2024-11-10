@@ -16,7 +16,7 @@
       <div class="mx-auto px-4 py-4 flex ml-4">
         <p class="text-sm text-colors-primary-400">jrnl.fm</p>
 
-        <div class="ml-auto m-4">
+        <div v-if="authenticated" class="ml-auto mx-4">
           <ThemeSelector/>
         </div>
       </div>

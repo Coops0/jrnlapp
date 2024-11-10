@@ -21,10 +21,7 @@ export const useTheme = (userService: UserService | null) => {
 
         const userTheme = user.value?.theme;
         if (userTheme) {
-            console.log('Detected lunar placeholder, switched to user theme', userTheme);
             setThemeLocal(userTheme);
-        } else {
-            console.warn('useTheme: activeTheme is lunar_placeholder');
         }
     }, { immediate: true });
 
@@ -32,7 +29,6 @@ export const useTheme = (userService: UserService | null) => {
 
     watch(user, p => {
         if (activeTheme.value === 'lunar_placeholder' && p) {
-            console.info('user watch in theme, found lunar placeholder, updating to', p.theme);
             setThemeLocal(p.theme);
         }
 

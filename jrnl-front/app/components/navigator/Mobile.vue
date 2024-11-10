@@ -20,7 +20,7 @@ const hideButton = ref<HTMLButtonElement | null>(null);
 
 const isHidden = useCookie('mobile-nav-hidden', {
   default: () => false,
-  maxAge: 60 * 60 * 24 * 30
+  maxAge: 60 * 60 * 24 * 365
 });
 
 function toggleNav(e: MouseEvent) {

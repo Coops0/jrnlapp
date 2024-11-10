@@ -4,7 +4,7 @@
 
     <div class="space-y-3">
       <FormTextInput
-          v-model="joinGroupCode"
+          v-model.trim="joinGroupCode"
           placeholder="group code"
           @input="updateGroupSearchResults"
       />

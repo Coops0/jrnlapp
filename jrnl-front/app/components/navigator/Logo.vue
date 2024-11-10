@@ -1,35 +1,46 @@
 <template>
-  <span
-      class="text-2xl font-semibold text-colors-primary-100 hover:text-colors-primary-300 transition-colors cursor-pointer"
-      @click="cycleTheme"
+  <NuxtLink
+      class="text-2xl font-semibold text-colors-primary-100 hover:text-colors-primary-300 transition-all ease-in duration-150 bg-transparent"
+      :class="{ 'glow-logo': isOnCurrentPage }"
+      to="/current"
+      @mousedown="startHold"
+      @mouseup="endHold"
+      @touchstart.passive="startHold"
+      @touchend.passive="endHold"
+      @touchmove.passive="endHold"
   >
     jrnl
-  </span>
+  </NuxtLink>
 </template>
 
 <script lang="ts" setup>
-import { UserService } from '~/services/user.service';
-import { themes } from 'assets/themes';
+const route = useRoute();
 
-const { $localApi } = useNuxtApp();
-const userService = new UserService($localApi);
+const isOnCurrentPage = computed(() => route.name === 'current');
 
-const { theme, setTheme } = useTheme(userService);
+const holdStartTime = ref<null | number>(null);
 
-const indexedThemes = computed(() => Object.keys(themes).filter(t => t !== 'lunar_placeholder'));
+const startHold = () => {
+  holdStartTime.value = Date.now();
+};
 
-function cycleTheme() {
-  const currentIndex = indexedThemes.value.indexOf(theme.value) ?? 2;
-  let nextIndex = currentIndex + 1;
-  if (nextIndex >= indexedThemes.value.length) {
-    nextIndex = 0;
+const endHold = async () => {
+  if (holdStartTime.value === null) {
+    return;
   }
 
-  const nextTheme = indexedThemes.value[nextIndex];
-  if (nextTheme) {
-    setTheme(nextTheme);
-  } else {
-    console.warn('next theme is undefined');
+  const holdTime = Date.now() - holdStartTime.value;
+  holdStartTime.value = null;
+
+  if (holdTime > 3500) {
+    await navigateTo('/logout');
   }
-}
+};
 </script>
+
+<style scoped>
+.glow-logo {
+  /*noinspection CssUnresolvedCustomProperty*/
+  text-shadow: hsl(var(--twc-colors-primary-500)) 0 0 16px;
+}
+</style>
