@@ -4,9 +4,8 @@ use tokio::time::interval;
 use tracing::error;
 
 pub mod extension;
-mod jwt;
-mod providers;
-pub mod routes;
+pub mod jwt;
+pub mod providers;
 
 pub async fn clean_expired_sessions(pool: PgPool) {
     let mut ticker = interval(Duration::from_secs(60 * 15));
@@ -16,8 +15,7 @@ pub async fn clean_expired_sessions(pool: PgPool) {
         let delete_temp_sessions_future = sqlx::query(
             // language=postgresql
             "DELETE FROM temp_auth_sessions WHERE expires_at < NOW()",
-        )
-        .execute(&pool);
+        ).execute(&pool);
 
         if let Err(why) = delete_temp_sessions_future.await {
             error!("Failed to clean expired temp sessions: {}", why);

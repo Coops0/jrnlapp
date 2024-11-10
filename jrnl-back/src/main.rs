@@ -3,6 +3,7 @@ mod controllers;
 mod error;
 mod schemas;
 mod web;
+mod services;
 
 use crate::{
     auth::clean_expired_sessions,
@@ -69,12 +70,12 @@ async fn main() -> anyhow::Result<()> {
     let state = AppState { pool, master_key: *master_key };
 
     let app = Router::new()
-        .nest("/user", controllers::user::users_controller())
-        .nest("/entries", controllers::entry::entries_controller())
-        .nest("/groups", controllers::group::groups_controller())
+        .nest("/user", controllers::user_controller::users_controller())
+        .nest("/entries", controllers::entry_controller::entries_controller())
+        .nest("/groups", controllers::group_controller::groups_controller())
         // don't run middleware only for auth route
         .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
-        .nest("/auth", auth::routes::auth_controller())
+        .nest("/auth", controllers::auth_controller::auth_controller())
         .layer(
             ServiceBuilder::new()
                 .layer(

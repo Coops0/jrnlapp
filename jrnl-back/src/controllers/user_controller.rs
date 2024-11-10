@@ -1,14 +1,14 @@
+use crate::services::user_service::UserService;
 use crate::{
-    schemas::user::User,
     error::{JrnlResult, JsonExtractor},
+    schemas::user::User,
     web::deserialize_empty_string,
-    AppState
+    AppState,
 };
 use axum::{
-    extract::State,
     routing::get,
     Json,
-    Router
+    Router,
 };
 use chrono_tz::Tz;
 use serde::{Deserialize, Deserializer};
@@ -47,22 +47,11 @@ fn deserialize_tz<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<T
 
 async fn update_self_user(
     user: User,
-    State(AppState { pool, .. }): State<AppState>,
+    user_service: UserService,
     JsonExtractor(payload): JsonExtractor<UpdateSelfPayload>,
 ) -> JrnlResult<Json<User>> {
-    sqlx::query_as::<_, User>(
-        // language=postgresql
-        "UPDATE users SET
-            timezone = COALESCE($1, timezone),
-            theme = COALESCE($2, theme)
-            WHERE id = $3 RETURNING *
-        ",
-    )
-    .bind(payload.tz.map(|tz| tz.to_string()))
-    .bind(payload.theme)
-    .bind(user.id)
-    .fetch_one(&pool)
-    .await
-    .map(Json)
-    .map_err(Into::into)
+    user_service.update_user(&user, &payload.theme, &payload.tz.map(|tz| tz.to_string()))
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }

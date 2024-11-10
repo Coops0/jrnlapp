@@ -29,15 +29,19 @@ pub struct DecryptedEntry {
 impl EncryptedEntry {
     pub fn decrypt(&self, master_key: &Key<Aes256Gcm>) -> anyhow::Result<DecryptedEntry> {
         let master_cipher = Aes256Gcm::new(master_key);
-        
+
         let nonce = Nonce::from_slice(&self.nonce[..]);
-        let decrypted_content_key = master_cipher.decrypt(nonce, &self.content_key[..]).map_err(|e| anyhow!(e))?;
+        let decrypted_content_key = master_cipher
+            .decrypt(nonce, &self.content_key[..])
+            .map_err(|_| anyhow!("failed to decrypt content key"))?;
 
         let content_key_cipher = Aes256Gcm::new(
             Key::<Aes256Gcm>::from_slice(&decrypted_content_key)
         );
 
-        let decrypted_content_bytes = content_key_cipher.decrypt(nonce, &self.encrypted_content[..]).map_err(|e| anyhow!(e))?;
+        let decrypted_content_bytes = content_key_cipher
+            .decrypt(nonce, &self.encrypted_content[..])
+            .map_err(|_| anyhow!("failed to decrypt entry content"))?;
 
         let decrypted_content = String::from_utf8(decrypted_content_bytes)?;
         let text = if decrypted_content.is_empty() {

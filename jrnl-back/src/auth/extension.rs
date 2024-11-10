@@ -1,6 +1,7 @@
-use crate::auth::jwt::{decode_jwt, Claims};
-use crate::error::{AuthenticationError, JrnlError};
+use crate::auth::jwt::{decode_user_jwt, Claims};
+use crate::error::JrnlError;
 use crate::schemas::user::User;
+use crate::services::user_service::UserService;
 use crate::AppState;
 use axum::async_trait;
 use axum::extract::FromRequestParts;
@@ -17,14 +18,14 @@ impl<S> FromRequestParts<S> for Claims {
             .get("Authorization")
             .and_then(|header| header.to_str().ok())
             .and_then(|header| header.strip_prefix("Bearer "))
-            .ok_or(JrnlError::AuthenticationError(AuthenticationError::BadAuthenticationHeader))?;
+            .ok_or(JrnlError::BadAuthenticationHeader)?;
 
-        let claims = decode_jwt(auth_header)
-            .map_err(|_| JrnlError::AuthenticationError(AuthenticationError::InvalidToken))?;
+        let claims = decode_user_jwt(auth_header)
+            .map_err(|_| JrnlError::InvalidToken)?;
 
         let parsed_exp = usize::try_from(Utc::now().timestamp()).map_err(Into::<anyhow::Error>::into)?;
         if claims.exp < parsed_exp {
-            return Err(JrnlError::AuthenticationError(AuthenticationError::ExpiredToken));
+            return Err(JrnlError::ExpiredToken);
         }
 
         Ok(claims)
@@ -40,16 +41,10 @@ impl FromRequestParts<AppState> for User {
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
         let Claims { sub, .. } = Claims::from_request_parts(parts, state).await?;
+        let user_service = UserService::from_request_parts(parts, state).await.unwrap();
 
-        sqlx::query_as::<_, Self>(
-            // language=postgresql
-            "
-            SELECT * FROM users WHERE id = $1 LIMIT 1
-            ",
-        )
-            .bind(sub)
-            .fetch_one(&state.pool)
-            .await
-            .map_err(|_| AuthenticationError::ProfileNotFound.into())
+
+        user_service.get_user_by_id(&sub).await
+            .map_err(|_| JrnlError::ProfileNotFound)
     }
 }

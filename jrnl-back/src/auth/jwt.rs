@@ -20,7 +20,7 @@ pub struct Claims {
     pub exp: usize,
 }
 
-pub fn encode_jwt(uid: Uuid) -> anyhow::Result<String> {
+pub fn encode_user_jwt(uid: Uuid) -> anyhow::Result<String> {
     let expiration = Utc::now()
         .checked_add_signed(chrono::Duration::days(30))
         .expect("valid timestamp")
@@ -35,7 +35,7 @@ pub fn encode_jwt(uid: Uuid) -> anyhow::Result<String> {
     encode(&header, &claims, &JWT_KEYS.0).map_err(Into::into)
 }
 
-pub fn decode_jwt(token: &str) -> anyhow::Result<Claims> {
+pub fn decode_user_jwt(token: &str) -> anyhow::Result<Claims> {
     jsonwebtoken::decode::<Claims>(token, &JWT_KEYS.1, &Validation::new(Algorithm::HS512))
         .map(|data| data.claims)
         .map_err(Into::into)

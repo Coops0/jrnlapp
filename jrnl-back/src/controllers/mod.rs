@@ -1,3 +1,4 @@
-pub mod entry;
-pub mod group;
-pub mod user;
+pub mod entry_controller;
+pub mod group_controller;
+pub mod user_controller;
+pub mod auth_controller;

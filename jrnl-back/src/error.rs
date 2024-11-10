@@ -33,9 +33,13 @@ pub enum JrnlError {
     #[status(StatusCode::FORBIDDEN)]
     CannotJoinMoreGroups,
 
-    #[error("authentication error {0}")]
+    #[error("google oauth authentication error {0}")]
     #[status(StatusCode::UNAUTHORIZED)]
-    AuthenticationError(#[from] AuthenticationError),
+    GoogleAuthenticationError(#[from] GoogleAuthenticationError),
+
+    #[error("apple oauth authentication error {0}")]
+    #[status(StatusCode::UNAUTHORIZED)]
+    AppleAuthenticationError(#[from] AppleAuthenticationError),
 
     #[deprecated(note = "use `DatabaseError` wrapper instead")]
     #[error("database error {0}")]
@@ -45,10 +49,34 @@ pub enum JrnlError {
     #[error("other error occurred {0}")]
     #[status(StatusCode::INTERNAL_SERVER_ERROR)]
     Other(#[from] anyhow::Error),
+
+    #[error("bad authentication header")]
+    #[status(StatusCode::UNAUTHORIZED)]
+    BadAuthenticationHeader,
+
+    #[error("invalid auth token")]
+    #[status(StatusCode::UNAUTHORIZED)]
+    InvalidToken,
+
+    #[error("expired auth token")]
+    #[status(StatusCode::UNAUTHORIZED)]
+    ExpiredToken,
+
+    #[error("failed to find profile")]
+    #[status(StatusCode::NOT_FOUND)]
+    ProfileNotFound,
+
+    #[error("failed to encrypt journal entry {0}")]
+    #[status(StatusCode::INTERNAL_SERVER_ERROR)]
+    EntryEncryptionFailed(anyhow::Error),
+
+    #[error("failed to decrypt journal entry {0}")]
+    #[status(StatusCode::INTERNAL_SERVER_ERROR)]
+    EntryDecryptionFailed(anyhow::Error),
 }
 
 #[derive(Debug, Error)]
-pub enum AuthenticationError {
+pub enum GoogleAuthenticationError {
     #[error("failed to generate provider session {0}")]
     ProviderGenerationFailed(anyhow::Error),
     #[error("bad callback state {0:?}")]
@@ -57,15 +85,18 @@ pub enum AuthenticationError {
     CodeExchangeFailed(anyhow::Error),
     #[error("failed to fetch your google profile {0}")]
     FetchGoogleProfileFailed(anyhow::Error),
+}
 
-    #[error("bad authentication header")]
-    BadAuthenticationHeader,
-    #[error("invalid auth token")]
-    InvalidToken,
-    #[error("expired auth token")]
-    ExpiredToken,
-    #[error("failed to find your profile")]
-    ProfileNotFound,
+#[derive(Debug, Error)]
+pub enum AppleAuthenticationError {
+    #[error("invalid callback data")]
+    BadCallbackState,
+    #[error("failed to migrate google account to apple {0}")]
+    FailedGoogleMigration(sqlx::Error),
+    #[error("no name payload data provided on sign up")]
+    NoNameOnSignup,
+    #[error("failed to verify apple id token {0}")]
+    VerificationError(anyhow::Error),
 }
 
 pub struct DatabaseError(pub sqlx::Error);

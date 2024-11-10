@@ -23,15 +23,17 @@ impl ActiveEntry {
         let key = Aes256Gcm::generate_key(OsRng);
         let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
 
-        let encrypted_content_key = master_cipher.encrypt(&nonce, &key[..]).map_err(|e| anyhow!(e))?;
+        let encrypted_content_key = master_cipher
+            .encrypt(&nonce, &key[..])
+            .map_err(|_| anyhow!("failed to encrypt content key"))?;
+
         let content_key_cipher = Aes256Gcm::new(
             Key::<Aes256Gcm>::from_slice(&encrypted_content_key)
         );
 
-        let encrypted_content = content_key_cipher.encrypt(
-            &nonce,
-            self.text.as_deref().unwrap_or_default().as_bytes(),
-        ).map_err(|e| anyhow!(e))?;
+        let encrypted_content = content_key_cipher
+            .encrypt(&nonce, self.text.as_deref().unwrap_or_default().as_bytes())
+            .map_err(|_| anyhow!("failed to encrypt entry content"))?;
 
 
         Ok(EncryptedEntry {
