@@ -4,7 +4,7 @@
       class="fixed bottom-0 left-0 right-0 transform transition-transform duration-300"
       @click="toggleNav"
   >
-    <div class="bg-colors-primary-900/95 backdrop-blur-sm">
+    <div class="backdrop-blur-sm">
       <div class="flex items-center justify-between px-4 py-2">
         <button ref="hideButton" class="text-colors-primary-400 hover:text-colors-primary-200">
           {{ isHidden ? '' : 'v' }}

@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div class="relative h-64 md:h-96 bg-colors-primary-900/40 rounded-lg overflow-hidden">
+    <div class="relative h-64 md:h-96 rounded-lg overflow-hidden">
       <div class="absolute inset-x-8 bottom-0 flex justify-between">
         <div
             v-for="day in WEEK_DAYS"

@@ -36,7 +36,7 @@
 
     <div
         v-else
-        class="px-4 py-12 text-center rounded-lg bg-colors-primary-900/20"
+        class="px-4 py-12 text-center rounded-lg"
     >
       <p class="text-colors-primary-400 text-sm">no entry text for this day</p>
     </div>

@@ -8,7 +8,7 @@ services:
         window: 120s
     environment:
       - NUXT_PUBLIC_API_BASE=https://my.jrnl.fm
-      - NUXT_PUBLIC_BASE=https://jrnl.fm
+      - NUXT_PUBLIC_APPLE_CLIENT_ID=${APPLE_CLIENT_ID}
       - NODE_ENV=production
     build:
       context: ./jrnl-front
@@ -29,6 +29,8 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - JWT_SECRET=${JWT_SECRET}
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
+      - APPLE_CLIENT_ID=${APPLE_CLIENT_ID}
     build:
       context: ./jrnl-back
       dockerfile: Dockerfile

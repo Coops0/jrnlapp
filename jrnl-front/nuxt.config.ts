@@ -28,8 +28,8 @@ export default defineNuxtConfig({
     },
     vite: false && process.env.NODE_ENV === 'production' ? {
         esbuild: {
-            drop: ['debugger'],
-            pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
+            drop: ['debugger', 'console'],
+            // pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
         },
     } : {},
 });

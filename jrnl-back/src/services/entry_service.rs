@@ -27,7 +27,7 @@ pub struct DayDataRow {
 }
 
 impl EntryService {
-    pub async fn create_entry_migration_transaction(&self, user: &User) -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
+    pub async fn create_entry_migration_transaction_without_today(&self, user: &User) -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
         let today_date = user.current_date_by_timezone();
 
         let mut transaction = self.0.begin().await?;

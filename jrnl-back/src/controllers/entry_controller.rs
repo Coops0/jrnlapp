@@ -23,13 +23,13 @@ pub fn entries_controller() -> Router<AppState> {
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
 
-async fn encrypt_active_entries(
+async fn encrypt_active_entries_except_today(
     user: &User,
     entry_service: &EntryService,
     master_key: Key<Aes256Gcm>,
 ) -> anyhow::Result<()> {
     let (mut transaction, entries) = entry_service
-        .create_entry_migration_transaction(user)
+        .create_entry_migration_transaction_without_today(user)
         .await?;
 
     if entries.is_empty() {
@@ -78,7 +78,7 @@ async fn get_trimmed_entries_paginated(
     let limit = params.limit.unwrap_or(20).clamp(1, 100);
 
     let cursor = params.cursor.unwrap_or_default();
-    encrypt_active_entries(&user, &entry_service, master_key).await?;
+    encrypt_active_entries_except_today(&user, &entry_service, master_key).await?;
 
     let mut entries = entry_service
         .get_paginated_trimmed_entries(&user, &cursor, i64::from(limit))

@@ -28,7 +28,7 @@
             :rating="entry.emotion_scale"
         />
       </div>
-      <div v-else class="p-4 rounded-lg bg-colors-primary-900/40">
+      <div v-else class="p-4 rounded-lg">
         <p class="text-colors-primary-400">you haven't logged anything yet</p>
       </div>
 
