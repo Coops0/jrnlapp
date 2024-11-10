@@ -49,7 +49,6 @@ function interpolate(color1: string, color2: string, percent: number) {
 }
 
 // I don't even know
-// 2024-04-03
 export const parseServerDate = (d: string): Date => {
     // noinspection SuspiciousTypeOfGuard
     if (!d || typeof d !== 'string') {

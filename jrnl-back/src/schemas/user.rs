@@ -1,4 +1,5 @@
-use chrono::{NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
+use chrono_tz::Tz;
 use serde::Serialize;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -14,8 +15,12 @@ pub struct User {
 }
 
 impl User {
-    pub fn current_date_by_timezone(&self) -> NaiveDate {
+    pub fn current_date_time_by_timezone(&self) -> DateTime<Tz> {
         let tz = self.timezone.parse().unwrap_or(chrono_tz::UTC);
-        Utc::now().with_timezone(&tz).date_naive()
+        Utc::now().with_timezone(&tz)
+    }
+
+    pub fn current_date_by_timezone(&self) -> NaiveDate {
+        self.current_date_time_by_timezone().date_naive()
     }
 }

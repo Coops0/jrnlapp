@@ -17,7 +17,7 @@ use sqlx::{
     PgPool,
 };
 use std::{env, time::Duration};
-use tokio::join;
+use tokio::{join, task};
 use tower::ServiceBuilder;
 use tower_http::{
     cors::{AllowCredentials, AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
@@ -25,6 +25,7 @@ use tower_http::{
 };
 use tracing::{info, warn};
 use tracing_subscriber::{filter::LevelFilter, EnvFilter};
+use services::entry_service::encrypt_old_entries;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -56,10 +57,12 @@ async fn main() -> anyhow::Result<()> {
         info!("migrations ran successfully / db connection valid");
     }
 
-    let session_clean_task = tokio::task::spawn(clean_expired_sessions(pool.clone()));
 
     let master_key_env = env::var("MASTER_ENCRYPTION_KEY")?;
     let master_key = Key::<Aes256Gcm>::from_slice(master_key_env.as_bytes());
+    
+    let session_clean_task = task::spawn(clean_expired_sessions(pool.clone()));
+    let encrypt_old_entries_task = task::spawn(encrypt_old_entries(pool.clone(), *master_key));
 
     let state = AppState {
         pool,
@@ -98,7 +101,7 @@ async fn main() -> anyhow::Result<()> {
 
     let axum_server = axum::serve(listener, app);
 
-    let _ = join!(axum_server, session_clean_task);
+    let _ = join!(axum_server, session_clean_task, encrypt_old_entries_task);
 
     unreachable!();
 }

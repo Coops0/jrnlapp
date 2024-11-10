@@ -14,6 +14,7 @@ pub struct ActiveEntry {
     pub date: NaiveDate,
     pub emotion_scale: f32,
     pub text: Option<String>,
+    pub expiry: chrono::DateTime<chrono::Utc>,
 }
 
 impl ActiveEntry {

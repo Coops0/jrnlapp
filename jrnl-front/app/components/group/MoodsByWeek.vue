@@ -12,14 +12,13 @@
         </FormButton>
         <span class="text-sm md:text-base text-colors-primary-400 min-w-[140px] text-center">
              <NuxtTime
-                 :datetime="before"
+                 :datetime="addDays(before, 6)"
                  day="2-digit"
-                 month="numeric"/> -
-              <NuxtTime
-                  :datetime="addDays(before, 6)"
-                  day="2-digit"
-                  month="numeric"
-              />
+                 month="numeric"
+             /> - <NuxtTime
+            :datetime="before"
+            day="2-digit"
+            month="numeric"/>
         </span>
         <FormButton
             size="sm"
@@ -95,5 +94,5 @@ const emit = defineEmits<{
 }>();
 
 const WEEK_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
-const getDayPosition = (date: Date) => (date.getDay() / 6) * 100;
+const getDayPosition = (date: Date) => (((date.getDay() + 1) / 7) * 100) - 6;
 </script>

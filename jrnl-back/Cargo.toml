@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.41.0", features = ["full"] }
+tokio = { version = "1.41.1", features = ["full"] }
 
 axum = { version = "0.7.7", features = ["json"] }
 tower-http = { version = "0.6.1", features = ["cors", "timeout"] }
@@ -24,7 +24,7 @@ serde_json = "1.0.132"
 reqwest = { version = "0.12.9", features = ["json"] }
 
 anyhow = "1.0.93"
-thiserror = "2.0.0"
+thiserror = "2.0.2"
 
 oauth2 = "4.4.2"
 jsonwebtoken = "9.3.0"

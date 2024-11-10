@@ -4,14 +4,14 @@
       <div
           :style="{
              width: percentage + '%',
-          backgroundColor: ratingLerp(modelValue ?? 0)
+             backgroundColor: ratingLerp(modelValue ?? 0)
         }"
           class="absolute h-full transition-all duration-100"
       />
     </div>
 
     <div
-        :style="{ left: 'calc(' + percentage + ' + % - 8px)' }"
+        :style="{ left: 'calc(' + percentage + '% - 8px)' }"
         class="absolute w-4 h-4 rounded-full bg-colors-primary-200 hover:bg-colors-primary-100 transition-colors shadow-sm pointer-events-none"
     />
 

@@ -3,11 +3,15 @@ use crate::schemas::active_entry::ActiveEntry;
 use crate::schemas::entry::EncryptedEntry;
 use crate::schemas::user::User;
 use crate::web::cursor::Cursor;
-use chrono::NaiveDate;
+use aes_gcm::{Aes256Gcm, Key};
+use chrono::{NaiveDate, Timelike};
 use serde::Serialize;
 use sqlx::postgres::PgArguments;
 use sqlx::query::Query;
 use sqlx::{Error, FromRow, PgPool, Postgres, Transaction};
+use std::time::Duration;
+use tokio::task::spawn_blocking;
+use tokio::time::interval;
 use uuid::Uuid;
 
 pub struct EntryService(PgPool);
@@ -28,15 +32,12 @@ pub struct DayDataRow {
 
 impl EntryService {
     pub async fn create_entry_migration_transaction_without_today(&self, user: &User) -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
-        let today_date = user.current_date_by_timezone();
-
         let mut transaction = self.0.begin().await?;
         let entries = sqlx::query_as::<_, ActiveEntry>(
             // language=postgresql
-            "DELETE FROM active_entries WHERE author = $1 AND NOT date = $2 RETURNING *",
+            "DELETE FROM active_entries WHERE author = $1 AND expiry < timezone('utc', now()) RETURNING *",
         )
             .bind(user.id)
-            .bind(today_date)
             .fetch_all(&mut *transaction)
             .await?;
 
@@ -112,10 +113,17 @@ impl EntryService {
         emotion_scale: f32,
         text: Option<String>,
     ) -> Result<ActiveEntry, Error> {
+        let expiry = user.current_date_time_by_timezone() + chrono::Duration::days(1);
+        let expiry_midnight = expiry.with_hour(0)
+            .and_then(|d| d.with_minute(0))
+            .and_then(|d| d.with_second(0))
+            .unwrap_or(expiry)
+            .to_utc();
+
         sqlx::query_as(
             // language=postgresql
             "
-                INSERT INTO active_entries (author, date, emotion_scale, text) VALUES ($1, $2, $3, $4)
+                INSERT INTO active_entries (author, date, emotion_scale, text, expiry) VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT (author, date)
                 DO UPDATE SET emotion_scale = $3, text = $4
                 RETURNING *
@@ -125,6 +133,7 @@ impl EntryService {
             .bind(user.current_date_by_timezone())
             .bind(emotion_scale)
             .bind(text)
+            .bind(expiry_midnight)
             .fetch_one(&self.0)
             .await
     }
@@ -151,5 +160,51 @@ impl EntryService {
             .bind(before_date)
             .fetch_all(&self.0)
             .await
+    }
+}
+
+pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> anyhow::Result<()> {
+    let mut ticker = interval(Duration::from_secs(60 * 15));
+
+    loop {
+        ticker.tick().await;
+
+        let mut transaction = pool.begin().await?;
+
+        let entries = sqlx::query_as::<_, ActiveEntry>(
+            // language=postgresql
+            "DELETE FROM active_entries WHERE expiry < timezone('utc', now()) RETURNING *",
+        )
+            .fetch_all(&mut *transaction)
+            .await?;
+
+        if entries.is_empty() {
+            continue;
+        }
+
+        let encrypted_entries = match spawn_blocking(move || -> anyhow::Result<_> {
+            entries
+                .into_iter()
+                .map(|entry| ActiveEntry::encrypt(&entry, &master_key))
+                .collect::<anyhow::Result<Vec<_>>>()
+        })
+            .await? {
+            Ok(entries) => entries,
+            Err(why) => {
+                transaction.rollback().await?;
+                panic!("failed to encrypt entries in daily task {why:?}");
+            }
+        };
+
+        for entry in encrypted_entries {
+            let Err(why) = EntryService::create_encrypted_entry_query(&entry)
+                .execute(&mut *transaction)
+                .await else { continue; };
+
+            transaction.rollback().await?;
+            panic!("failed to insert encrypted entry in daily task {why:?}");
+        }
+
+        transaction.commit().await?;
     }
 }

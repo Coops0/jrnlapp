@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS active_entries
 (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    author        UUID   NOT NULL REFERENCES users ON DELETE CASCADE,
-    date          DATE   NOT NULL  DEFAULT CURRENT_DATE,
-    emotion_scale FLOAT4 NOT NULL CHECK (emotion_scale >= 0 AND emotion_scale <= 10),
+    id            UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    author        UUID        NOT NULL REFERENCES users ON DELETE CASCADE,
+    date          DATE        NOT NULL DEFAULT CURRENT_DATE,
+    emotion_scale FLOAT4      NOT NULL CHECK (emotion_scale >= 0 AND emotion_scale <= 10),
     text          TEXT,
+    expiry        TIMESTAMPTZ NOT NULL,
     UNIQUE (author, date)
 );
 

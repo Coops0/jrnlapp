@@ -56,10 +56,7 @@ async fn encrypt_active_entries_except_today(
     for entry in encrypted_entries {
         let Err(why) = EntryService::create_encrypted_entry_query(&entry)
             .execute(&mut *transaction)
-            .await
-        else {
-            continue;
-        };
+            .await else { continue; };
 
         error!("Failed to insert encrypted entry: {:?}", why);
         transaction.rollback().await?;
@@ -98,11 +95,7 @@ async fn get_trimmed_entries_paginated(
         _ => None,
     };
 
-    Ok(Json(CursorPaginatedResponse {
-        items: entries,
-        next_cursor,
-        has_more,
-    }))
+    Ok(Json(CursorPaginatedResponse { items: entries, next_cursor, has_more }))
 }
 
 async fn get_entry(

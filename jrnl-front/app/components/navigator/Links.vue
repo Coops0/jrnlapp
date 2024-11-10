@@ -1,8 +1,5 @@
 <template>
   <nav class="flex items-center gap-6">
-    <p v-if="name" class="text-lg font-thin text-colors-primary-200 lowercase">
-      {{ name }}
-    </p>
     <NuxtLink
         v-for="link in links"
         :key="link.to"
@@ -21,7 +18,6 @@ const links = [
   { to: '/current', text: 'current' },
   { to: '/past', text: 'past' },
   { to: '/groups', text: 'groups' },
-  { to: '/theme', text: 'theme' },
   { to: '/logout', text: 'logout' },
 ];
 </script>
