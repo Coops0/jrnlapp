@@ -1,12 +1,5 @@
 <template>
   <div>
-    <button
-        class="text-colors-primary-500 hover:text-colors-primary-700 transition-colors"
-        @click="toggle"
-    >
-      🖍️
-    </button>
-
     <Transition
         enter-active-class="transition duration-200 ease-out"
         enter-from-class="transform scale-95 opacity-0"
@@ -18,7 +11,8 @@
       <div
           v-if="isOpen"
           ref="popupWindow"
-          class="absolute right-0 mb-2 bottom-5 w-40 z-10 rounded-lg backdrop-blur-md shadow-xl"
+          class="absolute w-40 z-50 rounded-lg backdrop-blur-xl shadow-xl outline-none"
+          :style="{ top: y + 'px', left: x + 'px' }"
           tabindex="-1"
           @focusout="unfocus"
       >
@@ -56,11 +50,19 @@
 import { UserService } from '~/services/user.service';
 import { themes } from '~/assets/themes';
 
+const isOpen = defineModel<boolean>({ default: false });
+withDefaults(defineProps<{
+  x?: number;
+  y?: number;
+}>(), {
+  x: 5,
+  y: 5
+});
+
 const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 const { theme, setTheme } = useTheme(userService);
 
-const isOpen = ref(false);
 const popupWindow = ref<HTMLElement | null>(null);
 
 const themesWithoutPlaceholder = computed(() =>
@@ -74,22 +76,18 @@ function selectTheme(name: string) {
 
 const focusNextFrame = ref(false);
 
-function toggle() {
-  if (isOpen.value) {
-    isOpen.value = false;
-    return;
+watch(isOpen, o => {
+  if (o) {
+    focusNextFrame.value = true;
   }
-
-  isOpen.value = true;
-  focusNextFrame.value = true;
-}
+}, { immediate: true });
 
 watch(popupWindow, (el) => {
   if (el && focusNextFrame.value) {
     el.focus();
     focusNextFrame.value = false;
   }
-});
+}, { immediate: true });
 
 
 function unfocus() {

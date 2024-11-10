@@ -1,54 +1,72 @@
 <template>
-  <div ref="entireLogoElement" tabindex="-1" class="outline-none flex flex-row" @focusout="handleLostFocus">
-
-    <NuxtLink
-        :id="logoId"
-        class="text-2xl font-semibold text-colors-primary-100 hover:text-colors-primary-300 transition-all duration-75 select-none touch-none"
-        draggable="false"
-        @mousedown="onPressLogo"
-        @touchstart="onPressLogo"
-    >
-      jrnl
-    </NuxtLink>
-
-    <Transition
-        enter-active-class="transition-all duration-200"
-        enter-from-class="opacity-0 -translate-x-2"
-        enter-to-class="opacity-100 translate-x-0"
-        leave-active-class="transition-all duration-150"
-        leave-from-class="opacity-100 translate-x-0"
-        leave-to-class="opacity-0 -translate-x-2"
-    >
-      <div
-          v-if="isToggled || isHolding"
-          class="bg-colors-primary-900/20 backdrop-blur-[2px] select-none ml-4"
+  <div>
+    <LazyNavigatorThemeSelector
+        v-model="showThemeSelector"
+        :x="lastKnownPosition?.clientX"
+        :y="lastKnownPosition?.clientY"
+    />
+    <div ref="entireLogoElement" tabindex="-1" class="outline-none w-full md:h-8" @focusout="handleLostFocus">
+      <div class="flex flex-col md:flex-row justify-items-center items-center gap-2">
+      <span
+          :id="logoId"
+          class="text-3xl !leading-normal font-semibold text-colors-primary-100 hover:text-colors-primary-300 transition-all duration-100 select-none touch-none cursor-pointer"
+          draggable="false"
+          @mousedown="onPressLogo"
+          @touchstart="onPressLogo"
       >
-        <div class="flex flex-row gap-1 transition-all duration-100 ease-in-out">
+        jrnl
+      </span>
+
+        <Transition
+            enter-active-class="transition-all duration-200"
+            enter-from-class="opacity-0 md:-translate-x-2 -translate-y-2 md:translate-y-0"
+            enter-to-class="opacity-100 translate-x-0 translate-y-0"
+            leave-active-class="transition-all duration-150"
+            leave-from-class="opacity-100 translate-x-0 translate-y-0"
+            leave-to-class="opacity-0 md:-translate-x-2 -translate-y-2 md:translate-y-0"
+        >
           <div
-              v-for="item in menuItems"
-              :key="item.path"
-              class="select-none border-2 border-colors-accent-50"
-              :class="{
-                'glow': route.name === item.name,
-                'scale-105 border-colors-primary-600': hoveringName === item.name,
-                'hover:border-colors-primary-600 hover:scale-105': isToggled
-              }"
-              :style="{
-                 opacity: 0.8
-               }"
-              :data-name="item.name"
-              :data-path="item.path"
+              v-if="isToggled || isHolding"
+              class="w-full max-h-full flex-grow absolute mt-12 md:mt-0 md:relative z-40 backdrop-blur-xl bg-colors-primary-950/40 rounded-lg overflow-hidden"
           >
-            <div
-                class="flex items-center justify-center px-4 cursor-pointer text-lg"
-                @click="() => goTo(item.path)"
-            >
-              <span class="text-colors-primary-50">{{ item.name }}</span>
+            <div class="flex flex-col md:flex-row md:justify-evenly md:justify-items-stretch w-full">
+              <div
+                  v-for="item in menuItems"
+                  :key="item.path"
+                  class="group w-full md:flex-grow select-none px-1 py-0.5"
+                  :class="{
+                  'bg-colors-primary-800/20': route.name === item.name,
+                  'scale-[1.02]': hoveringName === item.name,
+                }"
+                  :data-name="item.name"
+                  :data-path="item.path"
+              >
+                <div
+                    class="flex items-center justify-center px-6 py-3 md:py-2 cursor-pointer rounded-md transition-all duration-150 ease-out"
+                    :class="{
+                    'bg-colors-primary-800/40': route.name === item.name,
+                    'bg-colors-primary-800/20': hoveringName === item.name,
+                    'hover:bg-colors-primary-800/20 group-hover:bg-colors-primary-800/20': isToggled
+                  }"
+                    @click="() => goTo(item.path)"
+                >
+                <span
+                    class="text-lg md:text-base text-colors-primary-200 transition-colors duration-150"
+                    :class="{
+                      'text-colors-primary-50 glow': route.name === item.name,
+                      'text-color-primary-100': hoveringName === item.name,
+                      'group-hover:text-colors-primary-50': isToggled
+                    }"
+                >
+                  {{ item.name }}
+                </span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </Transition>
       </div>
-    </Transition>
+    </div>
   </div>
 </template>
 
@@ -61,9 +79,12 @@ const menuItems = [
   { name: 'current', path: '/current' },
   { name: 'groups', path: '/groups' },
   { name: 'past', path: '/past' },
+  { name: 'theme', path: '/theme' },
   { name: 'logout', path: '/logout' }
-  // todo move theme popup here
 ];
+
+const showThemeSelector = ref(false);
+const lastKnownPosition = ref<{ clientX: number; clientY: number } | null>(null);
 
 const entireLogoElement = ref<HTMLElement | null>(null);
 
@@ -122,7 +143,7 @@ const getLinkDataSet = (target: HTMLElement) => {
   let name = null;
   let path = null;
 
-  if (target && target.dataset) {
+  if (target?.dataset) {
     name = target.dataset.name ?? null;
     path = target.dataset.path ?? null;
   }
@@ -130,14 +151,16 @@ const getLinkDataSet = (target: HTMLElement) => {
   return { name, path };
 };
 
-const getElementsFromEvent = (e: TouchEvent | MouseEvent) => {
-  let coordinateContainer: { clientX: number; clientY: number } | undefined;
+const getCoordsFromEvent = (e: TouchEvent | MouseEvent): { clientX: number; clientY: number } | null => {
   if ('touches' in e || 'changedTouches' in e) {
-    coordinateContainer = (e as TouchEvent).touches?.[0] ?? (e as TouchEvent)?.changedTouches?.[0];
+    return (e as TouchEvent).touches?.[0] ?? (e as TouchEvent)?.changedTouches?.[0] ?? null;
   } else {
-    coordinateContainer = e;
+    return e;
   }
+};
 
+const getElementsFromEvent = (e: TouchEvent | MouseEvent) => {
+  const coordinateContainer = getCoordsFromEvent(e);
   if (coordinateContainer) {
     return document.elementsFromPoint(coordinateContainer.clientX, coordinateContainer.clientY);
   } else {
@@ -152,6 +175,11 @@ const getHoveredLinkFromMove = (e: TouchEvent | MouseEvent) => {
 };
 
 function handleDocumentHoldMove(e: MouseEvent | TouchEvent) {
+  if (!showThemeSelector.value) {
+    // for theme selector to pop up at mouse
+    lastKnownPosition.value = getCoordsFromEvent(e);
+  }
+
   if (!isHolding.value) {
     return;
   }
@@ -163,7 +191,8 @@ function handleDocumentHoldMove(e: MouseEvent | TouchEvent) {
 }
 
 function handleDocumentHoldEnd(e: MouseEvent | TouchEvent) {
-  const wasOnLogo = getElementsFromEvent(e).some(el => el.id === logoId);
+  const wasOnLogo = getElementsFromEvent(e)
+      .some(el => el.id === logoId);
 
   if (!wasOnLogo && !isHolding.value) {
     return;
@@ -171,18 +200,30 @@ function handleDocumentHoldEnd(e: MouseEvent | TouchEvent) {
 
   tryCancel(e);
 
+  const link = getElementsFromEvent(e)
+      .map(el => getLinkDataSet(el as HTMLElement))
+      .find(el => !!el.name);
+
   if (wasOnLogo) {
-    onReleaseLogo();
+    // current is first & overlaps
+    if (link?.name === 'current' && isHolding.value) {
+      goTo(link.path!);
+    } else {
+      onReleaseLogo();
+    }
+
     return;
   }
 
-  // if (isHolding.value)
-  isHolding.value = false;
-
-  const heldLink = getHoveredLinkFromMove(e);
-  if (heldLink?.path) {
-    goTo(heldLink.path);
+  if (!isHolding.value) {
+    return;
   }
+
+  if (link?.path) {
+    goTo(link.path);
+  }
+
+  isHolding.value = false;
 }
 
 onMounted(() => {
@@ -202,8 +243,13 @@ onUnmounted(() => {
 const goTo = async (path: string) => {
   isToggled.value = false;
   isHolding.value = false;
+  hoveringName.value = null;
 
-  await navigateTo(path);
+  if (path === '/theme') {
+    showThemeSelector.value = true;
+  } else {
+    await navigateTo(path);
+  }
 };
 </script>
 

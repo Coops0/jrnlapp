@@ -1,7 +1,9 @@
 <template>
   <div class="min-h-screen flex flex-col bg-colors-primary-900">
-    <header class="md:block hidden">
-      <NavigatorDesktop v-if="authenticated"/>
+    <header class="w-full">
+        <div v-if="authenticated" class="mx-auto px-4 py-3 w-full">
+          <NavigatorLogo/>
+        </div>
     </header>
 
     <main class="flex-grow flex w-full mx-auto px-4 py-6 mb-0">
@@ -10,22 +12,15 @@
       </ComponentErrorBoundary>
     </main>
 
-    <NavigatorMobile v-if="authenticated" class="md:hidden"/>
-
     <footer class="hidden md:block">
       <div class="mx-auto px-4 py-4 flex ml-4">
         <p class="text-sm text-colors-primary-400">jrnl.fm</p>
-
-        <div v-if="authenticated" class="ml-auto mx-4">
-          <ThemeSelector/>
-        </div>
       </div>
     </footer>
   </div>
 </template>
 
 <script lang="ts" setup>
-import ThemeSelector from '~/components/navigator/ThemeSelector.vue';
 
 const { jwt } = useAuth();
 const authenticated = computed(() => !!jwt.value?.length);
