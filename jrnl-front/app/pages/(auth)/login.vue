@@ -7,7 +7,8 @@
         data-ux_mode="popup"
         :data-login_uri="apiBase + '/auth/google/callback'"
         data-auto_select="true"
-        data-itp_support="true"/>
+        data-itp_support="true"
+    />
 
     <div
         class="g_id_signin"
@@ -19,7 +20,7 @@
         data-logo_alignment="left"
     />
 
-    <div id="appleid-signin" data-color="white" data-border="false" data-type="continue"/>
+    <div id="appleid-signin" data-color="white" data-border="false" data-type="continue" class="w-[210px] h-[40px]"/>
   </div>
 </template>
 
@@ -48,7 +49,7 @@ useHead({
   ],
   meta: [
     { name: 'appleid-signin-client-id', content: appleClientId },
-    { name: 'appleid-signin-scope', content: 'name email' },
+    { name: 'appleid-signin-scope', content: 'name' },
     { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback` },
     { name: 'appleid-signin-state', content: csrf },
     { name: 'appleid-signin-nonce', content: nonce },
@@ -56,10 +57,3 @@ useHead({
   ]
 });
 </script>
-
-<style>
-#appleid-signin {
-  width: 210px;
-  height: 40px;
-}
-</style>

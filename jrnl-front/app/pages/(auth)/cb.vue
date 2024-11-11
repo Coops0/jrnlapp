@@ -17,7 +17,7 @@ const { $localApi } = useNuxtApp();
 
 const userService = new UserService($localApi);
 
-const { user } = useUser(userService);
+const { user, hasRefreshedRemotely } = useUser(userService);
 const { jwt } = useAuth();
 
 type QueryPayload = { error: string } | { user: User, token: string };
@@ -32,6 +32,8 @@ onMounted(async () => {
   }
 
   jwt.value = data.token;
+
+  hasRefreshedRemotely.value = true;
   user.value = data.user;
 
   try {

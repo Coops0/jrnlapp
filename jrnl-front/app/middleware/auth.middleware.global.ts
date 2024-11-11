@@ -1,5 +1,15 @@
 import { UserService } from '~/services/user.service';
 
+// flow:
+// is authorized route:
+//   yes -> does user have jwt?
+//           yes -> does user have user data?
+//                   yes -> PASS
+//                   no -> refresh user data and PASS
+//           no -> FAIL
+//   no -> does user have jwt?
+//           yes -> redirect to journal PASS
+//           no -> PASS
 export default defineNuxtRouteMiddleware(async (to, _from) => {
     const { $localApi } = useNuxtApp();
     const userService = new UserService($localApi);
@@ -11,7 +21,6 @@ export default defineNuxtRouteMiddleware(async (to, _from) => {
     // if false, then redirect authenticated away
     const requiresAuth = to.meta['redirectUnautheticated'] !== false;
 
-    console.debug(`middleware: jwt ${!!jwt.value}, user id ${user.value?.id}, requiresAuth ${requiresAuth}`);
     if (!requiresAuth) {
         if (jwt.value) {
             return navigateTo('/current');
