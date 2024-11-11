@@ -1,26 +1,38 @@
 <template>
-  <div>
-    <div
-        id="g_id_onload"
-        :data-client_id="googleClientId"
-        data-context="signin"
-        data-ux_mode="popup"
-        :data-login_uri="apiBase + '/auth/google/callback'"
-        data-auto_select="true"
-        data-itp_support="true"
-    />
+  <div class="size-full flex-grow flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+      <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700">
+        <div class="space-y-6">
+          <div class="flex flex-col items-center gap-3">
+            <div
+                id="g_id_onload"
+                :data-client_id="googleClientId"
+                data-context="signin"
+                data-ux_mode="popup"
+                :data-login_uri="apiBase + '/auth/google/callback'"
+                data-auto_select="true"
+                data-itp_support="true"
+            />
 
-    <div
-        class="g_id_signin"
-        data-type="standard"
-        data-shape="rectangular"
-        data-theme="outline"
-        data-text="continue_with"
-        data-size="large"
-        data-logo_alignment="left"
-    />
+            <div
+                class="g_id_signin w-full"
+                data-type="standard"
+                data-text="continue_with"
+                data-logo_alignment="center"
+                data-width="375"
+            />
 
-    <div id="appleid-signin" data-color="white" data-border="false" data-type="continue" class="w-[210px] h-[40px]"/>
+            <div
+                id="appleid-signin"
+                data-color="black"
+                data-border="true"
+                data-type="continue"
+                class="w-full h-[40px]"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
