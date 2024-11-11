@@ -4,8 +4,12 @@ export default defineNuxtConfig({
         compatibilityVersion: 4,
     },
     compatibilityDate: '2024-04-03',
-    devtools: { enabled: true },
-    modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode', '@nuxt/eslint', 'nuxt-time', '@nuxt/scripts'],
+    modules: [
+        '@nuxtjs/tailwindcss',
+        '@nuxtjs/color-mode',
+        '@nuxt/eslint',
+        'nuxt-time',
+    ],
     colorMode: {
         preference: 'lunar_placeholder',
         fallback: 'lunar_placeholder',
@@ -24,6 +28,7 @@ export default defineNuxtConfig({
             apiBase: 'http://localhost:4000',
             // apiBase: 'https://my.jrnl.fm',
             appleClientId: 'fm.jrnl.jrnlapp',
+            googleClientId: '909343102938-jr9m7fcgajq7r6op9phtq392juhikune.apps.googleusercontent.com'
         },
     },
     vite: false && process.env.NODE_ENV === 'production' ? {
@@ -31,5 +36,5 @@ export default defineNuxtConfig({
             drop: ['debugger', 'console'],
             // pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
         },
-    } : {},
+    } : {}
 });

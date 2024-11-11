@@ -1,5 +1,4 @@
 import type { $Fetch } from 'nitro/types';
-import type { User } from '~/types/user.type';
 
 export class AuthService {
     constructor(private readonly api: $Fetch) {
@@ -9,15 +8,7 @@ export class AuthService {
         return this.api('/auth/logout');
     }
 
-    async loginWithGoogle(state: string, code: string): Promise<{ user: User, token: string }> {
-        return this.api('/auth/google/callback', {
-            ignoreResponseError: true,
-            method: 'POST',
-            body: { state, code }
-        });
-    }
-
-    async getAppleSessionDetails(): Promise<{ code: string, state: string }> {
-        return this.api('/auth/apple');
+    async getSessionDetails(): Promise<{ csrf_token: string, nonce: string }> {
+        return this.api('/auth/session');
     }
 }

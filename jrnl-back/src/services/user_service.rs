@@ -1,6 +1,5 @@
 use crate::impl_service;
 use crate::schemas::user::User;
-use sqlx::postgres::PgQueryResult;
 use sqlx::{Error, PgPool};
 use uuid::Uuid;
 
@@ -8,75 +7,26 @@ pub struct UserService(PgPool);
 impl_service!(UserService);
 
 impl UserService {
-    pub async fn create_user_from_google(&self, name: &str, email: &str) -> Result<User, Error> {
-        sqlx::query_as(
-            // language=postgresql
-            "
-                INSERT INTO users (name, email) VALUES ($1, $2)
-                ON CONFLICT(email) DO UPDATE SET name = $1
-                RETURNING *
-            ",
-        )
-            .bind(name)
-            .bind(email)
-            .fetch_one(&self.0)
-            .await
-    }
-
-    pub async fn create_user_from_apple(
+    pub async fn create_or_get_user(
         &self,
-        name: &str,
-        email: &str,
-        apple_id: &str,
+        name: &Option<String>,
+        google_subject: &Option<String>,
+        apple_subject: &Option<String>,
     ) -> Result<User, Error> {
+        // causes errors if is first time user and no name provided - shouldn't happen though hopefully
         sqlx::query_as(
             // language=postgresql
             "
-                INSERT INTO users (name, email, apple_subject) VALUES ($1, $2, $3)
-                ON CONFLICT(email) DO UPDATE SET apple_subject = $3
+                INSERT INTO users (name, google_subject, apple_subject) VALUES ($1, $2, $3)
+                ON CONFLICT ON CONSTRAINT unique_auth
+                DO UPDATE SET name = COALESCE($1, users.name)
                 RETURNING *
             ",
         )
             .bind(name)
-            .bind(email)
-            .bind(apple_id)
-            .fetch_one(&self.0)
-            .await
-    }
-
-    pub async fn get_user_by_email_or_apple_id(
-        &self,
-        email: &str,
-        apple_id: &str,
-    ) -> Result<Option<User>, Error> {
-        sqlx::query_as(
-            // language=postgresql
-            "SELECT * FROM users WHERE email = $1 OR apple_subject = $2 LIMIT 1",
-        )
-            .bind(email)
-            .bind(apple_id)
-            .fetch_optional(&self.0)
-            .await
-    }
-
-    pub async fn migrate_google_account_to_apple(
-        &self,
-        user: &User,
-        apple_subject: &str,
-        name: Option<&str>,
-    ) -> Result<PgQueryResult, Error> {
-        sqlx::query(
-            // language=postgresql
-            "
-                UPDATE users
-                SET apple_subject = $1, name = COALESCE($2, name)
-                WHERE id = $3
-            ",
-        )
+            .bind(google_subject)
             .bind(apple_subject)
-            .bind(name) // if first sign in thru apple, update name
-            .bind(user.id)
-            .execute(&self.0)
+            .fetch_one(&self.0)
             .await
     }
 

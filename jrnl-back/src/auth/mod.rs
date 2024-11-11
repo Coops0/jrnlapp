@@ -14,7 +14,7 @@ pub async fn clean_expired_sessions(pool: PgPool) {
 
         let delete_temp_sessions_future = sqlx::query(
             // language=postgresql
-            "DELETE FROM temp_auth_sessions WHERE expires_at < NOW()",
+            "DELETE FROM temp_auth_sessions WHERE expiry < NOW()",
         )
             .execute(&pool);
 

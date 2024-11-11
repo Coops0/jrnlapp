@@ -8,9 +8,9 @@ use uuid::Uuid;
 pub struct User {
     pub id: Uuid,
     pub name: String,
-    pub email: String,
-    pub theme: Option<String>,
+    pub google_subject: Option<String>,
     pub apple_subject: Option<String>,
+    pub theme: Option<String>,
     pub timezone: String,
 }
 

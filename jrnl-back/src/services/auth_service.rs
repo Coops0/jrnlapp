@@ -1,35 +1,40 @@
 use crate::impl_service;
-use sqlx::postgres::PgQueryResult;
-use sqlx::{Error, PgPool};
+use chrono::{DateTime, Utc};
+use serde::Serialize;
+use sqlx::{Error, FromRow, PgPool};
+use uuid::Uuid;
 
 pub struct AuthService(PgPool);
 impl_service!(AuthService);
 
+#[derive(Serialize, FromRow)]
+pub struct TempAuthSession {
+    pub csrf_token: Uuid,
+    pub nonce: Uuid,
+    pub expiry: DateTime<Utc>,
+}
+
 impl AuthService {
-    pub async fn create_temp_auth_session(
-        &self,
-        csrf_token: &str,
-        nonce: &str,
-    ) -> Result<PgQueryResult, Error> {
-        sqlx::query(
+    pub async fn create_temp_auth_session(&self) -> Result<TempAuthSession, Error> {
+        sqlx::query_as(
             // language=postgresql
             "
-                INSERT INTO temp_auth_sessions (csrf_token, nonce, expires_at)
-                VALUES ($1, $2, NOW() + INTERVAL '30 minutes')
+                INSERT INTO temp_auth_sessions (expiry)
+                VALUES (NOW() + INTERVAL '5 minutes')
+                RETURNING *
             ",
         )
-            .bind(csrf_token)
-            .bind(nonce)
-            .execute(&self.0)
+            .fetch_one(&self.0)
             .await
     }
 
-    pub async fn get_temp_auth_session(&self, csrf: &str) -> Result<String, Error> {
-        sqlx::query_as::<_, (String,)>(
+    pub async fn delete_and_fetch_nonce(&self, csrf: &Uuid) -> Result<Uuid, Error> {
+        sqlx::query_as::<_, (Uuid,)>(
             // language=postgresql
             "
-                SELECT nonce FROM temp_auth_sessions
-                WHERE csrf_token = $1 AND expires_at > NOW() LIMIT 1
+                DELETE FROM temp_auth_sessions 
+                WHERE csrf_token = $1 AND expiry > NOW()
+                RETURNING nonce
             ",
         )
             .bind(csrf)

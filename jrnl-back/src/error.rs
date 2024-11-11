@@ -77,24 +77,16 @@ pub enum JrnlError {
 
 #[derive(Debug, Error)]
 pub enum GoogleAuthenticationError {
-    #[error("failed to generate provider session {0}")]
-    ProviderGenerationFailed(anyhow::Error),
     #[error("bad callback state {0:?}")]
-    BadCallbackState(sqlx::Error),
+    BadCallbackState(Option<sqlx::Error>),
     #[error("code exchanged failed {0}")]
     CodeExchangeFailed(anyhow::Error),
-    #[error("failed to fetch your google profile {0}")]
-    FetchGoogleProfileFailed(anyhow::Error),
 }
 
 #[derive(Debug, Error)]
 pub enum AppleAuthenticationError {
     #[error("invalid callback data")]
     BadCallbackState,
-    #[error("failed to migrate google account to apple {0}")]
-    FailedGoogleMigration(sqlx::Error),
-    #[error("no name payload data provided on sign up")]
-    NoNameOnSignup,
     #[error("failed to verify apple id token {0}")]
     VerificationError(anyhow::Error),
 }

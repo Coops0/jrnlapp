@@ -164,7 +164,7 @@ impl EntryService {
 }
 
 pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> anyhow::Result<()> {
-    let mut ticker = interval(Duration::from_secs(60 * 15));
+    let mut ticker = interval(Duration::from_secs(60 * 5));
 
     loop {
         ticker.tick().await;

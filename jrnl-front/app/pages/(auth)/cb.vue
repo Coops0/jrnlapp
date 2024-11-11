@@ -11,6 +11,7 @@ import type { User } from '~/types/user.type';
 
 definePageMeta({ redirectUnautheticated: false });
 
+// todo make this page nicer
 const route = useRoute();
 const { $localApi } = useNuxtApp();
 

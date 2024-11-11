@@ -28,10 +28,9 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - FRONTEND_URL=https://my.jrnl.fm
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - APPLE_CLIENT_ID=${APPLE_CLIENT_ID}
       - JWT_SECRET=${JWT_SECRET}
       - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
-      - APPLE_CLIENT_ID=${APPLE_CLIENT_ID}
     build:
       context: ./jrnl-back
       dockerfile: Dockerfile

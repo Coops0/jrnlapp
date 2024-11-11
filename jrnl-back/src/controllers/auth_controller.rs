@@ -1,16 +1,15 @@
-use crate::auth::providers::{verify_apple_id_token, AppleCallbackPayload};
+use crate::auth::providers::{verify_apple_id_token, verify_google_credential, AppleCallbackPayload, StrippedGoogleVerificationClaims};
 use crate::error::AppleAuthenticationError;
-use crate::services::auth_service::AuthService;
+use crate::services::auth_service::{AuthService, TempAuthSession};
 use crate::services::user_service::UserService;
 use crate::{
-    auth::{
-        jwt,
-        providers::{fetch_google_profile, google_provider},
-    },
-    error::{GoogleAuthenticationError, JrnlResult, JsonExtractor},
+    auth::jwt,
+    error::{GoogleAuthenticationError, JrnlResult},
     AppState,
 };
 use anyhow::Context;
+use axum::http::header::COOKIE;
+use axum::http::HeaderMap;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Redirect},
@@ -19,167 +18,105 @@ use axum::{
 };
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use oauth2::{
-    reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
-    Scope, TokenResponse,
-};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 use std::env;
-use uuid::Uuid;
 
 pub fn auth_controller() -> Router<AppState> {
     Router::new()
-        .route("/google", get(google_url))
+        .route("/session", get(init_session))
         .route("/google/callback", post(google_callback))
-        .route("/apple", get(init_apple_session))
         .route("/apple/callback", post(apple_callback))
         .route("/logout", get(logout))
 }
 
-async fn google_url(auth_service: AuthService) -> JrnlResult<impl IntoResponse> {
-    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
-
-    let (auth_url, csrf_token) = google_provider()
-        .map_err(GoogleAuthenticationError::ProviderGenerationFailed)?
-        .authorize_url(CsrfToken::new_random)
-        .add_scopes(vec![
-            Scope::new("https://www.googleapis.com/auth/userinfo.email".to_string()),
-            Scope::new("https://www.googleapis.com/auth/userinfo.profile".to_string()),
-            Scope::new("openid".to_string()),
-        ])
-        .set_pkce_challenge(pkce_challenge)
-        .url();
-
-    auth_service
-        .create_temp_auth_session(csrf_token.secret(), pkce_verifier.secret())
-        .await?;
-
-    Ok(Redirect::temporary(auth_url.as_str()))
+#[derive(Deserialize)]
+struct GoogleCallbackPayload {
+    credential: String,
+    g_csrf_token: String,
 }
 
-#[derive(Deserialize)]
-struct CallbackPayload {
-    code: String,
-    state: String,
+async fn inner_google_callback(
+    user_service: UserService,
+    headers: HeaderMap,
+    Form(GoogleCallbackPayload { credential, g_csrf_token }): Form<GoogleCallbackPayload>,
+) -> JrnlResult<serde_json::Value> {
+    let csrf_cookie = headers.get(COOKIE)
+        .and_then(|c| c.to_str().ok())
+        .and_then(|c| c.split_once("g_csrf_token="))
+        .map(|(_, c)| c.trim().trim_matches(';'));
+
+    if csrf_cookie != Some(&*g_csrf_token) {
+        return Err(GoogleAuthenticationError::BadCallbackState(None).into());
+    }
+
+    let StrippedGoogleVerificationClaims { sub, name } = verify_google_credential(&credential).await
+        .map_err(GoogleAuthenticationError::CodeExchangeFailed)?;
+
+    let user = user_service.create_or_get_user(&name, &Some(sub), &None).await?;
+    let jwt = jwt::encode_user_jwt(user.id)?;
+
+    Ok(json!({ "token": jwt, "user": user }))
 }
 
 async fn google_callback(
-    auth_service: AuthService,
     user_service: UserService,
-    JsonExtractor(CallbackPayload { code, state }): JsonExtractor<CallbackPayload>,
+    headers: HeaderMap,
+    Form(payload): Form<GoogleCallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
-    let pkce_verifier = auth_service
-        .get_temp_auth_session(&state)
-        .await
-        .map_err(GoogleAuthenticationError::BadCallbackState)?;
-
-    let provider = google_provider()?;
-    let google_token = provider
-        .exchange_code(AuthorizationCode::new(code))
-        .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
-        .request_async(async_http_client)
-        .await
-        .map_err(|e| GoogleAuthenticationError::CodeExchangeFailed(e.into()))?;
-
-    let (name, email) = fetch_google_profile(google_token.access_token().secret())
-        .await
-        .map_err(GoogleAuthenticationError::FetchGoogleProfileFailed)?;
-
-    let user = user_service.create_user_from_google(&name, &email).await?;
-
-    let jwt = jwt::encode_user_jwt(user.id)?;
-    Ok(Json(json!({ "token": jwt, "user": user })))
+    let response = inner_google_callback(user_service, headers, Form(payload)).await;
+    serve_response_flash(response)
 }
 
-#[derive(Serialize)]
-struct AppleSession {
-    code: String,
-    state: String,
-}
-
-async fn init_apple_session(auth_service: AuthService) -> JrnlResult<Json<AppleSession>> {
-    let verifier = CsrfToken::new_random();
-    let nonce = Uuid::new_v4().to_string();
-
-    auth_service
-        .create_temp_auth_session(verifier.secret(), &nonce)
-        .await?;
-
-    Ok(Json(AppleSession {
-        code: nonce,
-        state: verifier.secret().to_owned(),
-    }))
+async fn init_session(auth_service: AuthService) -> JrnlResult<Json<TempAuthSession>> {
+    auth_service.create_temp_auth_session()
+        .await
+        .map(Json)
+        .map_err(Into::into)
 }
 
 async fn apple_callback_inner(
     auth_service: AuthService,
     user_service: UserService,
-    Form(AppleCallbackPayload {
-             id_token,
-             user,
-             state,
-             ..
-         }): Form<AppleCallbackPayload>) -> JrnlResult<serde_json::Value> {
+    Form(AppleCallbackPayload { id_token, user, state, .. }): Form<AppleCallbackPayload>,
+) -> JrnlResult<serde_json::Value> {
     let nonce = auth_service
-        .get_temp_auth_session(&state)
+        .delete_and_fetch_nonce(&state)
         .await
         .map_err(|_| AppleAuthenticationError::BadCallbackState)?;
 
-    let claims = verify_apple_id_token(&id_token, &nonce)
+    let subject = verify_apple_id_token(&id_token, &nonce)
         .await
         .map_err(AppleAuthenticationError::VerificationError)?;
 
-    let name = user.map(|u| format!("{} {}", u.name.first_name, u.name.last_name));
+    let name = user.map(|u| u.name.first_name);
 
-    let user = match user_service
-        .get_user_by_email_or_apple_id(&claims.email, &claims.sub)
-        .await?
-    {
-        Some(user) => {
-            if user.apple_subject.is_none() {
-                user_service
-                    .migrate_google_account_to_apple(&user, &claims.sub, name.as_deref())
-                    .await
-                    .map_err(AppleAuthenticationError::FailedGoogleMigration)?;
-            }
-
-            user
-        }
-        None => user_service
-            .create_user_from_apple(
-                &name.ok_or(AppleAuthenticationError::NoNameOnSignup)?,
-                &claims.email,
-                &claims.sub,
-            )
-            .await?,
-    };
-
+    let user = user_service.create_or_get_user(&name, &None, &Some(subject)).await?;
     let jwt = jwt::encode_user_jwt(user.id)?;
+
     Ok(json!({ "token": jwt, "user": user }))
 }
 
 // no actual error should ever be triggered in the jrnlresult, they should just be serialized and passed
-async fn apple_callback(
-    auth_service: AuthService,
-    user_service: UserService,
-    Form(payload): Form<AppleCallbackPayload>,
-) -> JrnlResult<Redirect> {
+async fn apple_callback(auth_service: AuthService, user_service: UserService, Form(payload): Form<AppleCallbackPayload>) -> JrnlResult<Redirect> {
     let response = apple_callback_inner(auth_service, user_service, Form(payload)).await;
+    serve_response_flash(response)
+}
 
+async fn logout() -> JrnlResult<StatusCode> {
+    Ok(StatusCode::OK)
+}
+
+fn serve_response_flash(response: JrnlResult<serde_json::Value>) -> JrnlResult<Redirect> {
     let json_value = response.unwrap_or_else(|err| json!({ "error": err.to_string() }));
     let encoded_string = STANDARD.encode(
         serde_json::to_string(&json_value).context("failed to serialize response")?.as_bytes(),
     );
 
     let redirect_uri = format!(
-        "{}/ac/apple?r={encoded_string}",
+        "{}/cb?r={encoded_string}",
         env::var("FRONTEND_URL").context("missing frontend url?")?,
     );
 
     Ok(Redirect::temporary(&redirect_uri))
-}
-
-async fn logout() -> JrnlResult<StatusCode> {
-    Ok(StatusCode::OK)
 }
