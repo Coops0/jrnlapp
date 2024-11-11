@@ -1,5 +1,5 @@
 import type { GroupService } from '~/services/group.service';
-import { getNextSunday, parseServerDate } from '~/util/index.util';
+import { getBestStartPosition, parseServerDate } from '~/util/index.util';
 
 export interface GroupInfo {
     name: string;
@@ -10,7 +10,10 @@ export const useGroup = (
     code: string,
     groupService: GroupService
 ) => {
-    const { data: group, error: groupInfoError } = useLazyAsyncData(`group-${code}`, () => groupService.getGroup(code), {
+    const {
+        data: group,
+        error: groupInfoError
+    } = useLazyAsyncData(`group-${code}`, () => groupService.getGroup(code), {
         transform(g) {
             return g && { name: g.name, id: g.id } as GroupInfo;
         }
@@ -18,14 +21,16 @@ export const useGroup = (
 
     const { data: members } = useLazyAsyncData(`members-${code}`, () => groupService.getGroupMembers(code));
 
-    const before = ref<Date>(getNextSunday(new Date()));
+    const before = ref<Date>(getBestStartPosition(new Date()));
 
     const { data: days } = useLazyAsyncData(
         `days-${code}`,
         () => groupService.getDaysData(code, before.value.toLocaleDateString(), 7),
         {
             transform(days) {
-                return days?.sort((a, b) => parseServerDate(b.day).getTime() - parseServerDate(a.day).getTime());
+                return days
+                    ?.map(d => ({ ...d, day: parseServerDate(d.day) }))
+                    ?.sort((a, b) => b.day.getTime() - a.day.getTime());
             },
             watch: [before]
         });

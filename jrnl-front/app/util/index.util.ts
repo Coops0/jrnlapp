@@ -73,11 +73,12 @@ export const parseServerDate = (d: string): Date => {
 
 export const addDays = (date: Date, days: number): Date => new Date(date.getTime() - (days * 24 * 60 * 60 * 1000));
 
-export function getNextSunday(date: Date): Date {
+export function getBestStartPosition(date: Date): Date {
     const d = new Date(date);
-
-    d.setDate(d.getDate() + (7 - d.getDay()) % 7);
     d.setHours(0, 0, 0, 0);
 
+    const currentDay = d.getDay();
+
+    d.setDate(d.getDate() - currentDay + 3);
     return d;
 }

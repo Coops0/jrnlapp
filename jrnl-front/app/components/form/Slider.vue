@@ -6,7 +6,7 @@
              width: percentage + '%',
              backgroundColor: ratingLerp(modelValue ?? 0)
         }"
-          class="absolute h-full transition-all duration-100"
+          class="absolute h-full transition-all ease-out duration-100"
       />
     </div>
 

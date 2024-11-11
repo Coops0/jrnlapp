@@ -14,7 +14,8 @@
       <div class="flex flex-col md:flex-row justify-items-center items-center gap-2">
         <span
             :id="logoId"
-            class="fixed md:static bottom-4 left-4 md:bottom-auto md:left-auto text-xl md:text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-100 select-none touch-none cursor-pointer z-20"
+            class="fixed md:static bottom-4 left-4 md:bottom-auto md:left-auto text-xl md:text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
+            :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
             @mousedown="onPressLogo"
             @touchstart="onPressLogo"
@@ -23,10 +24,10 @@
         </span>
 
         <Transition
-            enter-active-class="transition-all duration-300 ease-out"
+            enter-active-class="transition-all duration-150 ease-out"
             enter-from-class="opacity-0 scale-95"
             enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition-all duration-200 ease-in"
+            leave-active-class="transition-all duration-100 ease-in"
             leave-from-class="opacity-100 scale-100"
             leave-to-class="opacity-0 scale-95"
         >

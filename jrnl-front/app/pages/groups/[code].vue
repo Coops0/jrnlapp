@@ -41,7 +41,6 @@ const isOwned = computed(() =>
 );
 
 const move = (forward: boolean) => {
-  // I don't even know
   before.value = addDays(before.value, forward ? -7 : 7);
 };
 
