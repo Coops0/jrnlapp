@@ -5,35 +5,40 @@
         :x="lastKnownPosition?.clientX"
         :y="lastKnownPosition?.clientY"
     />
-    <div ref="entireLogoElement" tabindex="-1" class="outline-none w-full md:h-8" @focusout="handleLostFocus">
+    <div
+        ref="entireLogoElement"
+        tabindex="-1"
+        class="outline-none w-full md:h-8"
+        @focusout="handleLostFocus"
+    >
       <div class="flex flex-col md:flex-row justify-items-center items-center gap-2">
-      <span
-          :id="logoId"
-          class="text-3xl !leading-normal font-semibold text-colors-primary-100 hover:text-colors-primary-300 transition-all duration-100 select-none touch-none cursor-pointer"
-          draggable="false"
-          @mousedown="onPressLogo"
-          @touchstart="onPressLogo"
-      >
-        jrnl
-      </span>
+        <span
+            :id="logoId"
+            class="fixed md:static bottom-4 left-4 md:bottom-auto md:left-auto text-xl md:text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-100 select-none touch-none cursor-pointer z-50"
+            draggable="false"
+            @mousedown="onPressLogo"
+            @touchstart="onPressLogo"
+        >
+          jrnl
+        </span>
 
         <Transition
-            enter-active-class="transition-all duration-200"
-            enter-from-class="opacity-0 md:-translate-x-2 -translate-y-2 md:translate-y-0"
-            enter-to-class="opacity-100 translate-x-0 translate-y-0"
-            leave-active-class="transition-all duration-150"
-            leave-from-class="opacity-100 translate-x-0 translate-y-0"
-            leave-to-class="opacity-0 md:-translate-x-2 -translate-y-2 md:translate-y-0"
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition-all duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
         >
           <div
               v-if="isToggled || isHolding"
-              class="w-full max-h-full flex-grow absolute mt-12 md:mt-0 md:relative z-40 backdrop-blur-xl bg-colors-primary-950/40 rounded-lg overflow-hidden"
+              class="fixed md:absolute left-4 bottom-16 md:top-12 md:bottom-auto w-[calc(100%-2rem)] md:w-64 z-40 backdrop-blur-xl bg-colors-primary-950/90 rounded-xl shadow-xl shadow-colors-primary-950/20 border border-colors-primary-800/20 overflow-hidden"
           >
-            <div class="flex flex-col md:flex-row md:justify-evenly md:justify-items-stretch w-full">
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-2 p-2">
               <div
                   v-for="item in menuItems"
                   :key="item.path"
-                  class="group w-full md:flex-grow select-none px-1 py-0.5"
+                  class="group w-full select-none"
                   :class="{
                   'bg-colors-primary-800/20': route.name === item.name,
                   'scale-[1.02]': hoveringName === item.name,
@@ -42,7 +47,7 @@
                   :data-path="item.path"
               >
                 <div
-                    class="flex items-center justify-center px-6 py-3 md:py-2 cursor-pointer rounded-md transition-all duration-150 ease-out"
+                    class="flex items-center justify-center px-4 py-3 cursor-pointer rounded-lg transition-all duration-150 ease-out"
                     :class="{
                     'bg-colors-primary-800/40': route.name === item.name,
                     'bg-colors-primary-800/20': hoveringName === item.name,
@@ -50,16 +55,16 @@
                   }"
                     @click="() => goTo(item.path)"
                 >
-                <span
-                    class="text-lg md:text-base text-colors-primary-200 transition-colors duration-150"
-                    :class="{
+                  <span
+                      class="text-base font-medium text-colors-primary-200 transition-colors duration-150"
+                      :class="{
                       'text-colors-primary-50 glow': route.name === item.name,
-                      'text-color-primary-100': hoveringName === item.name,
+                      'text-colors-primary-100': hoveringName === item.name,
                       'group-hover:text-colors-primary-50': isToggled
                     }"
-                >
-                  {{ item.name }}
-                </span>
+                  >
+                    {{ item.name }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -72,7 +77,6 @@
 
 <script setup lang="ts">
 const route = useRoute();
-
 const logoId = useId();
 
 const menuItems = [
@@ -85,12 +89,10 @@ const menuItems = [
 
 const showThemeSelector = ref(false);
 const lastKnownPosition = ref<{ clientX: number; clientY: number } | null>(null);
-
 const entireLogoElement = ref<HTMLElement | null>(null);
 
 const isHolding = ref(false);
 const isToggled = ref(false);
-
 const hoveringName = ref<string | null>(null);
 
 const tryCancel = (e: TouchEvent | MouseEvent) => {
@@ -176,8 +178,22 @@ const getHoveredLinkFromMove = (e: TouchEvent | MouseEvent) => {
 
 function handleDocumentHoldMove(e: MouseEvent | TouchEvent) {
   if (!showThemeSelector.value) {
-    // for theme selector to pop up at mouse
-    lastKnownPosition.value = getCoordsFromEvent(e);
+    const p = getCoordsFromEvent(e);
+    lastKnownPosition.value = p && {
+      clientX: p.clientX,
+      clientY: p.clientY
+    };
+
+    if (p) {
+      if (p.clientX > window.innerWidth / 2) {
+        lastKnownPosition.value!.clientX = p.clientX - (window.innerWidth / 4);
+      }
+
+
+      if (p.clientY > window.innerHeight / 2) {
+        lastKnownPosition.value!.clientY = p.clientY - (window.innerHeight / 5);
+      }
+    }
   }
 
   if (!isHolding.value) {
@@ -205,13 +221,11 @@ function handleDocumentHoldEnd(e: MouseEvent | TouchEvent) {
       .find(el => !!el.name);
 
   if (wasOnLogo) {
-    // current is first & overlaps
     if (link?.name === 'current' && isHolding.value) {
       goTo(link.path!);
     } else {
       onReleaseLogo();
     }
-
     return;
   }
 
@@ -253,9 +267,9 @@ const goTo = async (path: string) => {
 };
 </script>
 
+<!--suppress CssUnresolvedCustomProperty -->
 <style scoped>
 .glow {
-  /*noinspection CssUnresolvedCustomProperty*/
   text-shadow: hsl(var(--twc-colors-primary-500)) 0 0 16px;
 }
 </style>
