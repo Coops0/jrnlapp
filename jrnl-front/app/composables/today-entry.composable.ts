@@ -17,6 +17,8 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     const lastSaved = ref(new Date(1900, 1, 1));
     const tomorrow = ref(getTomorrow());
 
+    const saveConflict = ref<[Entry, Entry] | null>(null);
+
     const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
     const saveEntryTimeoutId = ref<NodeJS.Timeout | null>(null);
 
@@ -62,7 +64,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     watch(entry, save, { deep: true });
 
     async function saveNow() {
-        if (!entry.value) {
+        if (!entry.value || saveConflict.value) {
             return;
         }
 
@@ -101,10 +103,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
                 (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
                 (entry.value.text?.length || entry.value.emotion_scale !== 5)
             ) {
-                console.warn('conflict detected between saved storage state && fetched state... defaulting to local storage');
-                console.debug(today, entry.value);
-
-                await saveNow();
+                onConflict(today);
                 return today;
             }
 
@@ -116,6 +115,13 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             return today;
         }
     });
+
+    function onConflict(today: Entry) {
+        console.warn('conflict detected between saved storage state && fetched state');
+        console.debug(today, entry.value);
+
+        saveConflict.value = [today, entry.value];
+    }
 
     onMounted(() => {
         if (status.value === 'success') {
@@ -164,11 +170,32 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         }
     });
 
+    async function handleSaveConflict(server: boolean) {
+        if (!saveConflict.value) {
+            return;
+        }
+
+        const [today,] = saveConflict.value;
+        saveConflict.value = null;
+
+        if (server) {
+            entry.value = today;
+            storage.value = today;
+        } else {
+            await saveNow();
+        }
+    }
+
     return {
         entry,
-        lastSaved,
         beginFetch: fetchToday,
+
         tomorrow,
-        lastSavedEntry
+
+        lastSaved,
+        lastSavedEntry,
+
+        saveConflict,
+        handleSaveConflict
     };
 };

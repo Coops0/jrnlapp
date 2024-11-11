@@ -1,5 +1,12 @@
 <template>
   <div class="flex flex-col relative flex-grow px-2 md:px-4 lg:px-10">
+    <LazyTodayEntrySaveConflictModal
+        v-if="saveConflict"
+        :server="saveConflict[0]"
+        :local="saveConflict[1]"
+        @resolve="handleSaveConflict"
+    />
+
     <div class="top-2 left-0 right-0 z-10 mb-2">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry" :entry/>
@@ -43,7 +50,15 @@ const entryCookie = useCookie<Entry>('entry-today', {
   maxAge: 60 * 60 * 24
 });
 
-const { beginFetch, tomorrow, entry, lastSaved, lastSavedEntry } = useTodayEntry(entryService, entryCookie);
+const {
+  beginFetch,
+  tomorrow,
+  entry,
+  lastSaved,
+  lastSavedEntry,
+  saveConflict,
+  handleSaveConflict
+} = useTodayEntry(entryService, entryCookie);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 beginFetch();

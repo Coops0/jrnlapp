@@ -31,7 +31,6 @@
 </template>
 
 <script lang="ts" setup>
-
 const { jwt } = useAuth();
 
 definePageMeta({ redirectUnautheticated: false });
