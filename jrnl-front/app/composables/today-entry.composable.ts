@@ -37,7 +37,6 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
 
             cancelledSaves.value = 0;
             await saveNow();
-
             return;
         }
 
@@ -103,7 +102,10 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
                 (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
                 (entry.value.text?.length || entry.value.emotion_scale !== 5)
             ) {
-                onConflict(today);
+                console.warn('conflict detected between saved storage state && fetched state');
+                console.debug(today, entry.value);
+
+                saveConflict.value = [today, entry.value];
                 return today;
             }
 
@@ -115,13 +117,6 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             return today;
         }
     });
-
-    function onConflict(today: Entry) {
-        console.warn('conflict detected between saved storage state && fetched state');
-        console.debug(today, entry.value);
-
-        saveConflict.value = [today, entry.value];
-    }
 
     onMounted(() => {
         if (status.value === 'success') {

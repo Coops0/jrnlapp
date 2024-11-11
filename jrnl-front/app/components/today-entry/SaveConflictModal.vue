@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="fixed inset-0 bg-colors-primary-950/90 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-colors-primary-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-30">
       <div class="bg-colors-primary-900 rounded-xl w-full max-w-md shadow-xl border border-colors-primary-800">
         <div class="p-6 space-y-4">
           <div class="space-y-2">
@@ -14,11 +14,12 @@
                 <div
                     class="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-colors-primary-900 to-transparent z-10"/>
                 <div class="p-4 bg-colors-primary-800/50 rounded-lg min-h-[80px] max-h-[200px] overflow-y-auto">
+                  <!-- eslint-disable vue/no-v-html -->
                   <pre
                       v-if="localText"
-                      class="text-colors-primary-200 lowercase whitespace-pre-wrap break-words text-sm">
-                    {{ localText }}
-                  </pre>
+                      class="text-colors-primary-200 lowercase whitespace-pre-wrap break-words text-sm"
+                      v-html="localText"
+                  />
                   <p v-else class="text-colors-primary-400 lowercase italic">empty entry</p>
                   <span class="text-xs text-colors-primary-400 mt-2 block lowercase">local version</span>
                 </div>
@@ -30,11 +31,12 @@
                 <div
                     class="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-colors-primary-900 to-transparent z-10"/>
                 <div class="p-4 bg-colors-primary-800/50 rounded-lg min-h-[80px] max-h-[200px] overflow-y-auto">
+                  <!-- eslint-disable vue/no-v-html -->
                   <pre
                       v-if="serverText"
-                       class="text-colors-primary-200 lowercase whitespace-pre-wrap break-words text-sm">
-                    {{ serverText }}
-                  </pre>
+                      class="text-colors-primary-200 lowercase whitespace-pre-wrap break-words text-sm"
+                      v-html="serverText"
+                  />
                   <p v-else class="text-colors-primary-400 lowercase italic">empty entry</p>
                   <span class="text-xs text-colors-primary-400 mt-2 block lowercase">server version</span>
                 </div>

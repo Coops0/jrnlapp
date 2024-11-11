@@ -11,7 +11,7 @@
       <div
           v-if="isOpen"
           ref="popupWindow"
-          class="absolute w-40 z-50 rounded-lg backdrop-blur-xl shadow-xl outline-none"
+          class="absolute w-40 z-20 rounded-lg backdrop-blur-xl shadow-xl outline-none"
           :style="{ top: y + 'px', left: x + 'px' }"
           tabindex="-1"
           @focusout="unfocus"

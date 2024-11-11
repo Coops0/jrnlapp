@@ -14,7 +14,7 @@
       <div class="flex flex-col md:flex-row justify-items-center items-center gap-2">
         <span
             :id="logoId"
-            class="fixed md:static bottom-4 left-4 md:bottom-auto md:left-auto text-xl md:text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-100 select-none touch-none cursor-pointer z-50"
+            class="fixed md:static bottom-4 left-4 md:bottom-auto md:left-auto text-xl md:text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-100 select-none touch-none cursor-pointer z-20"
             draggable="false"
             @mousedown="onPressLogo"
             @touchstart="onPressLogo"
@@ -32,7 +32,7 @@
         >
           <div
               v-if="isToggled || isHolding"
-              class="fixed md:absolute left-4 bottom-16 md:top-12 md:bottom-auto w-[calc(100%-2rem)] md:w-64 z-40 backdrop-blur-xl bg-colors-primary-950/90 rounded-xl shadow-xl shadow-colors-primary-950/20 border border-colors-primary-800/20 overflow-hidden"
+              class="fixed md:absolute left-4 bottom-16 md:top-12 md:bottom-auto w-[calc(100%-2rem)] md:w-64 z-10 backdrop-blur-xl bg-colors-primary-950/90 rounded-xl shadow-xl shadow-colors-primary-950/20 border border-colors-primary-800/20 overflow-hidden"
           >
             <div class="grid grid-cols-2 md:grid-cols-2 gap-2 p-2">
               <div
