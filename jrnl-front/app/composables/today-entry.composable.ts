@@ -27,8 +27,8 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
 
     const unsavedChanges = computed(() =>
-        (!lastSavedEntry.value || JSON.stringify(lastSavedEntry.value) !== JSON.stringify(entry.value)) &&
-        (entry.value.text?.length || entry.value.emotion_scale !== 5)
+        !!((!lastSavedEntry.value || JSON.stringify(lastSavedEntry.value) !== JSON.stringify(entry.value)) &&
+            (entry.value.text?.length || entry.value.emotion_scale !== 5))
     );
 
     async function save() {
@@ -46,7 +46,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             return;
         }
 
-        if (unsavedChanges.value) {
+        if (!unsavedChanges.value) {
             console.log('cancelling save, no changes');
             cancelledSaves.value++;
             return;

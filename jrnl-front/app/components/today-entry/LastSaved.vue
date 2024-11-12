@@ -12,7 +12,7 @@
 
       <span
           v-if="unsavedChanges || isUnsaved"
-          class="inline-block w-1.5 h-1.5 rounded-full bg-colors-accent-400 animate-pulse"
+          class="inline-block w-1.5 h-1.5 rounded-full bg-colors-accent-400"
       />
     </h5>
     <h5

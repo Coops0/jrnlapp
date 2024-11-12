@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col relative flex-grow px-2 md:px-4 lg:px-10">
+  <div class="flex flex-col relative flex-grow px-2 md:px-4 lg:px-10 max-w-full">
     <LazyTodayEntrySaveConflictModal
         v-if="saveConflict"
         :server="saveConflict[0]"
