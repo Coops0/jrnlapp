@@ -1,12 +1,22 @@
 <template>
-  <h5
-      class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity"
-  >
-    <span v-if="savedJustNow">last saved: just now</span>
-    <span v-else-if="isUnsaved">last saved: ...</span>
-    <span v-else-if="lastSaved.getFullYear() === 1900">last saved: never</span>
-    <span v-else>last saved: <NuxtTime :datetime="lastSaved" relative/></span>
-  </h5>
+  <div>
+    <h5
+        v-if="show"
+        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer"
+        @click="toggle"
+    >
+      <span v-if="savedJustNow">last saved: just now</span>
+      <span v-else-if="isUnsaved">last saved: ...</span>
+      <span v-else-if="lastSaved.getFullYear() === 1900">last saved: never</span>
+      <span v-else>last saved: <NuxtTime :datetime="lastSaved" relative/></span>
+    </h5>
+    <h5
+        v-else
+        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer px-4"
+        @click="toggle"
+    >🎛️
+    </h5>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -18,8 +28,17 @@ const props = defineProps<{
   entry: Entry | null;
 }>();
 
+const show = useCookie('show-last-saved', {
+  default: () => true,
+  maxAge: 60 * 60 * 24 * 365
+});
+
 const isUnsaved = ref(false);
 const savedJustNow = ref(false);
+
+const toggle = () => {
+  show.value = !show.value;
+};
 
 const timeCheckInterval = ref<NodeJS.Timeout | null>(null);
 
