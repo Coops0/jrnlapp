@@ -12,8 +12,8 @@
       </div>
     </div>
 
-    <div v-else-if="error" class="p-4 rounded-lg">
-      <p class="text-colors-accent-400">unable to load entries: {{ error }}</p>
+    <div v-else-if="error" class="p-4 rounded-lg justify-center">
+      <p class="text-colors-accent-400">unable to load entries ~ {{ error }}</p>
       <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
     </div>
 

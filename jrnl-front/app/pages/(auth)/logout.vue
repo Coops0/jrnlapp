@@ -1,5 +1,13 @@
 <template>
-  <div class="text-colors-text-200">one min im logging you out the jrnl</div>
+  <div class="size-full flex-grow flex items-center justify-center p-6">
+    <div class="w-full max-w-md text-center">
+      <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700">
+        <div class="text-red-400 mb-4">
+          <span class="text-lg">logging you in</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>

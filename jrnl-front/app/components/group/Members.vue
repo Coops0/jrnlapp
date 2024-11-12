@@ -28,6 +28,7 @@
             v-if="isOwned && member.id !== id"
             size="sm"
             variant="danger"
+            title="kick"
             @click="emit('kick', index)"
         >x
         </FormButton>

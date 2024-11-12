@@ -191,6 +191,6 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         lastSavedEntry,
 
         saveConflict,
-        handleSaveConflict
+        handleSaveConflict,
     };
 };

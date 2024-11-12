@@ -6,7 +6,7 @@
           jrnl.fm
         </h1>
         <p class="text-xl sm:text-2xl text-colors-primary-300 font-light">
-          the simplest journal app and emotion tracker
+          the simplest journal app that stays out of your way
         </p>
       </div>
 

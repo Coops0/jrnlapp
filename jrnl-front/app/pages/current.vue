@@ -57,7 +57,7 @@ const {
   lastSaved,
   lastSavedEntry,
   saveConflict,
-  handleSaveConflict
+  handleSaveConflict,
 } = useTodayEntry(entryService, entryCookie);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);

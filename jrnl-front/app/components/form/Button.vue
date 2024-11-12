@@ -9,6 +9,7 @@
       className
     ]"
       :disabled
+      :title
       :type="type"
       v-bind="$attrs"
   >
@@ -30,6 +31,7 @@ interface Props {
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   disabled?: boolean;
+  title?: string;
 }
 
 withDefaults(defineProps<Props>(), {

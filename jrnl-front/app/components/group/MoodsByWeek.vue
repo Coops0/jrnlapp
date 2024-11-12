@@ -7,9 +7,8 @@
         </FormButton>
 
         <span class="text-sm md:text-base text-colors-primary-400 min-w-[140px] text-center">
+          <NuxtTime :datetime="before" day="2-digit" month="numeric"/> -
           <NuxtTime :datetime="addDays(before, 6)" day="2-digit" month="numeric"/>
-          -
-          <NuxtTime :datetime="before" day="2-digit" month="numeric"/>
         </span>
 
         <FormButton size="sm" variant="ghost" @click="() => emit('move', true)">
