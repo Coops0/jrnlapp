@@ -50,17 +50,13 @@ async function kick(index: number) {
   try {
     await groupService.kickMember(code, member.id);
   } catch (e) {
-    console.error(e);
     members.value!.splice(index, 0, member);
+    throw e;
   }
 }
 
 async function leave() {
-  try {
-    await groupService.leaveGroup(code);
-    await navigateTo('/groups/');
-  } catch (e) {
-    console.error(e);
-  }
+  await groupService.leaveGroup(code);
+  await navigateTo('/groups/');
 }
 </script>

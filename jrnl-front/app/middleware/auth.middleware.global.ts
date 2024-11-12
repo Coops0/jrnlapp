@@ -10,6 +10,7 @@ import { UserService } from '~/services/user.service';
 //   no -> does user have jwt?
 //           yes -> redirect to journal PASS
 //           no -> PASS
+// noinspection JSUnusedGlobalSymbols
 export default defineNuxtRouteMiddleware(async (to, _from) => {
     const { $localApi } = useNuxtApp();
     const userService = new UserService($localApi);
