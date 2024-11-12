@@ -1,12 +1,11 @@
 use crate::{
-    auth::jwt,
-    auth::providers::{verify_apple_id_token, verify_google_credential, AppleCallbackPayload, StrippedGoogleVerificationClaims},
-    error::AppleAuthenticationError,
-    error::{GoogleAuthenticationError, JrnlResult},
-    services::{
-        auth_service::{AuthService, TempAuthSession},
-        user_service::UserService,
+    auth::{
+        jwt,
+        providers::{verify_apple_id_token, verify_google_credential, AppleCallbackPayload, StrippedGoogleVerificationClaims},
     },
+    error::{AppleAuthenticationError, GoogleAuthenticationError, JrnlResult},
+    schemas::user::User,
+    services::{auth_service::{AuthService, TempAuthSession}, user_service::UserService},
     AppState,
 };
 use anyhow::Context;
@@ -19,7 +18,7 @@ use axum::{
     Router,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::env;
 
@@ -28,6 +27,12 @@ pub fn auth_controller() -> Router<AppState> {
         .route("/session", get(init_session))
         .route("/google/callback", post(google_callback))
         .route("/apple/callback", post(apple_callback))
+}
+
+#[derive(Serialize)]
+struct JrnlTokenResponse {
+    token: String,
+    user: User,
 }
 
 #[derive(Deserialize)]
@@ -40,7 +45,7 @@ async fn inner_google_callback(
     user_service: UserService,
     headers: HeaderMap,
     Form(GoogleCallbackPayload { credential, g_csrf_token }): Form<GoogleCallbackPayload>,
-) -> JrnlResult<serde_json::Value> {
+) -> JrnlResult<JrnlTokenResponse> {
     let csrf_cookie = headers.get(COOKIE)
         .and_then(|c| c.to_str().ok())
         .and_then(|c| c.split_once("g_csrf_token="))
@@ -56,7 +61,7 @@ async fn inner_google_callback(
     let user = user_service.create_or_get_user(&name, &Some(sub), &None).await?;
     let jwt = jwt::encode_user_jwt(user.id)?;
 
-    Ok(json!({ "token": jwt, "user": user }))
+    Ok(JrnlTokenResponse { token: jwt, user })
 }
 
 async fn google_callback(
@@ -79,7 +84,7 @@ async fn apple_callback_inner(
     auth_service: AuthService,
     user_service: UserService,
     Form(AppleCallbackPayload { id_token, user, state, .. }): Form<AppleCallbackPayload>,
-) -> JrnlResult<serde_json::Value> {
+) -> JrnlResult<JrnlTokenResponse> {
     let nonce = auth_service
         .delete_and_fetch_nonce(&state)
         .await
@@ -94,7 +99,7 @@ async fn apple_callback_inner(
     let user = user_service.create_or_get_user(&name, &None, &Some(subject)).await?;
     let jwt = jwt::encode_user_jwt(user.id)?;
 
-    Ok(json!({ "token": jwt, "user": user }))
+    Ok(JrnlTokenResponse { token: jwt, user })
 }
 
 // no actual error should ever be triggered in the jrnlresult, they should just be serialized and passed
@@ -103,12 +108,13 @@ async fn apple_callback(auth_service: AuthService, user_service: UserService, Fo
     serve_response_flash(response)
 }
 
-fn serve_response_flash(response: JrnlResult<serde_json::Value>) -> JrnlResult<Redirect> {
-    let json_value = response.unwrap_or_else(|err| json!({ "error": err.to_string() }));
-    let encoded_string = STANDARD.encode(
-        serde_json::to_string(&json_value).context("failed to serialize response")?.as_bytes(),
-    );
+fn serve_response_flash(response: JrnlResult<JrnlTokenResponse>) -> JrnlResult<Redirect> {
+    let json_string = match response {
+        Ok(value) => serde_json::to_string(&value),
+        Err(err) => serde_json::to_string(&json!({ "error": err.to_string() })),
+    }.context("failed to serialize response")?;
 
+    let encoded_string = STANDARD.encode(json_string.as_bytes());
     let redirect_uri = format!(
         "{}/cb?r={encoded_string}",
         env::var("FRONTEND_URL").context("missing frontend url?")?,

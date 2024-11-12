@@ -1,9 +1,9 @@
 use crate::{
-    services::user_service::UserService,
     error::{JrnlResult, JsonExtractor},
     schemas::user::User,
+    services::user_service::UserService,
     web::deserialize_empty_string,
-    AppState
+    AppState,
 };
 use axum::{routing::get, Json, Router};
 use chrono_tz::Tz;
@@ -47,7 +47,7 @@ async fn update_self_user(
     JsonExtractor(payload): JsonExtractor<UpdateSelfPayload>,
 ) -> JrnlResult<Json<User>> {
     user_service
-        .update_user(&user, &payload.theme, &payload.tz.map(|tz| tz.to_string()))
+        .update_user(&user, &payload.theme, &payload.tz.as_ref().map(Tz::to_string))
         .await
         .map(Json)
         .map_err(Into::into)

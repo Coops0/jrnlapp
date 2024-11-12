@@ -7,15 +7,19 @@ mod web;
 
 use crate::{auth::clean_expired_sessions, schemas::user::User};
 use aes_gcm::{Aes256Gcm, Key};
+use axum::middleware::from_extractor_with_state;
 use axum::{
     extract::DefaultBodyLimit,
     http::header::{AUTHORIZATION, CONTENT_TYPE},
     Router,
 };
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    PgPool,
+use controllers::{
+    entry_controller::entries_controller,
+    group_controller::groups_controller,
+    user_controller::users_controller,
 };
+use services::entry_service::encrypt_old_entries;
+use sqlx::{postgres::{PgConnectOptions, PgPoolOptions}, PgPool};
 use std::{env, time::Duration};
 use tokio::{join, task};
 use tower::ServiceBuilder;
@@ -25,7 +29,6 @@ use tower_http::{
 };
 use tracing::{info, warn};
 use tracing_subscriber::{filter::LevelFilter, EnvFilter};
-use services::entry_service::encrypt_old_entries;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -57,10 +60,9 @@ async fn main() -> anyhow::Result<()> {
         info!("migrations ran successfully / db connection valid");
     }
 
-
     let master_key_env = env::var("MASTER_ENCRYPTION_KEY")?;
     let master_key = Key::<Aes256Gcm>::from_slice(master_key_env.as_bytes());
-    
+
     let session_clean_task = task::spawn(clean_expired_sessions(pool.clone()));
     let encrypt_old_entries_task = task::spawn(encrypt_old_entries(pool.clone(), *master_key));
 
@@ -70,17 +72,11 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let app = Router::new()
-        .nest("/user", controllers::user_controller::users_controller())
-        .nest(
-            "/entries",
-            controllers::entry_controller::entries_controller(),
-        )
-        .nest(
-            "/groups",
-            controllers::group_controller::groups_controller(),
-        )
+        .nest("/user", users_controller())
+        .nest("/entries", entries_controller())
+        .nest("/groups", groups_controller())
         // don't run middleware only for auth route
-        .layer(axum::middleware::from_extractor_with_state::<User, AppState>(state.clone()))
+        .layer(from_extractor_with_state::<User, AppState>(state.clone()))
         .nest("/auth", controllers::auth_controller::auth_controller())
         .layer(
             ServiceBuilder::new()
