@@ -11,27 +11,21 @@
 </template>
 
 <script lang="ts" setup>
-import { AuthService } from '~/services/auth.service';
 import { UserService } from '~/services/user.service';
 
 const { $localApi } = useNuxtApp();
 
-const authService = new AuthService($localApi);
 const userService = new UserService($localApi);
 
 const { logout } = useAuth();
 const { user } = useUser(userService);
 
 onMounted(async () => {
-  try {
-    await authService.logout();
-  } finally {
-    logout();
-    user.value = null;
-    useCookie('theme-cache').value = null;
-    useCookie('entry-today').value = null;
+  logout();
+  user.value = null;
+  useCookie('theme-cache').value = null;
+  useCookie('entry-today').value = null;
 
-    await navigateTo('/');
-  }
+  await navigateTo('/');
 });
 </script>

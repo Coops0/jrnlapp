@@ -11,7 +11,7 @@ use crate::{
 };
 use anyhow::Context;
 use axum::{
-    http::{header::COOKIE, HeaderMap, StatusCode},
+    http::{header::COOKIE, HeaderMap},
     response::{IntoResponse, Redirect},
     routing::{get, post},
     Form,
@@ -28,7 +28,6 @@ pub fn auth_controller() -> Router<AppState> {
         .route("/session", get(init_session))
         .route("/google/callback", post(google_callback))
         .route("/apple/callback", post(apple_callback))
-        .route("/logout", get(logout))
 }
 
 #[derive(Deserialize)]
@@ -102,10 +101,6 @@ async fn apple_callback_inner(
 async fn apple_callback(auth_service: AuthService, user_service: UserService, Form(payload): Form<AppleCallbackPayload>) -> JrnlResult<Redirect> {
     let response = apple_callback_inner(auth_service, user_service, Form(payload)).await;
     serve_response_flash(response)
-}
-
-async fn logout() -> JrnlResult<StatusCode> {
-    Ok(StatusCode::OK)
 }
 
 fn serve_response_flash(response: JrnlResult<serde_json::Value>) -> JrnlResult<Redirect> {
