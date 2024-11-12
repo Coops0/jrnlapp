@@ -1,5 +1,7 @@
-use crate::impl_service;
-use crate::schemas::user::User;
+use crate::{
+    impl_service,
+    schemas::user::User
+};
 use sqlx::{Error, PgPool};
 use uuid::Uuid;
 

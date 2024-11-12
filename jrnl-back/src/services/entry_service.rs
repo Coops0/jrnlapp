@@ -1,17 +1,29 @@
-use crate::impl_service;
-use crate::schemas::active_entry::ActiveEntry;
-use crate::schemas::entry::EncryptedEntry;
-use crate::schemas::user::User;
-use crate::web::cursor::Cursor;
+use crate::{
+    schemas::{
+        entry::EncryptedEntry,
+        active_entry::ActiveEntry,
+        user::User
+    },
+    impl_service,
+    web::cursor::Cursor
+};
 use aes_gcm::{Aes256Gcm, Key};
 use chrono::{NaiveDate, Timelike};
 use serde::Serialize;
-use sqlx::postgres::PgArguments;
-use sqlx::query::Query;
-use sqlx::{Error, FromRow, PgPool, Postgres, Transaction};
+use sqlx::{
+    postgres::PgArguments,
+    query::Query,
+    Error,
+    FromRow,
+    PgPool,
+    Postgres,
+    Transaction
+};
 use std::time::Duration;
-use tokio::task::spawn_blocking;
-use tokio::time::interval;
+use tokio::{
+    task::spawn_blocking,
+    time::interval
+};
 use uuid::Uuid;
 
 pub struct EntryService(PgPool);

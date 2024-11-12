@@ -1,6 +1,11 @@
 use crate::schemas::entry::EncryptedEntry;
-use aes_gcm::aead::{Aead, OsRng};
-use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit};
+use aes_gcm::{
+    aead::{Aead, OsRng},
+    AeadCore,
+    Aes256Gcm,
+    Key,
+    KeyInit
+};
 use anyhow::anyhow;
 use chrono::NaiveDate;
 use serde::Serialize;

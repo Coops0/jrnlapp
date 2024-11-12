@@ -1,5 +1,7 @@
-use rand::seq::SliceRandom;
-use rand::Rng;
+use rand::{
+    seq::SliceRandom,
+    Rng
+};
 use serde::Serialize;
 use sqlx::FromRow;
 use std::cell::LazyCell;

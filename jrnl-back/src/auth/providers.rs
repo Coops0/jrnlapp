@@ -1,8 +1,10 @@
 use anyhow::Context;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use reqwest::get;
-use serde::de::DeserializeOwned;
-use serde::Deserialize;
+use serde::{
+    de::DeserializeOwned,
+    Deserialize
+};
 use std::env;
 use uuid::Uuid;
 

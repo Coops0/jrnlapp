@@ -1,9 +1,10 @@
-use crate::services::entry_service::EntryService;
-use crate::services::group_service::{GetGroupAndMembersBody, GroupService, SelfGroup};
 use crate::{
     error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor},
-    schemas::group::Group,
-    schemas::user::User,
+    schemas::{group::Group, user::User},
+    services::{
+        entry_service::EntryService,
+        group_service::{GetGroupAndMembersBody, GroupService, SelfGroup},
+    },
     AppState,
 };
 use axum::{

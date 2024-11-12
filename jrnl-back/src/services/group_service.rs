@@ -1,9 +1,14 @@
-use crate::impl_service;
-use crate::schemas::group::Group;
-use crate::schemas::user::User;
+use crate::{
+    impl_service,
+    schemas::{group::Group, user::User},
+};
 use serde::Serialize;
-use sqlx::postgres::PgQueryResult;
-use sqlx::{Error, FromRow, PgPool};
+use sqlx::{
+    postgres::PgQueryResult,
+    Error,
+    FromRow,
+    PgPool,
+};
 use uuid::Uuid;
 
 pub struct GroupService(PgPool);

@@ -1,23 +1,24 @@
-use crate::auth::providers::{verify_apple_id_token, verify_google_credential, AppleCallbackPayload, StrippedGoogleVerificationClaims};
-use crate::error::AppleAuthenticationError;
-use crate::services::auth_service::{AuthService, TempAuthSession};
-use crate::services::user_service::UserService;
 use crate::{
     auth::jwt,
+    auth::providers::{verify_apple_id_token, verify_google_credential, AppleCallbackPayload, StrippedGoogleVerificationClaims},
+    error::AppleAuthenticationError,
     error::{GoogleAuthenticationError, JrnlResult},
+    services::{
+        auth_service::{AuthService, TempAuthSession},
+        user_service::UserService,
+    },
     AppState,
 };
 use anyhow::Context;
-use axum::http::header::COOKIE;
-use axum::http::HeaderMap;
 use axum::{
-    http::StatusCode,
+    http::{header::COOKIE, HeaderMap, StatusCode},
     response::{IntoResponse, Redirect},
     routing::{get, post},
-    Form, Json, Router,
+    Form,
+    Json,
+    Router,
 };
-use base64::engine::general_purpose::STANDARD;
-use base64::Engine;
+use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::Deserialize;
 use serde_json::json;
 use std::env;

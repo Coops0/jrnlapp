@@ -1,9 +1,9 @@
-use crate::services::user_service::UserService;
 use crate::{
+    services::user_service::UserService,
     error::{JrnlResult, JsonExtractor},
     schemas::user::User,
     web::deserialize_empty_string,
-    AppState,
+    AppState
 };
 use axum::{routing::get, Json, Router};
 use chrono_tz::Tz;
