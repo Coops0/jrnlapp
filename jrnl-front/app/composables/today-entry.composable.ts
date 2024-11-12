@@ -14,16 +14,22 @@ const BLANK_ENTRY = (): Entry => ({
 export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Entry>) => {
     const entry = ref<Entry>(storage.value ?? BLANK_ENTRY());
 
+    const lastSavedEntry = ref<Entry | null>(null);
     const lastSaved = ref(new Date(1900, 1, 1));
+
     const tomorrow = ref(getTomorrow());
 
     const saveConflict = ref<[Entry, Entry] | null>(null);
 
-    const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
-    const saveEntryTimeoutId = ref<NodeJS.Timeout | null>(null);
-
-    const lastSavedEntry = ref<Entry | null>(null);
+    const debouncedSaveTimeout = ref<NodeJS.Timeout | null>(null);
     const cancelledSaves = ref(0);
+
+    const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
+
+    const unsavedChanges = computed(() =>
+        (!lastSavedEntry.value || JSON.stringify(lastSavedEntry.value) !== JSON.stringify(entry.value)) &&
+        (entry.value.text?.length || entry.value.emotion_scale !== 5)
+    );
 
     async function save() {
         storage.value = {
@@ -40,22 +46,22 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             return;
         }
 
-        if (lastSavedEntry.value && JSON.stringify(lastSavedEntry.value) === JSON.stringify(entry.value)) {
+        if (unsavedChanges.value) {
             console.log('cancelling save, no changes');
             cancelledSaves.value++;
             return;
         }
 
-        if (saveEntryTimeoutId.value) {
-            clearTimeout(saveEntryTimeoutId.value);
+        if (debouncedSaveTimeout.value) {
+            clearTimeout(debouncedSaveTimeout.value);
         }
 
-        saveEntryTimeoutId.value = setTimeout(async () => {
+        debouncedSaveTimeout.value = setTimeout(async () => {
             cancelledSaves.value = 0;
             try {
                 await saveNow();
             } finally {
-                saveEntryTimeoutId.value = null;
+                debouncedSaveTimeout.value = null;
             }
         }, 300);
     }
@@ -79,7 +85,6 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         }
 
         lastSavedEntry.value = { ...entry.value };
-        console.debug('saved entry');
 
         storage.value = entryResponse;
         lastSaved.value = new Date();
@@ -160,8 +165,8 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             clearInterval(updateTomorrowIntervalId.value);
         }
 
-        if (saveEntryTimeoutId.value) {
-            clearTimeout(saveEntryTimeoutId.value);
+        if (debouncedSaveTimeout.value) {
+            clearTimeout(debouncedSaveTimeout.value);
         }
     });
 
@@ -192,5 +197,8 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
 
         saveConflict,
         handleSaveConflict,
+
+        forceSave: saveNow,
+        unsavedChanges
     };
 };

@@ -1,18 +1,23 @@
 <template>
-  <div>
+  <div class="flex items-center gap-1.5">
     <h5
         v-if="show"
-        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer"
+        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer flex items-center gap-1.5"
         @click="toggle"
     >
       <span v-if="savedJustNow">last saved: just now</span>
       <span v-else-if="isUnsaved">last saved: ...</span>
       <span v-else-if="lastSaved.getFullYear() === 1900">last saved: never</span>
       <span v-else>last saved: <NuxtTime :datetime="lastSaved" relative/></span>
+
+      <span
+          v-if="unsavedChanges || isUnsaved"
+          class="inline-block w-1.5 h-1.5 rounded-full bg-colors-accent-400 animate-pulse"
+      />
     </h5>
     <h5
         v-else
-        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer px-4"
+        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer px-4 flex items-center gap-1.5"
         @click="toggle"
     >🎛️
     </h5>
@@ -23,9 +28,10 @@
 import type { Entry } from '~/types/entry.type';
 
 const props = defineProps<{
-  lastSaved: Date;
-  lastSavedEntry: Entry | null;
-  entry: Entry | null;
+  lastSaved: Date
+  lastSavedEntry: Entry | null
+  entry: Entry | null
+  unsavedChanges: boolean | null
 }>();
 
 const show = useCookie('show-last-saved', {
@@ -60,7 +66,6 @@ function check(): number {
       savedJustNow.value = true;
       return 2;
     }
-
     return 0;
   }
 

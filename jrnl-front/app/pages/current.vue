@@ -9,7 +9,7 @@
 
     <div class="top-2 left-0 right-0 z-[2] mb-2">
       <div class="flex justify-between items-center mx-auto text-sm">
-        <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry" :entry/>
+        <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry" :unsaved-changes="unsavedChanges" :entry/>
         <TodayEntryTimeUntilTomorrow :tomorrow/>
       </div>
     </div>
@@ -58,8 +58,16 @@ const {
   lastSavedEntry,
   saveConflict,
   handleSaveConflict,
+  forceSave,
+  unsavedChanges
 } = useTodayEntry(entryService, entryCookie);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 beginFetch();
+
+onBeforeUnmount(async () => {
+  if (unsavedChanges.value) {
+    await forceSave();
+  }
+});
 </script>
