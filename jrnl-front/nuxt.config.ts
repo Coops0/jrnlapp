@@ -27,7 +27,7 @@ export default defineNuxtConfig({
             // overridden with NUXT_PUBLIC_API_BASE
             apiBase: 'http://localhost:4000',
             // apiBase: 'https://my.jrnl.fm',
-            appleClientId: 'fm.jrnl.jrnlapp',
+            appleClientId: 'fm.jrnl.oauth-signin',
             googleClientId: '909343102938-jr9m7fcgajq7r6op9phtq392juhikune.apps.googleusercontent.com'
         },
     },

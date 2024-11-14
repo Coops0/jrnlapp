@@ -40,9 +40,6 @@ const { data: sessionDetails } = await useAsyncData('session-details', () => aut
 const csrf = computed(() => sessionDetails.value?.csrf_token);
 const nonce = computed(() => sessionDetails.value?.nonce);
 
-// todo make sure the logins open in in-app browser, after logging in must return to this same state
-// fetch with nonce the session details ever few seconds
-
 useHead({
   script: [
     { src: 'https://accounts.google.com/gsi/client', defer: true, async: true },

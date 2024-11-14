@@ -1,6 +1,5 @@
 import { load } from '@tauri-apps/plugin-store';
 import type { Entry } from '~/types/entry.type';
-import { isSameDay } from '~/util/index.util';
 
 export const useLocalEntries = async () => {
     const storage = await load('local-entries');

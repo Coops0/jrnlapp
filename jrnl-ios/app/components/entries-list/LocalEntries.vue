@@ -3,7 +3,7 @@
     <div class="space-y-4">
       <div v-if="entries" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
-            v-for="entry in entries"
+            v-for="entry in datedEntries"
             :id="entry.id"
             :key="entry.id"
             :color="ratingLerp(entry.emotion_scale, theme)"
@@ -19,9 +19,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ratingLerp } from '~/util/index.util';
+import { parseServerDate, ratingLerp } from '~/util/index.util';
 import { useLocalEntries } from '~/composables/local-entries.composable';
 
 const { theme } = await useTheme(null);
 const { entries } = await useLocalEntries();
+
+const datedEntries = computed(() =>
+    entries.value.map(entry => ({
+      ...entry,
+      date: parseServerDate(entry.date)
+    }))
+);
 </script>

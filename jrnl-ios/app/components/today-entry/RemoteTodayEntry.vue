@@ -58,7 +58,7 @@ const {
   handleSaveConflict,
   forceSave,
   unsavedChanges
-} = await useTodayEntry(entryService, entryStore);
+} = await useRemoteTodayEntry(entryService, entryStore);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 beginFetch();
