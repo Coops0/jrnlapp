@@ -40,6 +40,9 @@ const { data: sessionDetails } = await useAsyncData('session-details', () => aut
 const csrf = computed(() => sessionDetails.value?.csrf_token);
 const nonce = computed(() => sessionDetails.value?.nonce);
 
+// todo make sure the logins open in in-app browser, after logging in must return to this same state
+// fetch with nonce the session details ever few seconds
+
 useHead({
   script: [
     { src: 'https://accounts.google.com/gsi/client', defer: true, async: true },
@@ -52,7 +55,7 @@ useHead({
   meta: [
     { name: 'appleid-signin-client-id', content: appleClientId },
     { name: 'appleid-signin-scope', content: 'name' },
-    { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback` },
+    { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback/mobile` },
     { name: 'appleid-signin-state', content: csrf },
     { name: 'appleid-signin-nonce', content: nonce },
     { name: 'appleid-signin-use-popup', content: 'false' }
@@ -72,7 +75,7 @@ onMounted(() => {
       client_id: googleClientId,
       context: 'signin',
       ux_mode: 'redirect',
-      login_uri: `${apiBase}/auth/google/callback`,
+      login_uri: `${apiBase}/auth/google/callback/mobile`,
       nonce: nonce.value,
       auto_select: true,
       itp_support: true
