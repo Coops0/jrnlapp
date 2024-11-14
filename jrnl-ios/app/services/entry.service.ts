@@ -32,4 +32,8 @@ export class EntryService {
     async putToday(emotion_scale: number, text?: string): Promise<Entry> {
         return this.api('/entries/today', { method: 'PUT', body: { emotion_scale, text } });
     }
+
+    async putPastEntries(entries: Entry[]): Promise<void> {
+        return this.api('/entries', { method: 'PUT', body: entries });
+    }
 }

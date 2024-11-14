@@ -32,6 +32,10 @@ pub enum JrnlError {
     #[error("cannot join more than 20 groups")]
     #[status(StatusCode::FORBIDDEN)]
     CannotJoinMoreGroups,
+    
+    #[error("too many entries to insert")]
+    #[status(StatusCode::BAD_REQUEST)]
+    TooManyEntries,
 
     #[error("google oauth authentication error {0}")]
     #[status(StatusCode::UNAUTHORIZED)]

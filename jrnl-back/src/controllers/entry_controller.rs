@@ -11,6 +11,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use chrono::{Duration, NaiveDate, Utc};
 use serde::Deserialize;
 use tokio::task::spawn_blocking;
 use tracing::error;
@@ -18,7 +19,7 @@ use uuid::Uuid;
 
 pub fn entries_controller() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_trimmed_entries_paginated))
+        .route("/", get(get_trimmed_entries_paginated).put(put_local_mobile_entries))
         .route("/:id", get(get_entry))
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
@@ -161,4 +162,45 @@ async fn update_today_entry(
         .await
         .map(Json)
         .map_err(Into::into)
+}
+
+#[derive(Deserialize)]
+struct MobilePastEntry {
+    date: NaiveDate,
+    emotion_scale: f32,
+    #[serde(default, deserialize_with = "sanitize_html_string")]
+    text: Option<String>,
+}
+
+async fn put_local_mobile_entries(
+    user: User,
+    entry_service: EntryService,
+    State(AppState { master_key, .. }): State<AppState>,
+    JsonExtractor(entries): JsonExtractor<Vec<MobilePastEntry>>,
+) -> JrnlResult<()> {
+    let today = user.current_date_by_timezone();
+
+    let entries = entries
+        .into_iter()
+        .filter(|entry| entry.date < today)
+        .map(|entry| ActiveEntry {
+            id: Uuid::new_v4(),
+            author: user.id,
+            date: entry.date,
+            emotion_scale: entry.emotion_scale,
+            text: entry.text,
+            // this should never get hit
+            expiry: Utc::now() + Duration::days(30),
+        })
+        .collect::<Vec<_>>();
+
+    if entries.is_empty() {
+        return Ok(());
+    }
+
+    if entries.len() > 365 {
+        return Err(JrnlError::TooManyEntries);
+    }
+
+    entry_service.insert_many_entries(entries, master_key).await
 }

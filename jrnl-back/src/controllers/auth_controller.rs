@@ -23,12 +23,13 @@ use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::env;
+use axum::routing::patch;
 use uuid::Uuid;
 
 pub fn auth_controller() -> Router<AppState> {
     Router::new()
         .route("/session", get(init_session))
-        .route("/take-session", get(take_oneshot_session))
+        .route("/take-session", patch(take_oneshot_session))
         .route("/google/callback", post(google_callback))
         .route("/google/callback/mobile", post(google_callback_mobile))
         .route("/apple/callback", post(apple_callback))

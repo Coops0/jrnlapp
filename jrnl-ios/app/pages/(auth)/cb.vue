@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { UserService } from '~/services/user.service';
 import type { User } from '~/types/user.type';
+import { EntryService } from '~/services/entry.service';
 
 definePageMeta({ redirectUnautheticated: false });
 
@@ -63,6 +64,16 @@ onMounted(async () => {
 
   try {
     await userService.updateMe({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  } catch (e) {
+    console.warn(e);
+  }
+
+
+  try {
+    const { entries } = await useLocalEntries();
+    if (entries.value?.length) {
+      await new EntryService($localApi).putPastEntries(entries.value);
+    }
   } catch (e) {
     console.warn(e);
   }

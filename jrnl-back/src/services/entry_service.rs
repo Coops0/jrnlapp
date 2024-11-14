@@ -1,11 +1,12 @@
+use crate::error::JrnlResult;
 use crate::{
-    schemas::{
-        entry::EncryptedEntry,
-        active_entry::ActiveEntry,
-        user::User
-    },
     impl_service,
-    web::cursor::Cursor
+    schemas::{
+        active_entry::ActiveEntry,
+        entry::EncryptedEntry,
+        user::User,
+    },
+    web::cursor::Cursor,
 };
 use aes_gcm::{Aes256Gcm, Key};
 use chrono::{NaiveDate, Timelike};
@@ -17,16 +18,17 @@ use sqlx::{
     FromRow,
     PgPool,
     Postgres,
-    Transaction
+    Transaction,
 };
 use std::time::Duration;
 use tokio::{
     task::spawn_blocking,
-    time::interval
+    time::interval,
 };
 use uuid::Uuid;
 
 pub struct EntryService(PgPool);
+
 impl_service!(EntryService);
 
 #[derive(Serialize, FromRow)]
@@ -172,6 +174,28 @@ impl EntryService {
             .bind(before_date)
             .fetch_all(&self.0)
             .await
+    }
+
+    // will ignore any individual errors
+    pub async fn insert_many_entries(&self, entries: Vec<ActiveEntry>, master_key: Key<Aes256Gcm>) -> JrnlResult<()> {
+        let encrypted_entries = spawn_blocking(move || -> Vec<EncryptedEntry> {
+            entries
+                .into_iter()
+                .filter_map(|entry| ActiveEntry::encrypt(&entry, &master_key).ok())
+                .collect::<Vec<_>>()
+        })
+            .await
+            .map_err(Into::<anyhow::Error>::into)?;
+
+        let mut transaction = self.0.begin().await?;
+
+        for entry in encrypted_entries {
+            let _ = Self::create_encrypted_entry_query(&entry)
+                .execute(&mut *transaction)
+                .await;
+        }
+
+        transaction.commit().await.map_err(Into::into)
     }
 }
 

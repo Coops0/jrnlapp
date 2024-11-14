@@ -59,6 +59,7 @@ useHead({
   ]
 });
 
+
 onMounted(() => {
   const interval = setInterval(() => {
     // @ts-ignore-next-line

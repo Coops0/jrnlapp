@@ -62,14 +62,17 @@ useHead({
   ]
 });
 
+const googleButtonInitInterval = ref<NodeJS.Timeout | null>(null);
+const nonceCheckInterval = ref<NodeJS.Timeout | null>(null);
+
 onMounted(() => {
-  const interval = setInterval(() => {
+  googleButtonInitInterval.value = setInterval(() => {
     // @ts-expect-error-next-line google is window type
     if (!window['google'] || !nonce.value || !csrf.value) {
       return;
     }
 
-    clearInterval(interval);
+    clearInterval(googleButtonInitInterval.value!);
     // @ts-expect-error-next-line google is window type
     google.accounts.id.initialize({
       client_id: googleClientId,
@@ -92,5 +95,35 @@ onMounted(() => {
     // @ts-expect-error-next-line google is window type
     google.accounts.id.prompt();
   });
+
+  nonceCheckInterval.value = setInterval(async () => {
+    if (!nonce.value) {
+      return;
+    }
+
+    let payload: null | string = null;
+    try {
+      payload = await authService.takeSession(nonce.value);
+    } catch {
+      /* empty */
+    }
+
+    if (!payload) {
+      return;
+    }
+
+    clearInterval(nonceCheckInterval.value!);
+    await navigateTo({ name: 'cb', query: { r: payload } });
+  }, 500);
+});
+
+onUnmounted(() => {
+  if (nonceCheckInterval.value) {
+    clearInterval(nonceCheckInterval.value);
+  }
+
+  if (googleButtonInitInterval.value) {
+    clearInterval(googleButtonInitInterval.value);
+  }
 });
 </script>

@@ -15,9 +15,12 @@ pub struct User {
 }
 
 impl User {
+    pub fn timezone(&self) -> Tz {
+        self.timezone.parse().unwrap_or(chrono_tz::UTC)
+    }
+    
     pub fn current_date_time_by_timezone(&self) -> DateTime<Tz> {
-        let tz = self.timezone.parse().unwrap_or(chrono_tz::UTC);
-        Utc::now().with_timezone(&tz)
+        Utc::now().with_timezone(&self.timezone())
     }
 
     pub fn current_date_by_timezone(&self) -> NaiveDate {
