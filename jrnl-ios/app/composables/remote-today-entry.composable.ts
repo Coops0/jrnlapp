@@ -11,7 +11,7 @@ const BLANK_ENTRY = (): Entry => ({
     id: ''
 });
 
-export const useRemoteTodayEntry = async (entryService: EntryService | null, storage: Store) => {
+export const useRemoteTodayEntry = async (entryService: EntryService, storage: Store) => {
     const entry = ref<Entry>(await storage.get('entry') ?? BLANK_ENTRY());
 
     const lastSavedEntry = ref<Entry | null>(null);
@@ -89,43 +89,40 @@ export const useRemoteTodayEntry = async (entryService: EntryService | null, sto
     }
 
 
-    let status = null;
-    let fetchToday = async () => {
-    };
-    if (entryService) {
-        const todayEntryFetch = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
-            immediate: false,
-            async transform(today) {
-                lastSavedEntry.value = today && { ...today };
+    const {
+        status,
+        execute: fetchToday,
+        error
+    } = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
+        immediate: false,
+        async transform(today) {
+            lastSavedEntry.value = today && { ...today };
 
-                if (today === null) {
-                    console.debug('fetch entry returned null, defaulting to blank');
-                    today = BLANK_ENTRY();
-                }
+            if (today === null) {
+                console.debug('fetch entry returned null, defaulting to blank');
+                today = BLANK_ENTRY();
+            }
 
-                if (
-                    (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
-                    (entry.value.text?.length || entry.value.emotion_scale !== 5)
-                ) {
-                    console.warn('conflict detected between saved storage state && fetched state');
-                    console.debug(today, entry.value);
+            if (
+                (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
+                (entry.value.text?.length || entry.value.emotion_scale !== 5)
+            ) {
+                console.warn('conflict detected between saved storage state && fetched state');
+                console.debug(today, entry.value);
 
-                    saveConflict.value = [today, entry.value];
-                    return today;
-                }
-
-                console.debug('setting entry to fetched state');
-
-                entry.value = today;
-                await storage.set('entry', today);
-
+                saveConflict.value = [today, entry.value];
                 return today;
             }
-        });
 
-        status = todayEntryFetch.status;
-        fetchToday = todayEntryFetch.refresh;
-    }
+            console.debug('setting entry to fetched state');
+
+            entry.value = today;
+            await storage.set('entry', today);
+
+            return today;
+        }
+    });
+
 
     onMounted(async () => {
         if (status?.value === 'success') {
@@ -207,6 +204,8 @@ export const useRemoteTodayEntry = async (entryService: EntryService | null, sto
         handleSaveConflict,
 
         forceSave: saveNow,
-        unsavedChanges
+        unsavedChanges,
+
+        error
     };
 };

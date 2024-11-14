@@ -9,7 +9,12 @@
 
     <div class="top-2 left-0 right-0 z-[2] mb-2">
       <div class="flex justify-between items-center mx-auto text-sm">
-        <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry" :unsaved-changes="unsavedChanges" :entry/>
+        <TodayEntryLastSaved
+            :last-saved="lastSaved"
+            :last-saved-entry="lastSavedEntry"
+            :unsaved-changes="unsavedChanges"
+            :entry
+        />
         <TodayEntryTimeUntilTomorrow :tomorrow/>
       </div>
     </div>
@@ -41,6 +46,10 @@ import { EntryService } from '~/services/entry.service';
 import { ratingLerp } from '~/util/index.util';
 import { load } from '@tauri-apps/plugin-store';
 
+const emit = defineEmits<{
+  forceLocal: []
+}>();
+
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
@@ -57,7 +66,8 @@ const {
   saveConflict,
   handleSaveConflict,
   forceSave,
-  unsavedChanges
+  unsavedChanges,
+  error
 } = await useRemoteTodayEntry(entryService, entryStore);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
@@ -66,6 +76,18 @@ beginFetch();
 onBeforeUnmount(async () => {
   if (unsavedChanges.value) {
     await forceSave();
+  }
+});
+
+watch(error, async e => {
+  if (e) {
+    try {
+      await forceSave();
+    } catch {
+      /* empty */
+    }
+
+    emit('forceLocal');
   }
 });
 </script>

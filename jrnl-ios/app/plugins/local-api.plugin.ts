@@ -1,8 +1,8 @@
 import { useAuth } from '~/composables/auth.composable';
 
-export default defineNuxtPlugin(nuxtApp => {
+export default defineNuxtPlugin(async _nuxtApp => {
     const config = useRuntimeConfig();
-    const { jwt } = useAuth();
+    const { jwt } = await useAuth();
 
     const localApi = $fetch.create({
         credentials: 'include',
@@ -15,9 +15,7 @@ export default defineNuxtPlugin(nuxtApp => {
         },
         async onResponseError({ options, response }) {
             if (!options.ignoreResponseError && response.status === 401) {
-                console.debug('got unauthorized response in $api plugin, redirecting to login');
                 jwt.value = null;
-                // await nuxtApp.runWithContext(() => navigateTo('/login'));
             }
         }
     });

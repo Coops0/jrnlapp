@@ -48,8 +48,11 @@
 <script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
 import { ratingLerp } from '~/util/index.util';
-import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
 import { useRemoteEntries } from '~/composables/remote-entries.composable';
+
+const emit = defineEmits<{
+  forceLocal: []
+}>();
 
 const { theme } = await useTheme(null);
 
@@ -58,6 +61,9 @@ const entryService = new EntryService($localApi);
 
 const { loadMore, refresh, status, error, paginator } = await useRemoteEntries(entryService);
 
-
-watchErrorAndThrow(error);
+watch(error, e => {
+  if (e) {
+    emit('forceLocal');
+  }
+});
 </script>

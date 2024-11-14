@@ -33,6 +33,10 @@
 import { EntryService } from '~/services/entry.service';
 import { parseServerDate } from '~/util/index.util';
 
+const emit = defineEmits<{
+  forceLocal: []
+}>();
+
 const route = useRoute();
 const { id } = route.params;
 
@@ -45,6 +49,12 @@ const { data: entry, error, status, refresh } = useLazyAsyncData(
     `entry-${id}`,
     () => entryService.getEntry(id as string)
 );
+
+watch(error, e => {
+  if (e) {
+    emit('forceLocal');
+  }
+});
 
 const parsedDate = computed(() => entry.value ? parseServerDate(entry.value.date) : null as never);
 </script>
