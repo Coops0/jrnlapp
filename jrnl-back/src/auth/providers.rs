@@ -3,7 +3,7 @@ use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use reqwest::get;
 use serde::{
     de::DeserializeOwned,
-    Deserialize
+    Deserialize,
 };
 use std::env;
 use uuid::Uuid;
@@ -56,6 +56,7 @@ pub struct GoogleIdTokenClaims {
     sub: String,
     name: Option<String>,
     given_name: Option<String>,
+    nonce: String,
 }
 
 pub struct StrippedGoogleVerificationClaims {
@@ -63,13 +64,17 @@ pub struct StrippedGoogleVerificationClaims {
     pub name: Option<String>,
 }
 
-pub async fn verify_google_credential(credential: &str) -> anyhow::Result<StrippedGoogleVerificationClaims> {
+pub async fn verify_google_credential(credential: &str, nonce: &Uuid) -> anyhow::Result<StrippedGoogleVerificationClaims> {
     let claims = verify_token::<GoogleIdTokenClaims>(
         "https://www.googleapis.com/oauth2/v3/certs",
         credential,
         &["https://accounts.google.com", "accounts.google.com"],
         &[&env::var("GOOGLE_CLIENT_ID")?],
     ).await?;
+
+    if claims.nonce != nonce.to_string() {
+        anyhow::bail!("nonce mismatch");
+    }
 
     let name = claims.name.or(claims.given_name);
 

@@ -40,7 +40,8 @@ withDefaults(defineProps<Props>(), {
   full: false,
   type: 'button',
   className: '',
-  disabled: false
+  disabled: false,
+  title: ''
 });
 
 const sizeClasses = {

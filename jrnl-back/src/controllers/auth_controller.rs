@@ -21,6 +21,7 @@ use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::env;
+use uuid::Uuid;
 
 pub fn auth_controller() -> Router<AppState> {
     Router::new()
@@ -39,12 +40,14 @@ struct JrnlTokenResponse {
 struct GoogleCallbackPayload {
     credential: String,
     g_csrf_token: String,
+    state: Uuid,
 }
 
 async fn inner_google_callback(
     user_service: UserService,
+    auth_service: AuthService,
     headers: HeaderMap,
-    Form(GoogleCallbackPayload { credential, g_csrf_token }): Form<GoogleCallbackPayload>,
+    Form(GoogleCallbackPayload { credential, g_csrf_token, state }): Form<GoogleCallbackPayload>,
 ) -> JrnlResult<JrnlTokenResponse> {
     let csrf_cookie = headers.get(COOKIE)
         .and_then(|c| c.to_str().ok())
@@ -55,7 +58,12 @@ async fn inner_google_callback(
         return Err(GoogleAuthenticationError::BadCallbackState(None).into());
     }
 
-    let StrippedGoogleVerificationClaims { sub, name } = verify_google_credential(&credential).await
+    let nonce = auth_service
+        .delete_and_fetch_nonce(&state)
+        .await
+        .map_err(|_| GoogleAuthenticationError::BadCallbackState(None))?;
+
+    let StrippedGoogleVerificationClaims { sub, name } = verify_google_credential(&credential, &nonce).await
         .map_err(GoogleAuthenticationError::CodeExchangeFailed)?;
 
     let user = user_service.create_or_get_user(&name, &Some(sub), &None).await?;
@@ -66,10 +74,11 @@ async fn inner_google_callback(
 
 async fn google_callback(
     user_service: UserService,
+    auth_service: AuthService,
     headers: HeaderMap,
     Form(payload): Form<GoogleCallbackPayload>,
 ) -> JrnlResult<impl IntoResponse> {
-    let response = inner_google_callback(user_service, headers, Form(payload)).await;
+    let response = inner_google_callback(user_service, auth_service, headers, Form(payload)).await;
     serve_response_flash(response)
 }
 

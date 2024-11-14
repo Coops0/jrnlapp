@@ -5,19 +5,10 @@
         <div class="space-y-6">
           <div class="flex flex-col items-center gap-3">
             <div
-                id="g_id_onload"
-                :data-client_id="googleClientId"
-                data-context="signin"
-                data-ux_mode="popup"
-                :data-login_uri="apiBase + '/auth/google/callback'"
-                data-auto_select="true"
-                data-itp_support="true"
-            />
-
-            <div
-                class="g_id_signin"
+                id="google-button-signin"
                 data-type="standard"
                 data-text="continue_with"
+                :data-state="csrf"
                 data-logo_alignment="center"
             />
 
@@ -45,7 +36,7 @@ definePageMeta({ redirectUnautheticated: false });
 
 const authService = new AuthService($localApi);
 
-const { data: sessionDetails } = useAsyncData('session-details', () => authService.getSessionDetails());
+const { data: sessionDetails } = await useAsyncData('session-details', () => authService.getSessionDetails());
 const csrf = computed(() => sessionDetails.value?.csrf_token);
 const nonce = computed(() => sessionDetails.value?.nonce);
 
@@ -66,5 +57,37 @@ useHead({
     { name: 'appleid-signin-nonce', content: nonce },
     { name: 'appleid-signin-use-popup', content: 'false' }
   ]
+});
+
+onMounted(() => {
+  const interval = setInterval(() => {
+    // @ts-ignore-next-line
+    if (!window['google'] || !nonce.value || !csrf.value) {
+      return;
+    }
+
+    clearInterval(interval);
+    // @ts-ignore-next-line
+    google.accounts.id.initialize({
+      client_id: googleClientId,
+      context: 'signin',
+      ux_mode: 'redirect',
+      login_uri: `${apiBase}/auth/google/callback`,
+      nonce: nonce.value,
+      auto_select: true,
+      itp_support: true
+    });
+
+    // @ts-ignore-next-line
+    google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
+      type: 'standard',
+      text: 'continue_with',
+      state: csrf.value,
+      logo_alignment: 'center'
+    });
+
+    // @ts-ignore-next-line
+    google.accounts.id.prompt();
+  });
 });
 </script>
