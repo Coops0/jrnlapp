@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <EntryLocalEntry v-if="forceLocalOverride || !jwt"/>
     <EntryRemoteEntry v-else @force-local="forceLocal"/>
   </div>

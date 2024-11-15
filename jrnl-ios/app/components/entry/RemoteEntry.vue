@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-2xl mx-auto">
+  <div class="w-full mx-auto">
     <div v-if="status === 'pending'" class="space-y-8">
       <EntryView
           :entry="{

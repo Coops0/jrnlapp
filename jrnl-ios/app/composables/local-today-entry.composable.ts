@@ -26,7 +26,7 @@ export const useLocalTodayEntry = async (storage: Store) => {
 
     watch(entry, save, { deep: true });
 
-    onMounted(async () => {
+    async function initialLoad() {
         const s: Entry | undefined = await storage.get('entry');
 
         if (!s) {
@@ -39,9 +39,9 @@ export const useLocalTodayEntry = async (storage: Store) => {
         }
 
         entry.value = s;
-    });
+    }
 
-    onMounted(() => {
+    const mounted = async () => {
         updateTomorrowIntervalId.value = setInterval(async () => {
             if (!isSameDay(tomorrow.value)) {
                 // tomorrow day is still different, we are good
@@ -56,13 +56,15 @@ export const useLocalTodayEntry = async (storage: Store) => {
             entry.value = BLANK_ENTRY();
             await storage.set('entry', BLANK_ENTRY());
         }, 1000);
-    });
 
-    onUnmounted(() => {
+        await initialLoad();
+    };
+
+    const unMounted = () => {
         if (updateTomorrowIntervalId.value) {
             clearInterval(updateTomorrowIntervalId.value);
         }
-    });
+    };
 
-    return { entry, tomorrow };
+    return { entry, tomorrow, mounted, unMounted };
 };

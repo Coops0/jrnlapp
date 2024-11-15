@@ -1,6 +1,6 @@
 <template>
   <div class="w-full max-w-2xl mx-auto">
-    <div class="space-y-4">
+    <div class="space-y-4 mt-4">
       <div v-if="entries" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
             v-for="entry in datedEntries"

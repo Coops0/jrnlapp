@@ -27,8 +27,8 @@
                 class="w-full aspect-square rounded-lg cursor-pointer transition-all duration-300
                      hover:ring-2 ring-colors-primary-200 group relative"
                 :style="{
-                backgroundColor: ratingLerp(scale, theme),
-                opacity: 0.8
+                    backgroundColor: ratingLerp(scale, theme),
+                    opacity: 0.8
               }"
             >
               <div

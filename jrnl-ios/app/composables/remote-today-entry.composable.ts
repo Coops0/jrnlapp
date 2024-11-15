@@ -123,8 +123,7 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
         }
     });
 
-
-    onMounted(async () => {
+    async function initialLoad() {
         if (status?.value === 'success') {
             console.debug('already fetched, skipping initial cookie load');
             return;
@@ -145,9 +144,9 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
 
         console.debug('loading cached entry');
         entry.value = s;
-    });
+    }
 
-    onMounted(() => {
+    const mounted = async () => {
         // if day changes as we are writing, then reset too
         updateTomorrowIntervalId.value = setInterval(async () => {
             if (!isSameDay(tomorrow.value)) {
@@ -163,9 +162,12 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
             entry.value = BLANK_ENTRY();
             await storage.set('entry', BLANK_ENTRY());
         }, 1000);
-    });
 
-    onUnmounted(() => {
+        await initialLoad();
+    };
+
+
+    const unMounted = () => {
         if (updateTomorrowIntervalId.value) {
             clearInterval(updateTomorrowIntervalId.value);
         }
@@ -173,7 +175,7 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
         if (debouncedSaveTimeout.value) {
             clearTimeout(debouncedSaveTimeout.value);
         }
-    });
+    };
 
     async function handleSaveConflict(server: boolean) {
         if (!saveConflict.value) {
@@ -206,6 +208,8 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
         forceSave: saveNow,
         unsavedChanges,
 
-        error
+        error,
+        mounted,
+        unMounted
     };
 };

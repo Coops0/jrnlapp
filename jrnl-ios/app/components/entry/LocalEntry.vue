@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-2xl mx-auto">
+  <div class="w-full mx-auto">
     <div v-if="entry" class="space-y-8">
       <EntryView
           :entry

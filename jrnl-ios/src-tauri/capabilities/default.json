@@ -10,6 +10,7 @@
     "shell:allow-open",
     "store:default",
     "store:allow-load",
-    "http:default"
+    "http:default",
+    "fs:default"
   ]
 }

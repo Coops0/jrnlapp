@@ -20,7 +20,7 @@
         :max="max"
         :min="min"
         :step="step"
-        class="absolute w-full h-full opacity-0 cursor-pointer"
+        class="absolute w-full h-full opacity-0 cursor-pointer py-4"
         type="range"
     >
   </div>

@@ -17,7 +17,7 @@
       <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
     </div>
 
-    <div v-else-if="paginator" class="space-y-4">
+    <div v-else-if="paginator" class="space-y-4 mt-4">
       <div v-if="paginator.items.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
             v-for="entry in paginator.items"

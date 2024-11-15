@@ -42,7 +42,12 @@ const nonce = computed(() => sessionDetails.value?.nonce);
 
 useHead({
   script: [
-    { src: 'https://accounts.google.com/gsi/client', defer: true, async: true },
+    {
+      src: 'https://accounts.google.com/gsi/client',
+      defer: true,
+      async: true,
+      type: 'application/javascript; charset=utf-8'
+    },
     {
       src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
       defer: true,

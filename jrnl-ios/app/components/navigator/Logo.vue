@@ -14,7 +14,7 @@
       <div class="flex flex-col justify-items-center items-center gap-2">
         <span
             :id="logoId"
-            class="fixed bottom-4 left-8 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
+            class="fixed p-8 bottom-3 left-4 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
             :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
             @mousedown="onPressLogo"

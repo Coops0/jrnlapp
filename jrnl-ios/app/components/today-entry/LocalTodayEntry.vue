@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col h-full relative flex-grow px-2 md:px-4 lg:px-10 max-w-full">
-    <div class="top-2 left-0 right-0 z-[2] mb-2">
+    <div class="z-[2] mb-2 mt-4">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryTimeUntilTomorrow :tomorrow/>
       </div>
@@ -37,7 +37,10 @@ const { theme } = await useTheme(null);
 
 const entryStore = await load('entry-today.json');
 
-const { entry, tomorrow } = await useLocalTodayEntry(entryStore);
+const { entry, tomorrow, unMounted, mounted } = await useLocalTodayEntry(entryStore);
+
+onMounted(mounted);
+onUnmounted(unMounted);
 
 const ratingLerpBind = (rating: number) => ratingLerp(rating, theme.value);
 </script>

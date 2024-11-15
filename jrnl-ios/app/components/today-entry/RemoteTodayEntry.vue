@@ -7,7 +7,7 @@
         @resolve="handleSaveConflict"
     />
 
-    <div class="top-2 left-0 right-0 z-[2] mb-2">
+    <div class="z-[2] mb-2 mt-4">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryLastSaved
             :last-saved="lastSaved"
@@ -67,11 +67,16 @@ const {
   handleSaveConflict,
   forceSave,
   unsavedChanges,
-  error
+  error,
+  mounted,
+  unMounted
 } = await useRemoteTodayEntry(entryService, entryStore);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 beginFetch();
+
+onMounted(mounted);
+onUnmounted(unMounted);
 
 onBeforeUnmount(async () => {
   if (unsavedChanges.value) {

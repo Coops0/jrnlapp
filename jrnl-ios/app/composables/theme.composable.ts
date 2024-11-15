@@ -23,7 +23,6 @@ export const useTheme = async (userService: UserService | null) => {
         if (hasRefreshedRemotely.value && p?.theme && p.theme !== theme.value) {
             console.debug('useTheme: user theme changed, setting theme to', p.theme);
             theme.value = p.theme;
-            theme.value = p.theme;
         }
     }, { immediate: true, deep: true });
 
