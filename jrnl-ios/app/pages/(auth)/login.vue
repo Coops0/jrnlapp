@@ -28,6 +28,7 @@
 
 <script lang="ts" setup>
 import { AuthService } from '~/services/auth.service';
+import { invoke } from '@tauri-apps/api/core';
 
 const { public: { apiBase, appleClientId, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
@@ -42,12 +43,11 @@ const nonce = computed(() => sessionDetails.value?.nonce);
 
 useHead({
   script: [
-    {
-      src: 'https://accounts.google.com/gsi/client',
-      defer: true,
-      async: true,
-      type: 'application/javascript; charset=utf-8'
-    },
+    // {
+    //   src: 'https://accounts.google.com/gsi/client',
+    //   defer: true,
+    //   async: true
+    // },
     {
       src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
       defer: true,
@@ -67,7 +67,35 @@ useHead({
 const googleButtonInitInterval = ref<NodeJS.Timeout | null>(null);
 const nonceCheckInterval = ref<NodeJS.Timeout | null>(null);
 
-onMounted(() => {
+onMounted(async () => {
+  nonceCheckInterval.value = setInterval(async () => {
+    if (!nonce.value) {
+      return;
+    }
+
+    let payload: null | string = null;
+    try {
+      payload = await authService.takeSession(nonce.value);
+    } catch {
+      /* empty */
+    }
+
+    if (!payload) {
+      return;
+    }
+
+    clearInterval(nonceCheckInterval.value!);
+    await navigateTo({ name: 'cb', query: { r: payload } });
+  }, 500);
+
+  const googleScriptContent = await invoke<string>('proxy_google_script');
+  console.log('script', googleScriptContent);
+  const googleScript = document.createElement('script');
+  googleScript.type = 'text/javascript';
+  googleScript.src = googleScriptContent;
+
+  document.head.appendChild(googleScript);
+
   googleButtonInitInterval.value = setInterval(() => {
     // @ts-expect-error-next-line google is window type
     if (!window['google'] || !nonce.value || !csrf.value) {
@@ -97,26 +125,6 @@ onMounted(() => {
     // @ts-expect-error-next-line google is window type
     google.accounts.id.prompt();
   });
-
-  nonceCheckInterval.value = setInterval(async () => {
-    if (!nonce.value) {
-      return;
-    }
-
-    let payload: null | string = null;
-    try {
-      payload = await authService.takeSession(nonce.value);
-    } catch {
-      /* empty */
-    }
-
-    if (!payload) {
-      return;
-    }
-
-    clearInterval(nonceCheckInterval.value!);
-    await navigateTo({ name: 'cb', query: { r: payload } });
-  }, 500);
 });
 
 onUnmounted(() => {

@@ -82,7 +82,10 @@ async fn main() -> anyhow::Result<()> {
             ServiceBuilder::new()
                 .layer(
                     CorsLayer::new()
-                        .allow_origin(AllowOrigin::exact(env::var("FRONTEND_URL")?.parse()?))
+                        .allow_origin(AllowOrigin::list([
+                            env::var("FRONTEND_URL")?.parse()?,
+                            "tauri://localhost".parse()?
+                        ]))
                         .allow_methods(AllowMethods::mirror_request())
                         .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))
                         .allow_credentials(AllowCredentials::yes()),

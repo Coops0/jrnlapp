@@ -2,6 +2,7 @@ use crate::dto::Entry;
 use crate::error::{JrnlIosError, JrnlIosResult};
 use chrono::Local;
 use tauri_plugin_fs::FsExt;
+use tauri_plugin_http::reqwest;
 
 mod dto;
 mod error;
@@ -21,7 +22,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![load_entries, save_today_entry])
+        .invoke_handler(tauri::generate_handler![load_entries, save_today_entry, proxy_google_script])
         .run(tauri::generate_context!())
         .expect("error while running jrnl ios app");
 }
@@ -71,4 +72,13 @@ async fn save_today_entry(entry: Entry) -> Result<(), JrnlIosError> {
 #[tauri::command]
 async fn load_entries() -> JrnlIosResult<Vec<Entry>> {
     inner_load_entries().await
+}
+
+
+#[tauri::command]
+async fn proxy_google_script() -> JrnlIosResult<String> {
+    let response = reqwest::get("https://accounts.google.com/gsi/client").await?;
+    response.text()
+        .await
+        .map_err(Into::into)
 }

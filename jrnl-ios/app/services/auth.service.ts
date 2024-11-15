@@ -11,7 +11,7 @@ export class AuthService {
     async takeSession(nonce: string): Promise<string> {
         return this.api('/auth/take-session', {
             method: 'PATCH',
-            nonce
+            body: { nonce }
         });
     }
 }

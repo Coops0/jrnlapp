@@ -23,7 +23,8 @@
     "tw-colors": "^3.3.2",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5",
-    "@tauri-apps/plugin-store": "^2.1.0"
+    "@tauri-apps/plugin-store": "^2.1.0",
+    "@tauri-apps/api": "^2.1.1"
   },
   "devDependencies": {
     "@nuxt/eslint": "^0.6.1",

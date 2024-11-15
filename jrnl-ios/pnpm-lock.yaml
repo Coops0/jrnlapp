@@ -11,15 +11,15 @@ importers:
       '@nuxt/kit':
         specifier: npm:@nuxt/kit-nightly@latest
         version: '@nuxt/kit-nightly@4.0.0-28853845.506333ff(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)'
-      '@nuxtjs/color-mode':
-        specifier: ^3.5.2
-        version: 3.5.2(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)
       '@nuxtjs/tailwindcss':
         specifier: ^6.12.2
         version: 6.12.2(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.15(tailwindcss@3.4.14)
+      '@tauri-apps/api':
+        specifier: ^2.1.1
+        version: 2.1.1
       '@tauri-apps/plugin-store':
         specifier: ^2.1.0
         version: 2.1.0
@@ -873,9 +873,6 @@ packages:
     engines: {node: ^14.18.0 || >=16.10.0}
     peerDependencies:
       vue: ^3.3.4
-
-  '@nuxtjs/color-mode@3.5.2':
-    resolution: {integrity: sha512-cC6RfgZh3guHBMLLjrBB2Uti5eUoGM9KyauOaYS9ETmxNWBMTvpgjvSiSJp1OFljIXPIqVTJ3xtJpSNZiO3ZaA==}
 
   '@nuxtjs/tailwindcss@6.12.2':
     resolution: {integrity: sha512-qPJiFH67CkTj/2kBGBzqXihOD1rQXMsbVS4vdQvfBxOBLPfGhU1yw7AATdhPl2BBjO2krjJLuZj39t7dnDYOwg==}
@@ -2510,8 +2507,8 @@ packages:
     resolution: {integrity: sha512-O1Ld7Dr+nqPnmGpdhzLmMTQ4vAsD+rHwMm1NLUmoUFFymBOMKxCCrtDxqdBRYXdeEPEi3SyoR4TizJLQrnKBNA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  h3-nightly@1.13.1-20241013-011028-3bf8af0:
-    resolution: {integrity: sha512-4kygQHpL1MqsabGd2IRpZ1nGUWw6xXpNq4u6ier2ydZr/Hs6/oQlR5fm9WNIhBYaO5sS5ati+UVwsFg+q5JFeg==}
+  h3-nightly@1.13.1-20241114-132633-3dd17c2:
+    resolution: {integrity: sha512-FCIC7pdIZgT5+F4PCJ7weGJ+3nPezcbqniVAR3aQ4cLWXHVowQm3QW6lPUPl9YjLnA97xem3z7F3EfC0McKqIw==}
 
   h3-nightly@2.0.0-1718872656.6765a6e:
     resolution: {integrity: sha512-LQ8hHOIzk+agD1p0K7UosByKuzDAKGLTnYsP0syV/XMr9E7pWmoaDSWkGdWjtLR9O3hinNqrXU1NW0kTmhiSag==}
@@ -3162,8 +3159,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nuxi-nightly@3.15.1-20241112-121946-45801c0:
-    resolution: {integrity: sha512-lbcgBHkvW6TmMg/LoxkZ6YFGu/i6SWTYqtp5YO2iNu643c4kHcRbKiJztcbYwDPEphHLTdZGCPyqXWa5OJTgqg==}
+  nuxi-nightly@3.15.1-20241115-121229-45801c0:
+    resolution: {integrity: sha512-V9jSbkT+xRYrxK0dzFrUxcEXYSs27DViuX7zJrIzG++GTkFxblLTe0WQA6b8EOSAFY3GEYEU5ka52INATDNvhg==}
     engines: {node: ^16.10.0 || >=18.0.0}
     hasBin: true
 
@@ -5490,18 +5487,6 @@ snapshots:
       - vue-tsc
       - webpack-sources
 
-  '@nuxtjs/color-mode@3.5.2(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)':
-    dependencies:
-      '@nuxt/kit': 3.14.159(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)
-      pathe: 1.1.2
-      pkg-types: 1.2.1
-      semver: 7.6.3
-    transitivePeerDependencies:
-      - magicast
-      - rollup
-      - supports-color
-      - webpack-sources
-
   '@nuxtjs/tailwindcss@6.12.2(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)':
     dependencies:
       '@nuxt/kit': 3.14.159(magicast@0.3.5)(rollup@4.25.0)(webpack-sources@3.2.3)
@@ -7327,7 +7312,7 @@ snapshots:
     dependencies:
       duplexer: 0.1.2
 
-  h3-nightly@1.13.1-20241013-011028-3bf8af0:
+  h3-nightly@1.13.1-20241114-132633-3dd17c2:
     dependencies:
       cookie-es: 1.2.2
       crossws: 0.3.1
@@ -7944,7 +7929,7 @@ snapshots:
       fs-extra: 11.2.0
       globby: 14.0.2
       gzip-size: 7.0.0
-      h3: h3-nightly@1.13.1-20241013-011028-3bf8af0
+      h3: h3-nightly@1.13.1-20241114-132633-3dd17c2
       hookable: 5.5.3
       httpxy: 0.1.5
       ioredis: 5.4.1
@@ -8051,7 +8036,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuxi-nightly@3.15.1-20241112-121946-45801c0: {}
+  nuxi-nightly@3.15.1-20241115-121229-45801c0: {}
 
   nuxt-nightly@4.0.0-28853845.506333ff(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.25.0)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(terser@5.36.0))(webpack-sources@3.2.3):
     dependencies:
@@ -8091,7 +8076,7 @@ snapshots:
       mlly: 1.7.2
       nanotar: 0.1.1
       nitro: nitro-nightly@3.0.0-beta-28796231.359af68d(typescript@5.6.3)(webpack-sources@3.2.3)
-      nuxi: nuxi-nightly@3.15.1-20241112-121946-45801c0
+      nuxi: nuxi-nightly@3.15.1-20241115-121229-45801c0
       nypm: 0.3.12
       ofetch: 1.4.1
       ohash: 1.1.4
