@@ -28,7 +28,7 @@ impl AuthService {
             // language=postgresql
             "
                 INSERT INTO temp_auth_sessions (expiry)
-                VALUES (NOW() + INTERVAL '5 minutes')
+                VALUES (NOW() + INTERVAL '30 minutes')
                 RETURNING *
             ",
         )
