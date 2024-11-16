@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1.41.1", features = ["full"] }
 
-axum = { version = "0.7.7", features = ["json"] }
+axum = { version = "0.7.9", features = ["json"] }
 tower-http = { version = "0.6.1", features = ["cors", "timeout"] }
 tower = "0.5.1"
 

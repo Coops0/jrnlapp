@@ -2,19 +2,17 @@ use crate::dto::Entry;
 use crate::error::{JrnlIosError, JrnlIosResult};
 use chrono::Local;
 use tauri_plugin_fs::FsExt;
-use tauri_plugin_http::reqwest;
 
 mod dto;
 mod error;
-
-// Refused to execute https://accounts.google.com/gsi/client as script because "X-Content-Type-Options: nosniff" was given and its Content-Type is not a script MIME type.
+mod context;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             let scope = app.fs_scope();
@@ -22,9 +20,10 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![load_entries, save_today_entry, proxy_google_script])
-        .run(tauri::generate_context!())
-        .expect("error while running jrnl ios app");
+        .invoke_handler(tauri::generate_handler![load_entries, save_today_entry, load_today_entry])
+        // context macro absolutely murders ide performance
+        .run(context::context())
+        .expect("error while running tauri application");
 }
 
 async fn handle_today_entry() -> JrnlIosResult<()> {
@@ -70,15 +69,14 @@ async fn save_today_entry(entry: Entry) -> Result<(), JrnlIosError> {
 }
 
 #[tauri::command]
-async fn load_entries() -> JrnlIosResult<Vec<Entry>> {
-    inner_load_entries().await
+async fn load_today_entry() -> Option<Entry> {
+    let tokio_file_handle = tokio::fs::File::open("entry-storage/today.mpk").await.ok()?;
+    let std_file_handle = tokio_file_handle.into_std().await;
+
+    rmp_serde::decode::from_read(std_file_handle).ok()
 }
 
-
 #[tauri::command]
-async fn proxy_google_script() -> JrnlIosResult<String> {
-    let response = reqwest::get("https://accounts.google.com/gsi/client").await?;
-    response.text()
-        .await
-        .map_err(Into::into)
+async fn load_entries() -> JrnlIosResult<Vec<Entry>> {
+    inner_load_entries().await
 }

@@ -32,7 +32,7 @@ export default defineNuxtConfig({
             strictPort: true,
             watch: {
                 ignored: ['./src-tauri/**'],
-            },
+            }
         },
         ssr: {
             noExternal: true

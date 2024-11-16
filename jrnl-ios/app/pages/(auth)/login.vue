@@ -28,7 +28,6 @@
 
 <script lang="ts" setup>
 import { AuthService } from '~/services/auth.service';
-import { invoke } from '@tauri-apps/api/core';
 
 const { public: { apiBase, appleClientId, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
@@ -43,11 +42,11 @@ const nonce = computed(() => sessionDetails.value?.nonce);
 
 useHead({
   script: [
-    // {
-    //   src: 'https://accounts.google.com/gsi/client',
-    //   defer: true,
-    //   async: true
-    // },
+    {
+      src: 'https://accounts.google.com/gsi/client',
+      defer: true,
+      async: true
+    },
     {
       src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
       defer: true,
@@ -88,22 +87,14 @@ onMounted(async () => {
     await navigateTo({ name: 'cb', query: { r: payload } });
   }, 500);
 
-  const googleScriptContent = await invoke<string>('proxy_google_script');
-  console.log('script', googleScriptContent);
-  const googleScript = document.createElement('script');
-  googleScript.type = 'text/javascript';
-  googleScript.src = googleScriptContent;
-
-  document.head.appendChild(googleScript);
-
   googleButtonInitInterval.value = setInterval(() => {
-    // @ts-expect-error-next-line google is window type
-    if (!window['google'] || !nonce.value || !csrf.value) {
+    /* global google */
+    if (typeof google === 'undefined' || !nonce.value || !csrf.value) {
       return;
     }
 
     clearInterval(googleButtonInitInterval.value!);
-    // @ts-expect-error-next-line google is window type
+    /* global google */
     google.accounts.id.initialize({
       client_id: googleClientId,
       context: 'signin',
@@ -114,7 +105,7 @@ onMounted(async () => {
       itp_support: true
     });
 
-    // @ts-expect-error-next-line google is window type
+    /* global google */
     google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
       type: 'standard',
       text: 'continue_with',
@@ -122,7 +113,7 @@ onMounted(async () => {
       logo_alignment: 'center'
     });
 
-    // @ts-expect-error-next-line google is window type
+    /* global google */
     google.accounts.id.prompt();
   });
 });
