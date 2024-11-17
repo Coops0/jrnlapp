@@ -19,13 +19,6 @@
       }
     ]
   },
-  "plugins": {
-    "deep-link": {
-      "mobile": [
-        { "host": "my.jrnl.fm", "pathPrefix": "/auth/apple/deeplink" }
-      ]
-    }
-  },
   "bundle": {
     "active": true,
     "targets": "all",

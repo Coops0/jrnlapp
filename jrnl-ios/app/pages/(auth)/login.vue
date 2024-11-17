@@ -27,8 +27,7 @@
 import { AuthService, type ServerResponse } from '~/services/auth.service';
 import { UserService } from '~/services/user.service';
 import { get_apple_id_credential } from 'tauri-plugin-sign-in-with-apple-api';
-import { open as tauriOpen } from '@tauri-apps/plugin-shell';
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
+import { requestSignin } from 'tauri-plugin-google-signin-api';
 
 const { public: { apiBase, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
@@ -44,25 +43,9 @@ const { data: sessionDetails } = await useAsyncData('session-details', () => aut
 const error = ref<string | null>(null);
 
 async function startGoogleLogin() {
-  await onOpenUrl(async ([url]) => {
-    if (url?.startsWith(`${apiBase}/auth/apple/deeplink`) !== true) {
-      return;
-    }
-
-    const uri = new URL(url);
-    let decodedServerResponse: ServerResponse;
-    try {
-      decodedServerResponse = JSON.parse(atob(uri.searchParams.get('r')!));
-    } catch (e) {
-      console.error(e);
-      error.value = 'failed to login to google';
-      return;
-    }
-
-    await handleServerResponse(decodedServerResponse);
-  });
-
-  await tauriOpen(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${apiBase}/auth/google/redirect&response_type=code&scope=openid%20profile`);
+  requestSignin()
+      .then(console.log)
+      .catch(console.error);
 }
 
 async function startAppleLogin() {

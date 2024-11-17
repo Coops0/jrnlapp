@@ -7,14 +7,13 @@ mod web;
 
 use crate::{auth::clean_expired_sessions, schemas::user::User};
 use aes_gcm::{Aes256Gcm, Key};
-use auth_controller::auth_controller;
-use axum::middleware::from_extractor_with_state;
 use axum::{
     extract::DefaultBodyLimit,
     http::header::{AUTHORIZATION, CONTENT_TYPE},
+    middleware::from_extractor_with_state,
     Router,
 };
-use controllers::{auth_controller, entry_controller::entries_controller, group_controller::groups_controller, user_controller::users_controller, well_known_controller};
+use controllers::{auth_controller::auth_controller, entry_controller::entries_controller, group_controller::groups_controller, user_controller::users_controller};
 use services::entry_service::encrypt_old_entries;
 use sqlx::{postgres::{PgConnectOptions, PgPoolOptions}, PgPool};
 use std::{env, time::Duration};
@@ -26,7 +25,6 @@ use tower_http::{
 };
 use tracing::{info, warn};
 use tracing_subscriber::{filter::LevelFilter, EnvFilter};
-use well_known_controller::well_known_controller;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -75,7 +73,6 @@ async fn main() -> anyhow::Result<()> {
         .nest("/groups", groups_controller())
         .layer(from_extractor_with_state::<User, AppState>(state.clone()))
         .nest("/auth", auth_controller())
-        .nest("/.well-known", well_known_controller())
         .layer(
             ServiceBuilder::new()
                 .layer(

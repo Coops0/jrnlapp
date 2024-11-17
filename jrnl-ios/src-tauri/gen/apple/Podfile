@@ -3,6 +3,7 @@
 target 'jrnl_IOS' do
 platform :ios, '13.0'
   # Pods for jrnl_IOS
+  pod 'GoogleSignIn'
 end
 
 target 'jrnl_macOS' do

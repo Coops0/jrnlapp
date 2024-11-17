@@ -7,13 +7,11 @@
   ],
   "permissions": [
     "core:default",
-    "shell:allow-open",
     "store:default",
     "store:allow-load",
     "http:default",
     "fs:default",
     "sign-in-with-apple:default",
-    "shell:allow-open",
-    "deep-link:default"
+    "google-signin:default"
   ]
 }
