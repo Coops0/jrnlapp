@@ -20,12 +20,8 @@ struct JWKPublicKey {
     e: String,
 }
 
-async fn verify_token<Claims: DeserializeOwned>(
-    url: &str,
-    token: &str,
-    issuer: &[&str],
-    audience: &[&str],
-) -> anyhow::Result<Claims> {
+async fn verify_token<Claims: DeserializeOwned>(url: &str, token: &str, issuer: &[&str], audience: &[&str]) -> anyhow::Result<Claims> {
+    // FIXME: cache these keys and use their headers to determine when to refresh
     let keys_response = get(url)
         .await?
         .json::<JwtPublicKeys>()
@@ -77,31 +73,22 @@ pub async fn verify_google_credential(credential: &str, nonce: &Uuid) -> anyhow:
     }
 
     let name = claims.name.or(claims.given_name);
-
     Ok(StrippedGoogleVerificationClaims { sub: claims.sub, name })
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct AppleCallbackPayload {
-    pub id_token: String,
-    pub state: Uuid,
-    #[serde(default, deserialize_with = "deserialize_maybe_user")]
+    pub authorization: AppleCallbackAuthorization,
     pub user: Option<AppleCallbackUser>,
 }
 
-fn deserialize_maybe_user<'de, D: serde::Deserializer<'de>>(
-    deserializer: D,
-) -> Result<Option<AppleCallbackUser>, D::Error> {
-    let Ok(s) = String::deserialize(deserializer) else {
-        return Ok(None);
-    };
-
-    serde_json::from_str(&s)
-        .map(Some)
-        .map_err(serde::de::Error::custom)
+#[derive(Deserialize)]
+pub struct AppleCallbackAuthorization {
+    pub id_token: String,
+    pub state: Uuid,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct AppleCallbackUser {
     pub name: AppleCallbackUserName,
 }

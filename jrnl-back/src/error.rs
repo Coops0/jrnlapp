@@ -32,7 +32,7 @@ pub enum JrnlError {
     #[error("cannot join more than 20 groups")]
     #[status(StatusCode::FORBIDDEN)]
     CannotJoinMoreGroups,
-    
+
     #[error("too many entries to insert")]
     #[status(StatusCode::BAD_REQUEST)]
     TooManyEntries,
@@ -129,7 +129,7 @@ where
         let req = Request::from_parts(parts, body);
         match axum::Json::<T>::from_request(req, state).await {
             Ok(value) => Ok(Self(value.0)),
-            Err(why) => Err(JrnlError::BadRequestSyntax(why)),
+            Err(why) => Err(JrnlError::BadRequestSyntax(why))
         }
     }
 }

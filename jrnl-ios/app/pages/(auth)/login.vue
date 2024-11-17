@@ -44,12 +44,12 @@ useHead({
   script: [
     {
       src: 'https://accounts.google.com/gsi/client',
-      defer: true,
+    //  defer: true,
       async: true
     },
     {
       src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
-      defer: true,
+      // defer: true,
       async: true
     }
   ],
@@ -59,72 +59,57 @@ useHead({
     { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback/mobile` },
     { name: 'appleid-signin-state', content: csrf },
     { name: 'appleid-signin-nonce', content: nonce },
-    { name: 'appleid-signin-use-popup', content: 'false' }
+    { name: 'appleid-signin-use-popup', content: 'true' }
   ]
 });
 
 const googleButtonInitInterval = ref<NodeJS.Timeout | null>(null);
-const nonceCheckInterval = ref<NodeJS.Timeout | null>(null);
 
 onMounted(async () => {
-  nonceCheckInterval.value = setInterval(async () => {
-    if (!nonce.value) {
-      return;
-    }
-
-    let payload: null | string = null;
-    try {
-      payload = await authService.takeSession(nonce.value);
-    } catch {
-      /* empty */
-    }
-
-    if (!payload) {
-      return;
-    }
-
-    clearInterval(nonceCheckInterval.value!);
-    await navigateTo({ name: 'cb', query: { r: payload } });
-  }, 500);
-
-  googleButtonInitInterval.value = setInterval(() => {
-    /* global google */
-    if (typeof google === 'undefined' || !nonce.value || !csrf.value) {
-      return;
-    }
-
-    clearInterval(googleButtonInitInterval.value!);
-    /* global google */
-    google.accounts.id.initialize({
-      client_id: googleClientId,
-      context: 'signin',
-      ux_mode: 'redirect',
-      login_uri: `${apiBase}/auth/google/callback/mobile`,
-      nonce: nonce.value,
-      auto_select: true,
-      itp_support: true
+  if (!nonce.value || !csrf.value) {
+    throw createError({
+      statusCode: 500,
+      message: 'failed to generate session details'
     });
+  }
 
-    /* global google */
-    google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
-      type: 'standard',
-      text: 'continue_with',
-      state: csrf.value,
-      logo_alignment: 'center'
-    });
-
-    /* global google */
-    google.accounts.id.prompt();
+  AppleID.auth.init({
+    clientId: appleClientId,
+    scope: 'name',
+    state: csrf.value,
+    nonce: nonce.value,
+    usePopup: true
   });
-});
 
-onUnmounted(() => {
-  if (nonceCheckInterval.value) {
-    clearInterval(nonceCheckInterval.value);
-  }
+  document.addEventListener('AppleIDSignInOnSuccess', (event) => {
+    // Handle successful response.
+    console.log(event.detail.data);
+  });
 
-  if (googleButtonInitInterval.value) {
-    clearInterval(googleButtonInitInterval.value);
-  }
+  document.addEventListener('AppleIDSignInOnFailure', (event) => {
+    // Handle error.
+    console.log(event.detail.error);
+  });
+
+  // @ts-expect-error google is defined from google script
+  google.accounts.id.initialize({
+    client_id: googleClientId,
+    context: 'use',
+    ux_mode: 'popup',
+    nonce: nonce.value,
+    auto_select: true,
+    itp_support: true,
+    callback: (response: any) => {
+      console.log(response);
+    }
+  });
+
+  // @ts-expect-error google is defined from google script
+  google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
+    type: 'standard',
+    text: 'continue_with',
+    state: csrf.value,
+    logo_alignment: 'center'
+  });
 });
 </script>

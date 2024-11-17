@@ -4,13 +4,7 @@
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
         <div class="space-y-6">
           <div class="flex flex-col items-center gap-3">
-            <div
-                id="google-button-signin"
-                data-type="standard"
-                data-text="continue_with"
-                :data-state="csrf"
-                data-logo_alignment="center"
-            />
+            <div id="google-button-signin"/>
 
             <div
                 id="appleid-signin"
@@ -20,6 +14,14 @@
                 class="w-full h-[40px]"
             />
           </div>
+
+          <div v-if="error"
+               class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700">
+            <div class="text-red-400 mb-4">
+              <span class="text-lg">login failed</span>
+            </div>
+            <p class="text-colors-text-300 mb-6">{{ error }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -27,68 +29,157 @@
 </template>
 
 <script lang="ts" setup>
-import { AuthService } from '~/services/auth.service';
+import { AuthService, type ServerResponse } from '~/services/auth.service';
+import { UserService } from '~/services/user.service';
 
-const { public: { apiBase, appleClientId, googleClientId } } = useRuntimeConfig();
+const { public: { appleClientId, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
 
 definePageMeta({ redirectUnautheticated: false });
 
 const authService = new AuthService($localApi);
+const userService = new UserService($localApi);
+
+const { jwt } = useAuth();
+const { user, hasRefreshedRemotely } = useUser(userService);
 
 const { data: sessionDetails } = await useAsyncData('session-details', () => authService.getSessionDetails());
-const csrf = computed(() => sessionDetails.value?.csrf_token);
-const nonce = computed(() => sessionDetails.value?.nonce);
+
+const error = ref<string | null>(null);
 
 useHead({
   script: [
-    { src: 'https://accounts.google.com/gsi/client', defer: true, async: true },
+    {
+      src: 'https://accounts.google.com/gsi/client',
+      async: true
+    },
     {
       src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
-      defer: true,
       async: true
     }
-  ],
-  meta: [
-    { name: 'appleid-signin-client-id', content: appleClientId },
-    { name: 'appleid-signin-scope', content: 'name' },
-    { name: 'appleid-signin-redirect-uri', content: `${apiBase}/auth/apple/callback` },
-    { name: 'appleid-signin-state', content: csrf },
-    { name: 'appleid-signin-nonce', content: nonce },
-    { name: 'appleid-signin-use-popup', content: 'false' }
   ]
 });
 
+const scriptCheckInterval = ref<NodeJS.Timeout | null>(null);
+
+
+// @ts-expect-error google & AppleID are defined from google & apple scripts
+const isReady = () => typeof google !== 'undefined' && typeof AppleID !== 'undefined';
 
 onMounted(() => {
-  const interval = setInterval(() => {
-    // @ts-ignore-next-line
-    if (!window['google'] || !nonce.value || !csrf.value) {
-      return;
+  if (isReady()) {
+    if (scriptCheckInterval.value) {
+      clearInterval(scriptCheckInterval.value);
+      scriptCheckInterval.value = null;
     }
-
-    clearInterval(interval);
-    // @ts-ignore-next-line
-    google.accounts.id.initialize({
-      client_id: googleClientId,
-      context: 'signin',
-      ux_mode: 'redirect',
-      login_uri: `${apiBase}/auth/google/callback`,
-      nonce: nonce.value,
-      auto_select: true,
-      itp_support: true
-    });
-
-    // @ts-ignore-next-line
-    google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
-      type: 'standard',
-      text: 'continue_with',
-      state: csrf.value,
-      logo_alignment: 'center'
-    });
-
-    // @ts-ignore-next-line
-    google.accounts.id.prompt();
-  });
+    initProviders();
+  } else if (!scriptCheckInterval.value) {
+    scriptCheckInterval.value = setInterval(() => {
+      if (isReady()) {
+        clearInterval(scriptCheckInterval.value!);
+        initProviders();
+      }
+    }, 250);
+  }
 });
+
+function initProviders() {
+  if (!sessionDetails.value) {
+    throw createError({
+      statusCode: 500,
+      message: 'failed to generate session details'
+    });
+  }
+
+  const { csrf_token: state, nonce } = sessionDetails.value;
+
+  // @ts-expect-error AppleID is defined from apple script
+  AppleID.auth.init({
+    clientId: appleClientId,
+    scope: 'name',
+    state,
+    nonce,
+    usePopup: true,
+    // redirectURI: `${apiBase}/auth/apple`
+    // redirectURI: 'https://my.jrnl.fm/auth/apple'
+    redirectURI: window.location.href
+  });
+
+  document.addEventListener('AppleIDSignInOnSuccess', async event => {
+    try {
+      // @ts-expect-error event is not typed
+      const response = await authService.loginWithApple(event?.detail);
+      await handleServerResponse(response);
+    } catch (e) {
+      console.error(e);
+      error.value = 'failed to login with apple';
+    }
+  });
+
+  document.addEventListener('AppleIDSignInOnFailure', event => {
+    // @ts-expect-error event is not typed
+    if (event.detail.error === 'popup_closed_by_user') {
+      error.value = 'the popup was closed';
+    } else {
+      // @ts-expect-error event is not typed
+      error.value = event?.detail?.error?.replaceAll('_', ' ');
+    }
+  });
+
+  // @ts-expect-error google is defined from google script
+  // noinspection JSUnusedGlobalSymbols
+  google.accounts.id.initialize({
+    client_id: googleClientId,
+    context: 'use',
+    ux_mode: 'popup',
+    nonce,
+    auto_select: true,
+    itp_support: true,
+    callback: async (googlePayload: unknown) => {
+      try {
+        const response = await authService.loginWithGoogle(googlePayload);
+        await handleServerResponse(response);
+      } catch (e) {
+        console.error(e);
+        error.value = 'failed to login with google';
+      }
+    },
+  });
+
+  // @ts-expect-error google is defined from google script
+  google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
+    type: 'standard',
+    text: 'continue_with',
+    state,
+    logo_alignment: 'center'
+  });
+
+  try {
+    // @ts-expect-error google is defined from google script
+    google.accounts.id.prompt();
+  } catch {
+    /* empty */
+  }
+}
+
+async function handleServerResponse(response: ServerResponse) {
+  if ('error' in response) {
+    console.error(response.error);
+    error.value = response.error;
+    return;
+  }
+
+  jwt.value = response.token;
+
+  hasRefreshedRemotely.value = true;
+  user.value = response.user;
+
+  try {
+    await userService.updateMe({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  } catch (e) {
+    console.warn(e);
+  }
+
+  await navigateTo('/current');
+}
 </script>

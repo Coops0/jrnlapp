@@ -11,11 +11,10 @@ impl_service!(UserService);
 impl UserService {
     pub async fn create_or_get_user(
         &self,
-        name: &Option<String>,
+        name: &str,
         google_subject: &Option<String>,
         apple_subject: &Option<String>,
     ) -> Result<User, Error> {
-        // causes errors if is first time user and no name provided - shouldn't happen though hopefully
         sqlx::query_as(
             // language=postgresql
             "

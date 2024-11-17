@@ -19,7 +19,7 @@ const emit = defineEmits<{
   'update:modelValue': [content: string]
 }>();
 
-const editorClasses = 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl prose-p:text-colors-primary-200 prose-strong:text-colors-primary-300 prose-headings:text-colors-primary-100 m-5 !outline-0 max-w-full h-full';
+const editorClasses = 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl prose-p:text-colors-primary-200 prose-strong:text-colors-primary-300 prose-headings:text-colors-primary-100 m-5 !outline-0 max-w-full h-full better-outline-none';
 
 watch(() => props.modelValue, value => {
   const e = editor.value;
@@ -54,3 +54,11 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<style>
+/* tailwind adds other properties */
+/*noinspection CssUnusedSymbol*/
+.better-outline-none {
+  outline: none;
+}
+</style>

@@ -9,13 +9,14 @@ import { themes } from 'assets/themes';
 
 
 const { theme } = useTheme(null);
-
 const themeColor = computed(() => themes[theme.value]?.colors?.primary[900] ?? '#111922');
 
 useHead({
   title: 'jr.nl',
   bodyAttrs: {
-    class: 'bg-colors-primary-900'
+    style: {
+      'background-color': 'hsl(var(--twc-colors-primary-900))'
+    }
   },
   meta: [
     { name: 'description', content: 'one day at a time' },
