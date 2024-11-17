@@ -1,3 +1,3 @@
 fn main() {
-    jrnl_ios_lib::run();
+    jrnl_lib::run();
 }

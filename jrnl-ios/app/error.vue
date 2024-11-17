@@ -9,9 +9,6 @@
 
       <div class="flex mt-4 flex-row gap-2 justify-center">
         <button class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded-md text-white-100" @click="clear">clear error</button>
-        <button class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded-md text-white-100" @click="clearCookiesAndRefresh">log out and
-          refresh
-        </button>
       </div>
     </div>
   </div>
@@ -21,19 +18,6 @@
 import type { NuxtError } from '#app';
 
 defineProps<{ error: NuxtError }>();
-
-function clearCookiesAndRefresh() {
-  useCookie('theme-cache').value = null;
-  useCookie('jwt').value = null;
-  useCookie('cached-user').value = null;
-  useCookie('entry-today').value = null;
-
-
-  clearNuxtData();
-  clearNuxtState();
-
-  reloadNuxtApp({ path: '/', force: true });
-}
 
 const clear = () => clearError({ redirect: '/' });
 </script>

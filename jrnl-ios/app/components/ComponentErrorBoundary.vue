@@ -25,14 +25,35 @@ interface ApiError {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parseError = (error: any): string => {
+  console.log(error);
   try {
     if (typeof error === 'string') {
       const parsed = JSON.parse(error) as ApiError;
       return parsed.msg ?? 'an error occured';
     }
+  } catch {
+    /* empty */
+  }
 
+  try {
     if (error.value) {
       return (error.value.data as ApiError).msg ?? 'an error occured';
+    }
+  } catch {
+    /* empty */
+  }
+
+  try {
+    if (error.message) {
+      return error.message;
+    }
+  } catch {
+    /* empty */
+  }
+
+  try {
+    if (error._value) {
+      return error._value;
     }
   } catch {
     /* empty */

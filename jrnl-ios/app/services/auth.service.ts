@@ -1,4 +1,7 @@
 import type { $Fetch } from 'nitro/types';
+import type { User } from '~/types/user.type';
+
+export type ServerResponse = { error: string } | { user: User, token: string };
 
 export class AuthService {
     constructor(private readonly api: $Fetch) {
@@ -8,10 +11,17 @@ export class AuthService {
         return this.api('/auth/session');
     }
 
-    async takeSession(nonce: string): Promise<string> {
-        return this.api('/auth/take-session', {
-            method: 'PATCH',
-            body: { nonce }
+    async loginWithGoogle(payload: unknown): Promise<ServerResponse>  {
+        return this.api('/auth/google', {
+            method: 'POST',
+            body: payload as object
+        });
+    }
+
+    async loginWithApple(payload: unknown): Promise<ServerResponse>  {
+        return this.api('/auth/apple', {
+            method: 'POST',
+            body: payload as object
         });
     }
 }

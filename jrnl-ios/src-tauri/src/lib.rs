@@ -14,6 +14,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_sign_in_with_apple::init())
         .setup(|app| {
             let scope = app.fs_scope();
             scope.allow_directory("entry-storage", true);
