@@ -120,13 +120,38 @@ function initGoogle() {
 }
 
 async function startAppleLogin() {
-  const response = await get_apple_id_credential({
-    scope: ['fullName'],
-    nonce: sessionDetails.value!.nonce,
-    state: sessionDetails.value!.csrf_token
-  });
+  let response;
+  try {
+    response = await get_apple_id_credential({
+      scope: ['fullName'],
+      nonce: sessionDetails.value!.nonce,
+      state: sessionDetails.value!.csrf_token
+    });
+  } catch (e) {
+    console.error(e);
+    error.value = 'failed to login with apple';
+    return;
+  }
 
-  console.log(response);
+  const correctlyFormattedResponse = {
+    authorization: {
+      id_token: response.identityToken,
+      state: response.state
+    },
+    user: response.givenName && {
+      name: {
+        firstName: response.givenName
+      }
+    }
+  };
+
+  try {
+    const serverResponse = await authService.loginWithApple(correctlyFormattedResponse);
+    await handleServerResponse(serverResponse);
+  } catch (e) {
+    console.error(e);
+    error.value = 'failed to login to jrnl with apple';
+  }
 }
 
 async function handleServerResponse(response: ServerResponse) {
