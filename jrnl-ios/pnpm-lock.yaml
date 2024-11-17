@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@nuxt/kit':
         specifier: npm:@nuxt/kit-nightly@latest
-        version: '@nuxt/kit-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)'
+        version: '@nuxt/kit-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)'
       '@nuxtjs/tailwindcss':
         specifier: ^6.12.2
         version: 6.12.2(magicast@0.3.5)(rollup@4.27.2)
@@ -34,10 +34,10 @@ importers:
         version: 2.9.1(@tiptap/core@2.9.1(@tiptap/pm@2.9.1))(@tiptap/pm@2.9.1)(vue@3.5.13(typescript@5.6.3))
       nuxt:
         specifier: npm:nuxt-nightly@latest
-        version: nuxt-nightly@4.0.0-28864051.d5494c9a(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))
+        version: nuxt-nightly@4.0.0-28864692.67456810(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))
       nuxt-time:
         specifier: 1.0.1
-        version: 1.0.1(magicast@0.3.5)(nuxt-nightly@4.0.0-28864051.d5494c9a(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0)))(rollup@4.27.2)
+        version: 1.0.1(magicast@0.3.5)(nuxt-nightly@4.0.0-28864692.67456810(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0)))(rollup@4.27.2)
       tw-colors:
         specifier: ^3.3.2
         version: 3.3.2(tailwindcss@3.4.15)
@@ -858,16 +858,16 @@ packages:
       vite-plugin-eslint2:
         optional: true
 
-  '@nuxt/kit-nightly@4.0.0-28864051.d5494c9a':
-    resolution: {integrity: sha512-hTAE3HBzDFdg2aQH3rQ5rQruZsG9aOgOMzei6qPObd3mQHFGZGNYXlHv5OxvuG6ljwl3iT8NbI/Mu51hyFyGgg==}
+  '@nuxt/kit-nightly@4.0.0-28864692.67456810':
+    resolution: {integrity: sha512-mbvDKhNCXPcFENgpPKDrKLtVG/D7PoGUI6Rm1TWGi87cfwpsAVcEBBMnAalrEpu1FKKLfyQ6Q1OmT7Wa2JGpwg==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
   '@nuxt/kit@3.14.159':
     resolution: {integrity: sha512-ZqxsCI1NKV/gjfEUUZjMcr82sg0MKYZOuyB6bu9QY5Zr7NGpfIZY/z5Z822AKTmFxKGChnuz9M0UaS4ze6p42g==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
-  '@nuxt/schema-nightly@4.0.0-28864051.d5494c9a':
-    resolution: {integrity: sha512-aY3DM54ZspRPa4x/33gMJMCnK8fA60qZqSnDBsZRgcBWSdYVt5zPqICeTVYGxi3tMcU5LnnTxVJJTNb+JNHTgQ==}
+  '@nuxt/schema-nightly@4.0.0-28864692.67456810':
+    resolution: {integrity: sha512-9xkJwhgHIrhceAaCeRKIKix7rmi2LJgJ8+/SD0q0uuHnJ8SXRBlyNz7FiU1UAP1XmTb/pQH/PpocptkzGN/mZw==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
   '@nuxt/schema@3.14.159':
@@ -878,8 +878,8 @@ packages:
     resolution: {integrity: sha512-h4YJ1d32cU7tDKjjhjtIIEck4WF/w3DTQBT348E9Pz85YLttnLqktLM0Ez9Xc2LzCeUgBDQv1el7Ob/zT3KUqg==}
     hasBin: true
 
-  '@nuxt/vite-builder-nightly@4.0.0-28864051.d5494c9a':
-    resolution: {integrity: sha512-W0eqr3hRcCsb+O9RZzm34lWdl01IBrm46rln/ZBLY9Cmy3247V+iJNtHdSY34isyvzanoOQL+4CuzCe7xAMW6w==}
+  '@nuxt/vite-builder-nightly@4.0.0-28864692.67456810':
+    resolution: {integrity: sha512-bxY1T5Oq5L7rh/GbkVqVs777xR9diTyMwLVWNwmO9FOc39aUavsKdfI/iIDcpnFo9WTbdF+qBn+dzUScqwk3kQ==}
     engines: {node: ^14.18.0 || >=16.10.0}
     peerDependencies:
       vue: ^3.3.4
@@ -3172,8 +3172,8 @@ packages:
     engines: {node: ^16.10.0 || >=18.0.0}
     hasBin: true
 
-  nuxt-nightly@4.0.0-28864051.d5494c9a:
-    resolution: {integrity: sha512-4/r3ayDmjeXjpDka96PQkGlboT8iKnXOoe4QliA373dNByXs+bGCn/qnSjPhNqqWXstEw+O9OvVE8GA4/VH0BA==}
+  nuxt-nightly@4.0.0-28864692.67456810:
+    resolution: {integrity: sha512-1dQiVUG7Mux0TXiR97QaYf4g2I05uFCFL1aT+HrL16Fb1/qSThE04u+aTEvpyaaJB6Y9Bw2leafongyZagSqHQ==}
     engines: {node: ^14.18.0 || >=16.10.0}
     hasBin: true
     peerDependencies:
@@ -5306,9 +5306,9 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@nuxt/kit-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)':
+  '@nuxt/kit-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)':
     dependencies:
-      '@nuxt/schema': '@nuxt/schema-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)'
+      '@nuxt/schema': '@nuxt/schema-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)'
       c12: 2.0.1(magicast@0.3.5)
       consola: 3.2.3
       defu: 6.1.4
@@ -5360,7 +5360,7 @@ snapshots:
       - rollup
       - supports-color
 
-  '@nuxt/schema-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)':
+  '@nuxt/schema-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)':
     dependencies:
       c12: 2.0.1(magicast@0.3.5)
       compatx: 0.1.8
@@ -5425,9 +5425,9 @@ snapshots:
       - rollup
       - supports-color
 
-  '@nuxt/vite-builder-nightly@4.0.0-28864051.d5494c9a(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))':
+  '@nuxt/vite-builder-nightly@4.0.0-28864692.67456810(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))':
     dependencies:
-      '@nuxt/kit': '@nuxt/kit-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)'
+      '@nuxt/kit': '@nuxt/kit-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)'
       '@rollup/plugin-replace': 6.0.1(rollup@4.27.2)
       '@vitejs/plugin-vue': 5.2.0(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))(vue@3.5.13(typescript@5.6.3))
       '@vitejs/plugin-vue-jsx': 4.1.0(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))(vue@3.5.13(typescript@5.6.3))
@@ -8038,14 +8038,14 @@ snapshots:
 
   nuxi-nightly@3.15.1-20241115-121229-45801c0: {}
 
-  nuxt-nightly@4.0.0-28864051.d5494c9a(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0)):
+  nuxt-nightly@4.0.0-28864692.67456810(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0)):
     dependencies:
       '@nuxt/devalue': 2.0.2
       '@nuxt/devtools': 1.6.0(rollup@4.27.2)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))(vue@3.5.13(typescript@5.6.3))
-      '@nuxt/kit': '@nuxt/kit-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)'
-      '@nuxt/schema': '@nuxt/schema-nightly@4.0.0-28864051.d5494c9a(magicast@0.3.5)(rollup@4.27.2)'
+      '@nuxt/kit': '@nuxt/kit-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)'
+      '@nuxt/schema': '@nuxt/schema-nightly@4.0.0-28864692.67456810(magicast@0.3.5)(rollup@4.27.2)'
       '@nuxt/telemetry': 2.6.0(magicast@0.3.5)(rollup@4.27.2)
-      '@nuxt/vite-builder': '@nuxt/vite-builder-nightly@4.0.0-28864051.d5494c9a(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))'
+      '@nuxt/vite-builder': '@nuxt/vite-builder-nightly@4.0.0-28864692.67456810(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))'
       '@unhead/dom': 1.11.11
       '@unhead/shared': 1.11.11
       '@unhead/ssr': 1.11.11
@@ -8150,11 +8150,11 @@ snapshots:
       - vue-tsc
       - xml2js
 
-  nuxt-time@1.0.1(magicast@0.3.5)(nuxt-nightly@4.0.0-28864051.d5494c9a(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0)))(rollup@4.27.2):
+  nuxt-time@1.0.1(magicast@0.3.5)(nuxt-nightly@4.0.0-28864692.67456810(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0)))(rollup@4.27.2):
     dependencies:
       '@nuxt/kit': 3.14.159(magicast@0.3.5)(rollup@4.27.2)
       defu: 6.1.4
-      nuxt: nuxt-nightly@4.0.0-28864051.d5494c9a(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))
+      nuxt: nuxt-nightly@4.0.0-28864692.67456810(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.2)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(terser@5.36.0))
       pathe: 1.1.2
     transitivePeerDependencies:
       - magicast

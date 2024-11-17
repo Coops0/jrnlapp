@@ -12,7 +12,7 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct GoogleSignin<R: Runtime>(AppHandle<R>);
 
 impl<R: Runtime> GoogleSignin<R> {
-    pub fn request_signin(&self) -> ! {
+    pub fn request_signin(&self, _nonce: String) -> ! {
         panic!("Google Sign In is not implemented on desktop platforms")
     }
 

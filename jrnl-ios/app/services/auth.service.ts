@@ -11,6 +11,13 @@ export class AuthService {
         return this.api('/auth/session');
     }
 
+    async loginWithGoogle(payload: unknown): Promise<ServerResponse>  {
+        return this.api('/auth/google', {
+            method: 'POST',
+            body: payload as object
+        });
+    }
+
     async loginWithApple(payload: unknown): Promise<ServerResponse>  {
         return this.api('/auth/apple', {
             method: 'POST',

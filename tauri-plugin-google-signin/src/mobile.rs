@@ -25,14 +25,14 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 pub struct GoogleSignin<R: Runtime>(PluginHandle<R>);
 
 impl<R: Runtime> GoogleSignin<R> {
-  pub fn request_signin(&self) -> crate::Result<String> {
+  pub fn request_signin(&self, nonce: String) -> crate::Result<RequestSignInResponse> {
     self
       .0
-      .run_mobile_plugin("request_signin", ())
+      .run_mobile_plugin("request_signin", RequestSignInArgs { nonce })
       .map_err(Into::into)
   }
 
-    pub fn logout(&self) -> crate::Result<String> {
+    pub fn logout(&self) -> crate::Result<()> {
         self
         .0
         .run_mobile_plugin("signout", ())

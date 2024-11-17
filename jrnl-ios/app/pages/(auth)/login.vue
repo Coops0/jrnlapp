@@ -29,7 +29,6 @@ import { UserService } from '~/services/user.service';
 import { get_apple_id_credential } from 'tauri-plugin-sign-in-with-apple-api';
 import { requestSignin } from 'tauri-plugin-google-signin-api';
 
-const { public: { apiBase, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
 
 const authService = new AuthService($localApi);
@@ -43,9 +42,28 @@ const { data: sessionDetails } = await useAsyncData('session-details', () => aut
 const error = ref<string | null>(null);
 
 async function startGoogleLogin() {
-  requestSignin()
-      .then(console.log)
-      .catch(console.error);
+  let response;
+  try {
+    response = await requestSignin(sessionDetails.value!.nonce);
+  } catch (e: unknown) {
+    console.error(e);
+    error.value = e as string ?? 'failed to login with google';
+    return;
+  }
+
+  let serverResponse: ServerResponse;
+  try {
+    serverResponse = await authService.loginWithGoogle({
+      credential: response.idToken,
+      state: sessionDetails.value!.csrf_token
+    });
+  } catch (e) {
+    console.error(e);
+    error.value = 'failed to login to jrnl with google';
+    return;
+  }
+
+  await handleServerResponse(serverResponse);
 }
 
 async function startAppleLogin() {
@@ -106,5 +124,4 @@ async function handleServerResponse(response: ServerResponse) {
 
   await navigateTo('/current');
 }
-
 </script>

@@ -508,7 +508,7 @@
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
 			requirement = {
 				kind = exactVersion;
-				version = 7.0.0;
+				version = "8.1.0-vwg-eap-1.0.0";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
