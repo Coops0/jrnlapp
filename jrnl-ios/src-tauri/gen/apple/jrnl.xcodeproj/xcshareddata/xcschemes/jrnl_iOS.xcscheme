@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8946B8D5E0233B5DE97C0421"
-               BuildableName = "jrnl-ios.app"
-               BlueprintName = "jrnl-ios_iOS"
-               ReferencedContainer = "container:jrnl-ios.xcodeproj">
+               BuildableName = "jrnl.app"
+               BlueprintName = "jrnl_IOS"
+               ReferencedContainer = "container:jrnl.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -31,9 +31,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8946B8D5E0233B5DE97C0421"
-            BuildableName = "jrnl-ios.app"
-            BlueprintName = "jrnl-ios_iOS"
-            ReferencedContainer = "container:jrnl-ios.xcodeproj">
+            BuildableName = "jrnl.app"
+            BlueprintName = "jrnl_IOS"
+            ReferencedContainer = "container:jrnl.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -66,9 +66,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8946B8D5E0233B5DE97C0421"
-            BuildableName = "jrnl-ios.app"
-            BlueprintName = "jrnl-ios_iOS"
-            ReferencedContainer = "container:jrnl-ios.xcodeproj">
+            BuildableName = "jrnl.app"
+            BlueprintName = "jrnl_IOS"
+            ReferencedContainer = "container:jrnl.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -95,9 +95,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8946B8D5E0233B5DE97C0421"
-            BuildableName = "jrnl-ios.app"
-            BlueprintName = "jrnl-ios_iOS"
-            ReferencedContainer = "container:jrnl-ios.xcodeproj">
+            BuildableName = "jrnl.app"
+            BlueprintName = "jrnl_IOS"
+            ReferencedContainer = "container:jrnl.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>

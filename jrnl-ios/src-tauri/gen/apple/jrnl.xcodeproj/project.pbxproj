@@ -29,7 +29,7 @@
 		4A0F06906DE2E2828DC9A346 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		5A3B6A4B60E760FE833EDC8E /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		818B5B2BD0F6F361FC468767 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		886077BD4E784D1108C033BD /* jrnl-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "jrnl-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		886077BD4E784D1108C033BD /* jrnl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jrnl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8ADA2147D61EEC52BF68BAE3 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		8BA93E15C25F574E7E53BAC6 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
 		8C9AACC6EE67FAF276ABB404 /* main.rs */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.rs; sourceTree = "<group>"; };
@@ -37,7 +37,7 @@
 		B0589349F48467E42415B58F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		BC867F25A634856429A0FB03 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		C22971861F8E13D49AD40D51 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		C6DE7348559A5AA3DF8F50A7 /* jrnl-ios_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "jrnl-ios_iOS.entitlements"; sourceTree = "<group>"; };
+		C6DE7348559A5AA3DF8F50A7 /* jrnl_IOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = jrnl_IOS.entitlements; sourceTree = "<group>"; };
 		E4CEBA3E9A1DB0D4D3A07769 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F061A4B33FCD49849848D1FA /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -91,19 +91,19 @@
 			path = bindings;
 			sourceTree = "<group>";
 		};
-		458A0D9B6F5356FB8F969018 /* jrnl-ios_iOS */ = {
+		458A0D9B6F5356FB8F969018 /* jrnl_IOS */ = {
 			isa = PBXGroup;
 			children = (
 				C22971861F8E13D49AD40D51 /* Info.plist */,
-				C6DE7348559A5AA3DF8F50A7 /* jrnl-ios_iOS.entitlements */,
+				C6DE7348559A5AA3DF8F50A7 /* jrnl_IOS.entitlements */,
 			);
-			path = "jrnl-ios_iOS";
+			path = jrnl_IOS;
 			sourceTree = "<group>";
 		};
 		893E1785E401822C0916885F /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				C6DAE3420D32E28183A758E8 /* jrnl-ios */,
+				C6DAE3420D32E28183A758E8 /* jrnl */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -115,7 +115,7 @@
 				E4CEBA3E9A1DB0D4D3A07769 /* Assets.xcassets */,
 				818B5B2BD0F6F361FC468767 /* LaunchScreen.storyboard */,
 				02D0CC84C0F021ED9A9FBEF7 /* Externals */,
-				458A0D9B6F5356FB8F969018 /* jrnl-ios_iOS */,
+				458A0D9B6F5356FB8F969018 /* jrnl_IOS */,
 				893E1785E401822C0916885F /* Sources */,
 				CB3B1CDAE5A8688EE583FFDE /* src */,
 				0B3D110A8407EB1560D0386F /* Frameworks */,
@@ -126,18 +126,18 @@
 		C16C3ABA7CCD82ED0DD40C76 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				886077BD4E784D1108C033BD /* jrnl-ios.app */,
+				886077BD4E784D1108C033BD /* jrnl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C6DAE3420D32E28183A758E8 /* jrnl-ios */ = {
+		C6DAE3420D32E28183A758E8 /* jrnl */ = {
 			isa = PBXGroup;
 			children = (
 				2C00511ACCC2D87F17C8058F /* main.mm */,
 				3B8EC24636629F1D9D66267A /* bindings */,
 			);
-			path = "jrnl-ios";
+			path = jrnl;
 			sourceTree = "<group>";
 		};
 		CB3B1CDAE5A8688EE583FFDE /* src */ = {
@@ -153,9 +153,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8946B8D5E0233B5DE97C0421 /* jrnl-ios_iOS */ = {
+		8946B8D5E0233B5DE97C0421 /* jrnl_IOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A033DB6B5FAEC8990782362 /* Build configuration list for PBXNativeTarget "jrnl-ios_iOS" */;
+			buildConfigurationList = 6A033DB6B5FAEC8990782362 /* Build configuration list for PBXNativeTarget "jrnl_IOS" */;
 			buildPhases = (
 				74D38A86CF915F1361ED9751 /* Build Rust Code */,
 				B3C24A11A7BCB330E8043B60 /* Sources */,
@@ -166,9 +166,9 @@
 			);
 			dependencies = (
 			);
-			name = "jrnl-ios_iOS";
-			productName = "jrnl-ios_iOS";
-			productReference = 886077BD4E784D1108C033BD /* jrnl-ios.app */;
+			name = jrnl_IOS;
+			productName = jrnl_IOS;
+			productReference = 886077BD4E784D1108C033BD /* jrnl.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -180,7 +180,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 			};
-			buildConfigurationList = CBF634800C20299B364B49B5 /* Build configuration list for PBXProject "jrnl-ios" */;
+			buildConfigurationList = CBF634800C20299B364B49B5 /* Build configuration list for PBXProject "jrnl" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -192,7 +192,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8946B8D5E0233B5DE97C0421 /* jrnl-ios_iOS */,
+				8946B8D5E0233B5DE97C0421 /* jrnl_IOS */,
 			);
 		};
 /* End PBXProject section */
@@ -312,7 +312,7 @@
 					"arm64-sim",
 				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "jrnl-ios_iOS/jrnl-ios_iOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = jrnl_IOS/jrnl_IOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = X4FSN5HD4U;
 				ENABLE_BITCODE = NO;
@@ -322,7 +322,7 @@
 					"$(inherited)",
 					"\".\"",
 				);
-				INFOPLIST_FILE = "jrnl-ios_iOS/Info.plist";
+				INFOPLIST_FILE = jrnl_IOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -348,8 +348,8 @@
 					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
 					"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = fm.jrnl.jrnl-ios-app;
-				PRODUCT_NAME = "jrnl-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = "fm.jrnl.jrnl-app-id";
+				PRODUCT_NAME = jrnl;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "arm64  arm64-sim";
@@ -365,7 +365,7 @@
 					"arm64-sim",
 				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "jrnl-ios_iOS/jrnl-ios_iOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = jrnl_IOS/jrnl_IOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = X4FSN5HD4U;
 				ENABLE_BITCODE = NO;
@@ -375,7 +375,7 @@
 					"$(inherited)",
 					"\".\"",
 				);
-				INFOPLIST_FILE = "jrnl-ios_iOS/Info.plist";
+				INFOPLIST_FILE = jrnl_IOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -401,8 +401,8 @@
 					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
 					"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = fm.jrnl.jrnl-ios-app;
-				PRODUCT_NAME = "jrnl-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = "fm.jrnl.jrnl-app-id";
+				PRODUCT_NAME = jrnl;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "arm64  arm64-sim";
@@ -475,7 +475,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6A033DB6B5FAEC8990782362 /* Build configuration list for PBXNativeTarget "jrnl-ios_iOS" */ = {
+		6A033DB6B5FAEC8990782362 /* Build configuration list for PBXNativeTarget "jrnl_IOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7D24CB04EA84FBC558E1764C /* debug */,
@@ -484,7 +484,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = debug;
 		};
-		CBF634800C20299B364B49B5 /* Build configuration list for PBXProject "jrnl-ios" */ = {
+		CBF634800C20299B364B49B5 /* Build configuration list for PBXProject "jrnl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A75860D1683831FA4C62D189 /* debug */,

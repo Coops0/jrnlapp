@@ -1,13 +1,13 @@
 # Uncomment the next line to define a global platform for your project
 
-target 'jrnl-ios_iOS' do
+target 'jrnl_IOS' do
 platform :ios, '13.0'
-  # Pods for jrnl-ios_iOS
+  # Pods for jrnl_IOS
 end
 
-target 'jrnl-ios_macOS' do
+target 'jrnl_macOS' do
 platform :osx, '11.0'
-  # Pods for jrnl-ios_macOS
+  # Pods for jrnl_macOS
 end
 
 # Delete the deployment target for iOS and macOS, causing it to be inherited from the Podfile
