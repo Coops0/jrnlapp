@@ -4,7 +4,7 @@
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
         <div class="space-y-6">
           <div class="flex flex-col items-center gap-3">
-            <div id="google-button-signin"/>
+            <LoginGoogleButton class="w-full h-[40px]" @click="startGoogleLogin"/>
             <LoginAppleButton class="w-full h-[40px]" @click="startAppleLogin"/>
           </div>
 
@@ -27,8 +27,10 @@
 import { AuthService, type ServerResponse } from '~/services/auth.service';
 import { UserService } from '~/services/user.service';
 import { get_apple_id_credential } from 'tauri-plugin-sign-in-with-apple-api';
+import { open as tauriOpen } from '@tauri-apps/plugin-shell';
+import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 
-const { public: { appleClientId, googleClientId } } = useRuntimeConfig();
+const { public: { apiBase, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
 
 const authService = new AuthService($localApi);
@@ -41,82 +43,26 @@ const { data: sessionDetails } = await useAsyncData('session-details', () => aut
 
 const error = ref<string | null>(null);
 
-// useHead({
-//   script: [
-//     {
-//       src: 'https://accounts.google.com/gsi/client',
-//       async: true
-//     }
-//   ]
-// });
-
-const scriptCheckInterval = ref<NodeJS.Timeout | null>(null);
-
-
-// @ts-expect-error google & AppleID are defined from google & apple scripts
-const isReady = () => typeof google !== 'undefined' && typeof AppleID !== 'undefined';
-
-onMounted(() => {
-  if (isReady()) {
-    if (scriptCheckInterval.value) {
-      clearInterval(scriptCheckInterval.value);
-      scriptCheckInterval.value = null;
+async function startGoogleLogin() {
+  await onOpenUrl(async ([url]) => {
+    if (url?.startsWith(`${apiBase}/auth/apple/deeplink`) !== true) {
+      return;
     }
-    initGoogle();
-  } else if (!scriptCheckInterval.value) {
-    scriptCheckInterval.value = setInterval(() => {
-      if (isReady()) {
-        clearInterval(scriptCheckInterval.value!);
-        initGoogle();
-      }
-    }, 250);
-  }
-});
 
-function initGoogle() {
-  if (!sessionDetails.value) {
-    throw createError({
-      statusCode: 500,
-      message: 'failed to generate session details'
-    });
-  }
+    const uri = new URL(url);
+    let decodedServerResponse: ServerResponse;
+    try {
+      decodedServerResponse = JSON.parse(atob(uri.searchParams.get('r')!));
+    } catch (e) {
+      console.error(e);
+      error.value = 'failed to login to google';
+      return;
+    }
 
-  const { csrf_token: state, nonce } = sessionDetails.value;
-
-  // @ts-expect-error google is defined from google script
-  // noinspection JSUnusedGlobalSymbols
-  google.accounts.id.initialize({
-    client_id: googleClientId,
-    context: 'use',
-    ux_mode: 'popup',
-    nonce,
-    auto_select: true,
-    itp_support: true,
-    callback: async (googlePayload: unknown) => {
-      try {
-        const response = await authService.loginWithGoogle(googlePayload);
-        await handleServerResponse(response);
-      } catch (e) {
-        console.error(e);
-        error.value = 'failed to login with google';
-      }
-    },
+    await handleServerResponse(decodedServerResponse);
   });
 
-  // @ts-expect-error google is defined from google script
-  google.accounts.id.renderButton(document.getElementById('google-button-signin'), {
-    type: 'standard',
-    text: 'continue_with',
-    state,
-    logo_alignment: 'center'
-  });
-
-  try {
-    // @ts-expect-error google is defined from google script
-    google.accounts.id.prompt();
-  } catch {
-    /* empty */
-  }
+  await tauriOpen(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${apiBase}/auth/google/redirect&response_type=code&scope=openid%20profile`);
 }
 
 async function startAppleLogin() {
@@ -145,13 +91,16 @@ async function startAppleLogin() {
     }
   };
 
+  let serverResponse: ServerResponse;
   try {
-    const serverResponse = await authService.loginWithApple(correctlyFormattedResponse);
-    await handleServerResponse(serverResponse);
+    serverResponse = await authService.loginWithApple(correctlyFormattedResponse);
   } catch (e) {
     console.error(e);
     error.value = 'failed to login to jrnl with apple';
+    return;
   }
+
+  await handleServerResponse(serverResponse);
 }
 
 async function handleServerResponse(response: ServerResponse) {

@@ -12,6 +12,8 @@
     "store:allow-load",
     "http:default",
     "fs:default",
-    "sign-in-with-apple:default"
+    "sign-in-with-apple:default",
+    "shell:allow-open",
+    "deep-link:default"
   ]
 }

@@ -3,13 +3,14 @@ use crate::error::{JrnlIosError, JrnlIosResult};
 use chrono::Local;
 use tauri_plugin_fs::FsExt;
 
+mod context;
 mod dto;
 mod error;
-mod context;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_store::Builder::default().build())
@@ -21,7 +22,11 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![load_entries, save_today_entry, load_today_entry])
+        .invoke_handler(tauri::generate_handler![
+            load_entries,
+            save_today_entry,
+            load_today_entry
+        ])
         // context macro absolutely murders ide performance
         .run(context::context())
         .expect("error while running tauri application");
@@ -45,16 +50,14 @@ async fn handle_today_entry() -> JrnlIosResult<()> {
     let tokio_file_handle = tokio::fs::File::create("entry-storage/entries.mpk").await?;
     let mut std_file_handle = tokio_file_handle.into_std().await;
 
-    rmp_serde::encode::write(&mut std_file_handle, &existing_entries)
-        .map_err(Into::into)
+    rmp_serde::encode::write(&mut std_file_handle, &existing_entries).map_err(Into::into)
 }
 
 async fn inner_load_entries() -> JrnlIosResult<Vec<Entry>> {
     let tokio_file_handle = tokio::fs::File::open("entry-storage/entries.mpk").await?;
     let std_file_handle = tokio_file_handle.into_std().await;
 
-    rmp_serde::decode::from_read(std_file_handle)
-        .map_err(Into::into)
+    rmp_serde::decode::from_read(std_file_handle).map_err(Into::into)
 }
 
 #[tauri::command]
@@ -65,13 +68,14 @@ async fn save_today_entry(entry: Entry) -> Result<(), JrnlIosError> {
     let tokio_file_handle = tokio::fs::File::create("entry-storage/today.mpk").await?;
     let mut std_file_handle = tokio_file_handle.into_std().await;
 
-    rmp_serde::encode::write(&mut std_file_handle, &entry)
-        .map_err(Into::into)
+    rmp_serde::encode::write(&mut std_file_handle, &entry).map_err(Into::into)
 }
 
 #[tauri::command]
 async fn load_today_entry() -> Option<Entry> {
-    let tokio_file_handle = tokio::fs::File::open("entry-storage/today.mpk").await.ok()?;
+    let tokio_file_handle = tokio::fs::File::open("entry-storage/today.mpk")
+        .await
+        .ok()?;
     let std_file_handle = tokio_file_handle.into_std().await;
 
     rmp_serde::decode::from_read(std_file_handle).ok()
