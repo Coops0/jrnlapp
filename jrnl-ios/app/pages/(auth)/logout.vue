@@ -17,14 +17,15 @@ const { $localApi } = useNuxtApp();
 
 const userService = new UserService($localApi);
 
-const { logout } = await useAuth();
-const { user } = await useUser(userService);
+const { logout } = useAuth();
+const { user } = useUser(userService);
 
 onMounted(async () => {
-  await logout();
+  logout();
   user.value = null;
-  useCookie('theme-cache').value = null;
-  useCookie('entry-today').value = null;
+  localStorage.removeItem('jwt');
+  localStorage.removeItem('user');
+  localStorage.removeItem('theme');
 
   await navigateTo('/');
 });

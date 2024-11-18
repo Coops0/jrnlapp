@@ -80,7 +80,7 @@
 const route = useRoute();
 const logoId = useId();
 
-const { jwt } = await useAuth();
+const { jwt } = useAuth();
 
 const menuItems = computed(() => {
   if (jwt.value) {

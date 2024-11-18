@@ -34,8 +34,8 @@ const { $localApi } = useNuxtApp();
 const authService = new AuthService($localApi);
 const userService = new UserService($localApi);
 
-const { jwt } = await useAuth();
-const { user, hasRefreshedRemotely } = await useUser(userService);
+const { jwt } = useAuth();
+const { user, hasRefreshedRemotely } = useUser(userService);
 
 const { data: sessionDetails } = await useAsyncData('session-details', () => authService.getSessionDetails());
 

@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-const { jwt } = await useAuth();
+const { jwt } = useAuth();
 const forceLocalOverride = ref(false);
 
 const forceLocal = () => {

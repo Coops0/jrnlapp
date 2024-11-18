@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
-export default defineNuxtRouteMiddleware(async (to, _from) => {
-    const { jwt } = await useAuth();
+export default defineNuxtRouteMiddleware((to, _from) => {
+    const { jwt } = useAuth();
 
     const requiresAuth = to.meta['requireLoggedIn'] === true;
 

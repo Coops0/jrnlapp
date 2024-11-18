@@ -1,18 +1,14 @@
 import type { UserService } from '~/services/user.service';
 import { useUser } from '~/composables/user.composable';
-import { load } from '@tauri-apps/plugin-store';
+import { useLocalStorage } from '~/composables/local-storage.composable';
 
-export const useTheme = async (userService: UserService | null) => {
-    const { user, hasRefreshedRemotely } = await useUser(userService);
+export const useTheme = (userService: UserService | null) => {
+    const { user, hasRefreshedRemotely } = useUser(userService);
 
-    const themeStore = await load('theme.json');
-    const initialCachedTheme = await themeStore.get<string>('theme');
-
-    const theme = useState('theme', () => user.value?.theme || initialCachedTheme || 'lunar_placeholder');
+    const theme = useLocalStorage<string>('theme', () => user.value?.theme || 'lunar_placeholder');
 
     watch(theme, async t => {
         document.body.setAttribute('data-theme', t);
-        await themeStore.set('theme', t);
     }, { immediate: true });
 
     watch(user, p => {

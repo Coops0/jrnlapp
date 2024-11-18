@@ -44,7 +44,8 @@
 <script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
 import { ratingLerp } from '~/util/index.util';
-import { load } from '@tauri-apps/plugin-store';
+import { BLANK_ENTRY } from '~/composables/local-today-entry.composable';
+import { useLocalStorage } from '~/composables/local-storage.composable';
 
 const emit = defineEmits<{
   forceLocal: []
@@ -53,14 +54,13 @@ const emit = defineEmits<{
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const { theme } = await useTheme(null);
+const { theme } = useTheme(null);
 
-const entryStore = await load('entry-today.json');
+const entry = useLocalStorage('entry-today', BLANK_ENTRY);
 
 const {
   fetchToday,
   tomorrow,
-  entry,
   lastSaved,
   lastSavedEntry,
   saveConflict,
@@ -69,7 +69,7 @@ const {
   unsavedChanges,
   mounted,
   unMounted
-} = await useRemoteTodayEntry(entryService, entryStore);
+} = useRemoteTodayEntry(entryService, entry);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 fetchToday();

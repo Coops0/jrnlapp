@@ -33,9 +33,10 @@ const { $localApi } = useNuxtApp();
 const groupService = new GroupService($localApi);
 const userService = new UserService($localApi);
 
-const { theme } = await useTheme(null);
-const { user } = await useUser(userService);
+const { theme } = useTheme(null);
+const { user } = useUser(userService);
 const { group, members, days, before, groupInfoError } = useGroup(code, groupService);
+
 watchErrorAndThrow(groupInfoError);
 
 const isOwned = computed(() =>

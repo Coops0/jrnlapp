@@ -1,8 +1,8 @@
 import { useAuth } from '~/composables/auth.composable';
 
-export default defineNuxtPlugin(async _nuxtApp => {
+export default defineNuxtPlugin(_nuxtApp => {
     const config = useRuntimeConfig();
-    const { jwt } = await useAuth();
+    const { jwt } = useAuth();
 
     const localApi = $fetch.create({
         credentials: 'include',

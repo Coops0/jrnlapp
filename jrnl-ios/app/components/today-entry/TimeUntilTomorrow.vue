@@ -19,16 +19,13 @@
 </template>
 
 <script lang="ts" setup>
-import { load } from '@tauri-apps/plugin-store';
+import { useLocalStorage } from '~/composables/local-storage.composable';
 
 defineProps<{ tomorrow: Date }>();
 
-const showStorage = await load('show-time-until.json');
+const show = useLocalStorage('show-time-until', () => true);
 
-const show = ref<boolean>(await showStorage.get('val') ?? true);
-
-async function toggle() {
+function toggle() {
   show.value = !show.value;
-  await showStorage.set('val', show.value);
 }
 </script>

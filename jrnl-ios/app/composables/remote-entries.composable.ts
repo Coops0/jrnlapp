@@ -3,7 +3,7 @@ import { isSameDay, parseServerDate } from '~/util/index.util';
 
 type StrippedEntryWithDate = Omit<StrippedEntry, 'date'> & { date: Date };
 
-export const useRemoteEntries = async (entryService: EntryService) => {
+export const useRemoteEntries = (entryService: EntryService) => {
     const nextCursor = ref<string | null>(null);
     const limit = ref(50);
 

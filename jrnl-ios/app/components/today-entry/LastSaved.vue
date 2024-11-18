@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import type { Entry } from '~/types/entry.type';
-import { load } from '@tauri-apps/plugin-store';
+import { useLocalStorage } from '~/composables/local-storage.composable';
 
 const props = defineProps<{
   lastSaved: Date
@@ -38,13 +38,10 @@ const props = defineProps<{
 const isUnsaved = ref(false);
 const savedJustNow = ref(false);
 
-const showStorage = await load('show-time-until.json');
+const show = useLocalStorage('show-time-until', () => true);
 
-const show = ref<boolean>(await showStorage.get('val') ?? true);
-
-async function toggle() {
+function toggle() {
   show.value = !show.value;
-  await showStorage.set('val', show.value);
 }
 
 const timeCheckInterval = ref<NodeJS.Timeout | null>(null);

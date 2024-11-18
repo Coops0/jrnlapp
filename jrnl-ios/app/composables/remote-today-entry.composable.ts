@@ -1,19 +1,9 @@
 import type { Entry } from '~/types/entry.type';
 import type { EntryService } from '~/services/entry.service';
 import { getTomorrow, isSameDay, parseServerDate } from '~/util/index.util';
-import type { Store } from '@tauri-apps/plugin-store';
+import { BLANK_ENTRY } from '~/composables/local-today-entry.composable';
 
-const BLANK_ENTRY = (): Entry => ({
-    text: '',
-    emotion_scale: 5,
-    date: new Date().toString(),
-    author: '',
-    id: ''
-});
-
-export const useRemoteTodayEntry = async (entryService: EntryService, storage: Store) => {
-    const entry = ref<Entry>(await storage.get('entry') ?? BLANK_ENTRY());
-
+export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry>) => {
     const lastSavedEntry = ref<Entry | null>(null);
     const lastSaved = ref(new Date(1900, 1, 1));
 
@@ -32,12 +22,6 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
     );
 
     async function save() {
-        await storage.set('entry', {
-            ...(await storage.get('entry') ?? {}),
-            text: entry.value.text,
-            emotion_scale: entry.value.emotion_scale
-        });
-
         if (!entryService) {
             await saveNow();
             return;
@@ -48,6 +32,10 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
 
             cancelledSaves.value = 0;
             await saveNow();
+            return;
+        }
+
+        if (lastSavedEntry.value && JSON.stringify(lastSavedEntry.value) === JSON.stringify(entry.value)) {
             return;
         }
 
@@ -77,13 +65,13 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
         if (!entry.value || saveConflict.value) {
             return;
         }
+        // todo save api to backend
 
         if (entryService) {
-            const entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
-
-            lastSavedEntry.value = { ...entry.value };
-            await storage.set('entry', entryResponse);
+            entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
         }
+
+        lastSavedEntry.value = { ...entry.value };
         lastSaved.value = new Date();
     }
 
@@ -121,7 +109,6 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
         console.debug('setting entry to fetched state');
 
         entry.value = today;
-        await storage.set('entry', today);
 
         return today;
     }
@@ -140,7 +127,6 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
             // todo save to local entries
 
             entry.value = BLANK_ENTRY();
-            await storage.set('entry', BLANK_ENTRY());
         }, 1000);
 
         if (status.value === 'success') {
@@ -148,21 +134,10 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
             return;
         }
 
-        const s: Entry | undefined = await storage.get('entry');
-
-        if (!s) {
-            console.debug('no cached entry');
+        if (!isSameDay(parseServerDate(entry.value.date))) {
+            entry.value = BLANK_ENTRY();
             return;
         }
-
-        if (!isSameDay(parseServerDate(s.date))) {
-            console.debug('resetting local entry, different day', s, parseServerDate(s.date));
-            await storage.set('entry', BLANK_ENTRY());
-            return;
-        }
-
-        console.debug('loading cached entry');
-        entry.value = s;
     };
 
 
@@ -186,15 +161,13 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
 
         if (server) {
             entry.value = today;
-            await storage.set('entry', today);
+            // todo
         } else {
             await saveNow();
         }
     }
 
     return {
-        entry,
-
         fetchToday,
         tomorrow,
 

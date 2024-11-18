@@ -1,20 +1,11 @@
-import { load } from '@tauri-apps/plugin-store';
+import { useLocalStorage } from '~/composables/local-storage.composable';
 
-export const useAuth = async () => {
-    const cachedJwt = await load('jwt');
-    const initialCachedJwt = await cachedJwt.get<string>('jwt');
+export const useAuth = () => {
+    const jwt = useLocalStorage<string | null>('jwt', () => null);
 
-    const jwt = useState<string | null>('jwt', () => initialCachedJwt || null);
-
-    const logout = async () => {
+    const logout = () => {
         jwt.value = null;
-        await cachedJwt.set('jwt', null);
     };
-
-    watch(jwt, async j => {
-        console.debug('saving cached jwt to cookie', j);
-        await cachedJwt.set('jwt', j);
-    }, { deep: true });
 
     return { jwt, logout };
 };

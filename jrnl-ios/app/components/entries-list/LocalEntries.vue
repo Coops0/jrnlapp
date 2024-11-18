@@ -22,8 +22,8 @@
 import { parseServerDate, ratingLerp } from '~/util/index.util';
 import { useLocalEntries } from '~/composables/local-entries.composable';
 
-const { theme } = await useTheme(null);
-const { entries } = await useLocalEntries();
+const { theme } = useTheme(null);
+const { entries } = useLocalEntries();
 
 const datedEntries = computed(() =>
     entries.value.map(entry => ({

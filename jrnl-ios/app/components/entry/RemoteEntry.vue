@@ -43,7 +43,7 @@ const { id } = route.params;
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const { theme } = await useTheme(null);
+const { theme } = useTheme(null);
 
 const { data: entry, error, status, refresh } = useLazyAsyncData(
     `entry-${id}`,

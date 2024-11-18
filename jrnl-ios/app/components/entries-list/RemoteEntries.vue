@@ -54,12 +54,12 @@ const emit = defineEmits<{
   forceLocal: []
 }>();
 
-const { theme } = await useTheme(null);
+const { theme } = useTheme(null);
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 
-const { loadMore, refresh, status, error, paginator } = await useRemoteEntries(entryService);
+const { loadMore, refresh, status, error, paginator } = useRemoteEntries(entryService);
 
 watch(error, e => {
   if (e) {

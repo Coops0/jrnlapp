@@ -1,12 +1,9 @@
 import type { UserService } from '~/services/user.service';
 import type { User } from '~/types/user.type';
-import { load } from '@tauri-apps/plugin-store';
+import { useLocalStorage } from '~/composables/local-storage.composable';
 
-export const useUser = async (userService: UserService | null) => {
-    const localUser = await load('cached-user.json');
-    const initialCachedUser = await localUser.get<User>('user');
-
-    const user = useState<User | null>('user', () => initialCachedUser ?? null);
+export const useUser = (userService: UserService | null) => {
+    const user = useLocalStorage<User | null>('user', () => null);
 
     const hasRefreshedRemotely = ref(false);
 
@@ -16,10 +13,6 @@ export const useUser = async (userService: UserService | null) => {
             hasRefreshedRemotely.value = true;
         }
     };
-
-    watch(user, u => {
-        localUser.set('user', u);
-    }, { deep: true });
 
     return { refresh, user, hasRefreshedRemotely };
 };

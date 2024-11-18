@@ -1,11 +1,10 @@
-import { load } from '@tauri-apps/plugin-store';
 import type { Entry } from '~/types/entry.type';
 
-export const useLocalEntries = async () => {
-    const storage = await load('local-entries');
-    const initialCachedEntries = await storage.get<Entry[]>('entries');
-
-    const entries = useState<Entry[]>('entries', () => initialCachedEntries ?? []);
+export const useLocalEntries = () => {
+    // const storage = await load('local-entries');
+    // const initialCachedEntries = await storage.get<Entry[]>('entries');
+// todo
+    const entries = useState<Entry[]>('entries', () => []);
 
     async function saveEntry(entry: Entry) {
         const index = entries.value.findIndex(e => e.id === entry.id);
@@ -16,7 +15,6 @@ export const useLocalEntries = async () => {
         }
 
         sort();
-        await storage.set('entries', entries.value);
     }
 
     function sort() {

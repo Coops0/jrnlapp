@@ -18,7 +18,7 @@ import { themes } from '~/assets/themes';
 const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 
-const { theme, setTheme } = await useTheme(userService);
+const { theme, setTheme } = useTheme(userService);
 const themesWithoutPlaceholder = computed(() => Object.entries(themes)
     .filter(([name]) => name !== 'lunar_placeholder')
 );

@@ -16,7 +16,6 @@
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@tailwindcss/typography": "^0.5.15",
     "@tauri-apps/api": "^2.1.1",
-    "@tauri-apps/plugin-store": "^2.1.0",
     "@tiptap/pm": "^2.9.1",
     "@tiptap/starter-kit": "^2.9.1",
     "@tiptap/vue-3": "^2.9.1",

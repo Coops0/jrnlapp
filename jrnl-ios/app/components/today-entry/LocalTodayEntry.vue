@@ -29,15 +29,16 @@
 </template>
 
 <script lang="ts" setup>
-import { load } from '@tauri-apps/plugin-store';
-import { useLocalTodayEntry } from '~/composables/local-today-entry.composable';
+import { BLANK_ENTRY, useLocalTodayEntry } from '~/composables/local-today-entry.composable';
 import { ratingLerp } from '~/util/index.util';
+import { useLocalStorage } from '~/composables/local-storage.composable';
+import type { Entry } from '~/types/entry.type';
 
-const { theme } = await useTheme(null);
+const { theme } = useTheme(null);
 
-const entryStore = await load('entry-today.json');
+const entry = useLocalStorage<Entry>('entry-today', BLANK_ENTRY);
 
-const { entry, tomorrow, unMounted, mounted } = await useLocalTodayEntry(entryStore);
+const { tomorrow, unMounted, mounted } = useLocalTodayEntry(entry);
 
 onMounted(mounted);
 onUnmounted(unMounted);

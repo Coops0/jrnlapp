@@ -19,9 +19,9 @@ import { parseServerDate } from '~/util/index.util';
 const route = useRoute();
 const { id } = route.params;
 
-const { theme } = await useTheme(null);
+const { theme } = useTheme(null);
 
-const { entries } = await useLocalEntries();
+const { entries } = useLocalEntries();
 
 const entry = computed(() => entries.value.find(entry => entry.id === id));
 
