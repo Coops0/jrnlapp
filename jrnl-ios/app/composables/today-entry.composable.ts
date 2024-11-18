@@ -1,10 +1,22 @@
 import type { Entry } from '~/types/entry.type';
 import type { EntryService } from '~/services/entry.service';
 import { getTomorrow, isSameDay, parseServerDate } from '~/util/index.util';
-import { BLANK_ENTRY } from '~/composables/local-today-entry.composable';
 import { useDebouncedFn } from '~/composables/util/debounced-fn.util.composable';
+import type { LocalBackendService } from '~/services/local-backend.service';
 
-export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry>) => {
+export const BLANK_ENTRY = (): Entry => ({
+    text: '',
+    emotion_scale: 5,
+    date: new Date().toString(),
+    id: crypto.randomUUID(),
+    author: '',
+});
+
+export const useTodayEntry = (
+    entry: Ref<Entry>,
+    localBackendService: LocalBackendService,
+    entryService: EntryService | null,
+) => {
     const lastSavedEntry = ref<Entry | null>(null);
     const lastSaved = ref(new Date(1900, 1, 1));
 
@@ -14,16 +26,24 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
 
     const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
 
-    const unsavedChanges = computed(() =>
-        !!((!lastSavedEntry.value || JSON.stringify(lastSavedEntry.value) !== JSON.stringify(entry.value)) &&
-            (entry.value.text?.length || entry.value.emotion_scale !== 5))
-    );
+    const unsavedChanges = computed<boolean>(() => {
+        if (!lastSavedEntry.value) {
+            return false;
+        }
+
+        if (JSON.stringify(lastSavedEntry.value) !== JSON.stringify(entry.value)) {
+            return true;
+        }
+
+        return !!(entry.value.text?.length || entry.value.emotion_scale !== 5);
+    });
 
     async function saveNow() {
         if (!entry.value || saveConflict.value) {
             return;
         }
-        // todo save api to backend
+
+        await localBackendService.saveEntry(entry.value);
 
         if (entryService) {
             entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
@@ -38,21 +58,33 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
     async function save() {
         if (!entryService) {
             await saveNow();
-            return;
+        } else if (!lastSavedEntry.value || unsavedChanges.value) {
+            saveDebounced();
         }
-
-        if (lastSavedEntry.value && !unsavedChanges.value) {
-            return;
-        }
-
-        saveDebounced();
     }
 
     watch(entry, save, { deep: true });
 
+
+    const onTomorrow = async () => {
+        if (unsavedChanges.value) {
+            await saveNow();
+        }
+
+        await localBackendService.saveEntry(entry.value);
+
+        entry.value = BLANK_ENTRY();
+        tomorrow.value = getTomorrow();
+        lastSavedEntry.value = null;
+    };
+
     const status = ref<string>('pending');
 
     async function fetchToday() {
+        if (!entryService) {
+            return;
+        }
+
         let today: Entry | null = null;
         try {
             today = await entryService.getToday();
@@ -78,26 +110,18 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
             console.debug(today, entry.value);
 
             saveConflict.value = [today, entry.value];
-            return today;
+            return;
         }
 
         entry.value = today;
-        return today;
     }
 
     onMounted(() => {
         // if day changes as we are writing, then reset too
         updateTomorrowIntervalId.value = setInterval(async () => {
-            if (!isSameDay(tomorrow.value)) {
-                // tomorrow day is still different, we are good
-                return;
+            if (isSameDay(tomorrow.value)) {
+                await onTomorrow();
             }
-
-            tomorrow.value = getTomorrow();
-
-            // todo save to local entries
-
-            entry.value = BLANK_ENTRY();
         }, 1000);
 
         if (status.value === 'success') {
@@ -129,7 +153,7 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
 
         if (server) {
             entry.value = today;
-            // todo
+            await localBackendService.saveEntry(today);
         } else {
             await saveNow();
         }

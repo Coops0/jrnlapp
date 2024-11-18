@@ -32,7 +32,7 @@ const props = defineProps<{
   lastSaved: Date
   lastSavedEntry: Entry | null
   entry: Entry | null
-  unsavedChanges: boolean | null
+  unsavedChanges: boolean
 }>();
 
 const isUnsaved = ref(false);
