@@ -82,68 +82,48 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
             const entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
 
             lastSavedEntry.value = { ...entry.value };
-
             await storage.set('entry', entryResponse);
         }
         lastSaved.value = new Date();
     }
 
+    const status = ref<string>('pending');
 
-    const {
-        status,
-        execute: fetchToday,
-        error
-    } = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
-        immediate: false,
-        async transform(today) {
-            lastSavedEntry.value = today && { ...today };
+    async function fetchToday() {
+        let today: Entry | null = null;
+        try {
+            today = await entryService.getToday();
+        } catch (e) {
+            status.value = 'error';
+            console.error('error fetching today', e);
+            throw e;
+        }
 
-            if (today === null) {
-                console.debug('fetch entry returned null, defaulting to blank');
-                today = BLANK_ENTRY();
-            }
+        status.value = 'success';
+        lastSavedEntry.value = today && { ...today };
 
-            if (
-                (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
-                (entry.value.text?.length || entry.value.emotion_scale !== 5)
-            ) {
-                console.warn('conflict detected between saved storage state && fetched state');
-                console.debug(today, entry.value);
+        if (today === null) {
+            console.debug('fetch entry returned null, defaulting to blank');
+            today = BLANK_ENTRY();
+        }
 
-                saveConflict.value = [today, entry.value];
-                return today;
-            }
+        if (
+            (JSON.stringify(today) !== JSON.stringify(entry.value)) &&
+            (entry.value.text?.length || entry.value.emotion_scale !== 5)
+        ) {
+            console.warn('conflict detected between saved storage state && fetched state');
+            console.debug(today, entry.value);
 
-            console.debug('setting entry to fetched state');
-
-            entry.value = today;
-            await storage.set('entry', today);
-
+            saveConflict.value = [today, entry.value];
             return today;
         }
-    });
 
-    async function initialLoad() {
-        if (status?.value === 'success') {
-            console.debug('already fetched, skipping initial cookie load');
-            return;
-        }
+        console.debug('setting entry to fetched state');
 
-        const s: Entry | undefined = await storage.get('entry');
+        entry.value = today;
+        await storage.set('entry', today);
 
-        if (!s) {
-            console.debug('no cached entry');
-            return;
-        }
-
-        if (!isSameDay(parseServerDate(s.date))) {
-            console.debug('resetting local entry, different day', s, parseServerDate(s.date));
-            await storage.set('entry', BLANK_ENTRY());
-            return;
-        }
-
-        console.debug('loading cached entry');
-        entry.value = s;
+        return today;
     }
 
     const mounted = async () => {
@@ -163,7 +143,26 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
             await storage.set('entry', BLANK_ENTRY());
         }, 1000);
 
-        await initialLoad();
+        if (status.value === 'success') {
+            console.debug('already fetched, skipping initial cookie load');
+            return;
+        }
+
+        const s: Entry | undefined = await storage.get('entry');
+
+        if (!s) {
+            console.debug('no cached entry');
+            return;
+        }
+
+        if (!isSameDay(parseServerDate(s.date))) {
+            console.debug('resetting local entry, different day', s, parseServerDate(s.date));
+            await storage.set('entry', BLANK_ENTRY());
+            return;
+        }
+
+        console.debug('loading cached entry');
+        entry.value = s;
     };
 
 
@@ -195,8 +194,8 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
 
     return {
         entry,
-        beginFetch: fetchToday,
 
+        fetchToday,
         tomorrow,
 
         lastSaved,
@@ -208,7 +207,6 @@ export const useRemoteTodayEntry = async (entryService: EntryService, storage: S
         forceSave: saveNow,
         unsavedChanges,
 
-        error,
         mounted,
         unMounted
     };

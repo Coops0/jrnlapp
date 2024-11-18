@@ -58,7 +58,7 @@ const { theme } = await useTheme(null);
 const entryStore = await load('entry-today.json');
 
 const {
-  beginFetch,
+  fetchToday,
   tomorrow,
   entry,
   lastSaved,
@@ -67,13 +67,12 @@ const {
   handleSaveConflict,
   forceSave,
   unsavedChanges,
-  error,
   mounted,
   unMounted
 } = await useRemoteTodayEntry(entryService, entryStore);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
-beginFetch();
+fetchToday();
 
 onMounted(mounted);
 onUnmounted(unMounted);
@@ -84,15 +83,24 @@ onBeforeUnmount(async () => {
   }
 });
 
-watch(error, async e => {
-  if (e) {
-    try {
-      await forceSave();
-    } catch {
-      /* empty */
-    }
-
-    emit('forceLocal');
+onErrorCaptured(() => {
+  try {
+    forceSave();
+  } catch {
+    /* empty */
   }
+
+  emit('forceLocal');
 });
+// watch(error, async e => {
+//   if (e) {
+//     try {
+//       await forceSave();
+//     } catch {
+//       /* empty */
+//     }
+//
+//     emit('forceLocal');
+//   }
+// });
 </script>
