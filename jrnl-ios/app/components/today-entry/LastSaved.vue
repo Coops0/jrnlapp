@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import type { Entry } from '~/types/entry.type';
-import { useLocalStorage } from '~/composables/local-storage.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 
 const props = defineProps<{
   lastSaved: Date

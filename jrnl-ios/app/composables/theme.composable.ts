@@ -1,6 +1,6 @@
 import type { UserService } from '~/services/user.service';
 import { useUser } from '~/composables/user.composable';
-import { useLocalStorage } from '~/composables/local-storage.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 
 export const useTheme = (userService: UserService | null) => {
     const { user, hasRefreshedRemotely } = useUser(userService);

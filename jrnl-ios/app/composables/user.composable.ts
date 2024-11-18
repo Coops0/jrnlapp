@@ -1,6 +1,6 @@
 import type { UserService } from '~/services/user.service';
 import type { User } from '~/types/user.type';
-import { useLocalStorage } from '~/composables/local-storage.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 
 export const useUser = (userService: UserService | null) => {
     const user = useLocalStorage<User | null>('user', () => null);

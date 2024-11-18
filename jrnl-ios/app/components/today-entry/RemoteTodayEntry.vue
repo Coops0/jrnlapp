@@ -45,7 +45,7 @@
 import { EntryService } from '~/services/entry.service';
 import { ratingLerp } from '~/util/index.util';
 import { BLANK_ENTRY } from '~/composables/local-today-entry.composable';
-import { useLocalStorage } from '~/composables/local-storage.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 
 const emit = defineEmits<{
   forceLocal: []
@@ -66,22 +66,11 @@ const {
   saveConflict,
   handleSaveConflict,
   forceSave,
-  unsavedChanges,
-  mounted,
-  unMounted
+  unsavedChanges
 } = useRemoteTodayEntry(entryService, entry);
 
 const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 fetchToday();
-
-onMounted(mounted);
-onUnmounted(unMounted);
-
-onBeforeUnmount(async () => {
-  if (unsavedChanges.value) {
-    await forceSave();
-  }
-});
 
 onErrorCaptured(() => {
   try {

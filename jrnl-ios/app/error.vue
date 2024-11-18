@@ -23,6 +23,7 @@ const clear = () => clearError({ redirect: '/' });
 </script>
 
 <style>
+/*noinspection CssUnusedSymbol*/
 body, html, #__nuxt {
   width: 100%;
   height: 100%

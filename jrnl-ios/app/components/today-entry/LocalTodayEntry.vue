@@ -31,7 +31,7 @@
 <script lang="ts" setup>
 import { BLANK_ENTRY, useLocalTodayEntry } from '~/composables/local-today-entry.composable';
 import { ratingLerp } from '~/util/index.util';
-import { useLocalStorage } from '~/composables/local-storage.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 import type { Entry } from '~/types/entry.type';
 
 const { theme } = useTheme(null);

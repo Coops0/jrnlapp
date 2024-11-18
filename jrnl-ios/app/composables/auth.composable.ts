@@ -1,4 +1,4 @@
-import { useLocalStorage } from '~/composables/local-storage.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 
 export const useAuth = () => {
     const jwt = useLocalStorage<string | null>('jwt', () => null);

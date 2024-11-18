@@ -2,6 +2,7 @@ import type { Entry } from '~/types/entry.type';
 import type { EntryService } from '~/services/entry.service';
 import { getTomorrow, isSameDay, parseServerDate } from '~/util/index.util';
 import { BLANK_ENTRY } from '~/composables/local-today-entry.composable';
+import { useDebouncedFn } from '~/composables/util/debounced-fn.util.composable';
 
 export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry>) => {
     const lastSavedEntry = ref<Entry | null>(null);
@@ -11,55 +12,12 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
 
     const saveConflict = ref<[Entry, Entry] | null>(null);
 
-    const debouncedSaveTimeout = ref<NodeJS.Timeout | null>(null);
-    const cancelledSaves = ref(0);
-
     const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
 
     const unsavedChanges = computed(() =>
         !!((!lastSavedEntry.value || JSON.stringify(lastSavedEntry.value) !== JSON.stringify(entry.value)) &&
             (entry.value.text?.length || entry.value.emotion_scale !== 5))
     );
-
-    async function save() {
-        if (!entryService) {
-            await saveNow();
-            return;
-        }
-
-        if (cancelledSaves.value >= 20) {
-            console.debug('too many cancelled saves, saving forcefully');
-
-            cancelledSaves.value = 0;
-            await saveNow();
-            return;
-        }
-
-        if (lastSavedEntry.value && JSON.stringify(lastSavedEntry.value) === JSON.stringify(entry.value)) {
-            return;
-        }
-
-        if (!unsavedChanges.value) {
-            console.log('cancelling save, no changes');
-            cancelledSaves.value++;
-            return;
-        }
-
-        if (debouncedSaveTimeout.value) {
-            clearTimeout(debouncedSaveTimeout.value);
-        }
-
-        debouncedSaveTimeout.value = setTimeout(async () => {
-            cancelledSaves.value = 0;
-            try {
-                await saveNow();
-            } finally {
-                debouncedSaveTimeout.value = null;
-            }
-        }, 300);
-    }
-
-    watch(entry, save, { deep: true });
 
     async function saveNow() {
         if (!entry.value || saveConflict.value) {
@@ -74,6 +32,23 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
         lastSavedEntry.value = { ...entry.value };
         lastSaved.value = new Date();
     }
+
+    const { debounced: saveDebounced } = useDebouncedFn(() => saveNow());
+
+    async function save() {
+        if (!entryService) {
+            await saveNow();
+            return;
+        }
+
+        if (lastSavedEntry.value && !unsavedChanges.value) {
+            return;
+        }
+
+        saveDebounced();
+    }
+
+    watch(entry, save, { deep: true });
 
     const status = ref<string>('pending');
 
@@ -106,14 +81,11 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
             return today;
         }
 
-        console.debug('setting entry to fetched state');
-
         entry.value = today;
-
         return today;
     }
 
-    const mounted = async () => {
+    onMounted(() => {
         // if day changes as we are writing, then reset too
         updateTomorrowIntervalId.value = setInterval(async () => {
             if (!isSameDay(tomorrow.value)) {
@@ -121,7 +93,6 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
                 return;
             }
 
-            console.debug('tripped daily reset');
             tomorrow.value = getTomorrow();
 
             // todo save to local entries
@@ -131,25 +102,22 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
 
         if (status.value === 'success') {
             console.debug('already fetched, skipping initial cookie load');
-            return;
-        }
-
-        if (!isSameDay(parseServerDate(entry.value.date))) {
+        } else if (!isSameDay(parseServerDate(entry.value.date))) {
             entry.value = BLANK_ENTRY();
-            return;
         }
-    };
+    });
 
-
-    const unMounted = () => {
+    onUnmounted(() => {
         if (updateTomorrowIntervalId.value) {
             clearInterval(updateTomorrowIntervalId.value);
         }
+    });
 
-        if (debouncedSaveTimeout.value) {
-            clearTimeout(debouncedSaveTimeout.value);
+    onBeforeUnmount(async () => {
+        if (unsavedChanges.value) {
+            await saveNow();
         }
-    };
+    });
 
     async function handleSaveConflict(server: boolean) {
         if (!saveConflict.value) {
@@ -178,9 +146,6 @@ export const useRemoteTodayEntry = (entryService: EntryService, entry: Ref<Entry
         handleSaveConflict,
 
         forceSave: saveNow,
-        unsavedChanges,
-
-        mounted,
-        unMounted
+        unsavedChanges
     };
 };
