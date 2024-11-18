@@ -14,7 +14,8 @@
             author: '',
             date: new Date().toString(),
             text: 'loading...',
-            id: ''
+            id: '',
+            saved: false
           }"
           :parsed-date="new Date()"
           :theme
@@ -55,7 +56,7 @@ async function fetchEntry() {
 
   try {
     entry.value = await entryService.getEntry(id as string);
-    await localBackendService.saveEntry(entry.value!);
+    await localBackendService.saveEntry({ ...entry.value!, saved: true });
   } catch {
     /* empty */
   } finally {

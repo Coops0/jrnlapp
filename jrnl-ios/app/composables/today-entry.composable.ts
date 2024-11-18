@@ -10,6 +10,7 @@ export const BLANK_ENTRY = (): Entry => ({
     date: new Date().toString(),
     id: crypto.randomUUID(),
     author: '',
+    saved: false
 });
 
 export const useTodayEntry = (
@@ -43,10 +44,13 @@ export const useTodayEntry = (
             return;
         }
 
-        await localBackendService.saveEntry(entry.value);
-
-        if (entryService) {
-            entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+        try {
+            if (entryService) {
+                entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+                entry.value.saved = true;
+            }
+        } finally {
+            await localBackendService.saveEntry(entry.value);
         }
 
         lastSavedEntry.value = { ...entry.value };
@@ -64,7 +68,6 @@ export const useTodayEntry = (
     }
 
     watch(entry, save, { deep: true });
-
 
     const onTomorrow = async () => {
         if (unsavedChanges.value) {
@@ -92,6 +95,10 @@ export const useTodayEntry = (
             status.value = 'error';
             console.error('error fetching today', e);
             throw e;
+        }
+
+        if (today) {
+            today.saved = true;
         }
 
         status.value = 'success';

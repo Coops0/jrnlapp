@@ -28,6 +28,8 @@ import { AuthService, type ServerResponse } from '~/services/auth.service';
 import { UserService } from '~/services/user.service';
 import { get_apple_id_credential } from 'tauri-plugin-sign-in-with-apple-api';
 import { requestSignin } from 'tauri-plugin-google-signin-api';
+import { LocalBackendService } from '~/services/local-backend.service';
+import { EntryService } from '~/services/entry.service';
 
 const { $localApi } = useNuxtApp();
 
@@ -118,6 +120,21 @@ async function handleServerResponse(response: ServerResponse) {
 
   try {
     await userService.updateMe({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  } catch (e) {
+    console.warn(e);
+  }
+
+  const localBackendService = new LocalBackendService();
+
+  try {
+    const { entries } = useEntries(localBackendService, new EntryService($localApi));
+    const unsaved = entries.value
+        .filter(entry => !entry.saved)
+        .map(entry => ({ ...entry, saved: true, date: entry.date.toLocaleDateString() }));
+
+    if (unsaved.length) {
+      await localBackendService.saveEntries(unsaved);
+    }
   } catch (e) {
     console.warn(e);
   }

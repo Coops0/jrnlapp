@@ -4,4 +4,5 @@ export interface Entry {
     text?: string;
     emotion_scale: number; // 0-10
     date: string;
+    saved: boolean;
 }

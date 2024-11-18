@@ -1,15 +1,16 @@
-import type { EntryService, StrippedEntry } from '~/services/entry.service';
+import type { EntryService } from '~/services/entry.service';
 import { isSameDay, parseServerDate } from '~/util/index.util';
 import type { LocalBackendService } from '~/services/local-backend.service';
+import type { Entry } from '~/types/entry.type';
 
-type StrippedEntryWithDate = Omit<StrippedEntry, 'date'> & { date: Date };
+type EntryWithDate = Omit<Entry, 'date'> & { date: Date };
 
 export const useEntries = (localBackendService: LocalBackendService, entryService: EntryService | null) => {
     const nextCursor = ref<string | null>(null);
     const cursor = ref<string | null>(null);
     const hasMore = ref(false);
 
-    const entries = ref<StrippedEntryWithDate[]>([]);
+    const entries = ref<EntryWithDate[]>([]);
 
     const loadLocalEntries = async () => {
         const localEntries = await localBackendService.getEntries();
@@ -22,15 +23,15 @@ export const useEntries = (localBackendService: LocalBackendService, entryServic
         }
 
         const paginator = await entryService.getEntriesPaginated(c || undefined, 50);
-
-        const newEntries: StrippedEntryWithDate[] = [...(entries.value ?? [])];
+        const newEntries: EntryWithDate[] = [...(entries.value ?? [])];
 
         for (const entry of (paginator?.items ?? [])) {
-            if (!newEntries.find((e: StrippedEntryWithDate) => e.id === entry.id)) {
+            if (!newEntries.find((e: EntryWithDate) => e.id === entry.id)) {
                 newEntries.push({
                     ...entry,
-                    date: parseServerDate(entry.date)
-                } as StrippedEntryWithDate);
+                    date: parseServerDate(entry.date),
+                    saved: true,
+                } as EntryWithDate);
             }
         }
 
