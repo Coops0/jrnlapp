@@ -39,15 +39,30 @@ async fn load_entries() -> JrnlIosResult<Vec<Entry>> {
 
 #[tauri::command]
 async fn save_entry(entry: Entry) -> Result<(), JrnlIosError> {
-    todo!("this should save to entries in the correct position")
+    let mut entries = load_entries().await?;
+
+    let existing_index = entries.iter().position(|e| e.id == entry.id);
+    if existing_index {
+        entries[existing_index] = entry;
+    } else {
+        entries.insert(0, entry);
+    }
+
+    entries.sort_by(|a, b| b.date.cmp(&a.date));
+
+    let tokio_file_handle = tokio::fs::File::create("entries.mpk").await?;
+    let mut std_file_handle = tokio_file_handle.into_std().await;
+
+    rmp_serde::encode::write(&mut std_file_handle, &entries)
+        .map_err(Into::into)
 }
 
 #[tauri::command]
 async fn get_entry(id: String) -> JrnlIosResult<Option<Entry>> {
     Ok(
         load_entries().await?
-        .into_iter()
-        .find(|entry| entry.id == id)
+            .into_iter()
+            .find(|entry| entry.id == id)
     )
 }
 

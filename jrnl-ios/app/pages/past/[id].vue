@@ -32,6 +32,7 @@ import { EntryService } from '~/services/entry.service';
 import { parseServerDate } from '~/util/index.util';
 import type { Entry } from '~/types/entry.type';
 import { LocalBackendService } from '~/services/local-backend.service';
+import { useOnline } from '~/composables/util/online.util.composable';
 
 const route = useRoute();
 const { id } = route.params;
@@ -42,6 +43,7 @@ const localBackendService = new LocalBackendService();
 
 const { jwt } = useAuth();
 const { theme } = useTheme(null);
+const {isOnline} = useOnline();
 
 const entry = ref<Entry | null>(null);
 
@@ -50,7 +52,7 @@ const hasTriedFetch = ref(false);
 async function fetchEntry() {
   entry.value = await localBackendService.getEntry(id as string);
 
-  if (!jwt.value) {
+  if (!jwt.value || !isOnline.value) {
     return;
   }
 

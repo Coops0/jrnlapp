@@ -124,16 +124,16 @@ async function handleServerResponse(response: ServerResponse) {
     console.warn(e);
   }
 
-  const localBackendService = new LocalBackendService();
+  const entryService = new EntryService($localApi);
 
   try {
-    const { entries } = useEntries(localBackendService, new EntryService($localApi));
+    const { entries } = useEntries(new LocalBackendService(), entryService);
     const unsaved = entries.value
         .filter(entry => !entry.saved)
         .map(entry => ({ ...entry, saved: true, date: entry.date.toLocaleDateString() }));
 
     if (unsaved.length) {
-      await localBackendService.saveEntries(unsaved);
+      await entryService.putPastEntries(unsaved);
     }
   } catch (e) {
     console.warn(e);

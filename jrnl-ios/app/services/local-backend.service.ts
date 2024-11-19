@@ -13,8 +13,4 @@ export class LocalBackendService {
     async getEntries(): Promise<Entry[]> {
         return await invoke('get_entries');
     }
-
-    async saveEntries(entries: Entry[]) {
-        await invoke('save_entries', { entries });
-    }
 }

@@ -77,28 +77,29 @@
 </template>
 
 <script setup lang="ts">
+import { useOnline } from '~/composables/util/online.util.composable';
+
 const route = useRoute();
 const logoId = useId();
 
 const { jwt } = useAuth();
+const { isOnline } = useOnline();
 
 const menuItems = computed(() => {
+  const items: { name: string; path: string; disabled?: boolean; }[] = [
+    { name: 'current', path: '/current' },
+    { name: 'past', path: '/past' },
+    { name: 'theme', path: '/theme' }
+  ];
+
   if (jwt.value) {
-    return [
-      { name: 'current', path: '/current' },
-      { name: 'groups', path: '/groups' },
-      { name: 'past', path: '/past' },
-      { name: 'theme', path: '/theme' },
-      { name: 'logout', path: '/logout' }
-    ];
+    // groups disabled for now
+    items.push({ name: 'logout', path: '/logout', disabled: !isOnline.value });
   } else {
-    return [
-      { name: 'current', path: '/current' },
-      { name: 'past', path: '/past' },
-      { name: 'theme', path: '/theme' },
-      { name: 'login', path: '/login' }
-    ];
+    items.push({ name: 'login', path: '/login', disabled: !isOnline.value });
   }
+
+  return items;
 });
 
 const showThemeSelector = ref(false);
