@@ -26,7 +26,6 @@
 import { AuthService, type ServerResponse } from '~/services/auth.service';
 import { UserService } from '~/services/user.service';
 import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
-import ErrorDisplay from '~/components/ErrorDisplay.vue';
 
 const { public: { appleClientId, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();

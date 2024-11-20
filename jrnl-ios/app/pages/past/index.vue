@@ -16,7 +16,7 @@
       </div>
 
       <FormButton
-          v-if="jwt && hasMore"
+          v-if="hasMore"
           full
           size="sm"
           variant="secondary"

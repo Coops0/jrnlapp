@@ -1,5 +1,5 @@
 <template>
-  <ErrorDisplay class="size-full" :error="error" :clearError="clear">
+  <ErrorDisplay class="size-full" :error="error" :clear-error="clear">
     <FormButton size="md" variant="secondary" full @click="clearCookiesAndRefresh">
       logout & refresh
     </FormButton>
@@ -8,7 +8,6 @@
 
 <script setup lang="ts">
 import type { NuxtError } from '#app';
-import ErrorDisplay from '~/components/ErrorDisplay.vue';
 
 const props = defineProps<{ error: NuxtError }>();
 

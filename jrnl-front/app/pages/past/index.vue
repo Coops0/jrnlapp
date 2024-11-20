@@ -46,7 +46,6 @@
 import { EntryService, type StrippedEntry } from '~/services/entry.service';
 import { isSameDay, parseServerDate, ratingLerp } from '~/util/index.util';
 import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
-import ErrorDisplay from '~/components/ErrorDisplay.vue';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);

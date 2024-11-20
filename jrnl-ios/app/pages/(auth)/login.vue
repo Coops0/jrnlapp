@@ -3,27 +3,14 @@
     <div class="w-full max-w-md">
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
         <div class="space-y-6">
-          <div v-if="sessionError">
-            <div class="text-red-400">
-              <span class="text-lg">an error occurred while connecting to jrnl servers</span>
-            </div>
-            <p class="text-colors-text-300 mt-2">{{ sessionError }}</p>
-          </div>
+         <ErrorDisplay v-if="sessionError" :error="sessionError" :clear-error="refresh"/>
           <div v-else>
             <div class="flex flex-col items-center gap-3">
               <LoginGoogleButton class="w-full h-[40px]" @click="startGoogleLogin"/>
               <LoginAppleButton class="w-full h-[40px]" @click="startAppleLogin"/>
             </div>
 
-            <div
-                v-if="error"
-                class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700 text-center"
-            >
-              <div class="text-red-400">
-                <span class="text-lg">login failed</span>
-              </div>
-              <p class="text-colors-text-300 mt-2">{{ error }}</p>
-            </div>
+            <ErrorDisplay v-if="error" :error="error"/>
           </div>
         </div>
       </div>
@@ -49,7 +36,8 @@ const { user, hasRefreshedRemotely } = useUser(userService);
 
 const {
   data: sessionDetails,
-  error: sessionError
+  error: sessionError,
+  refresh
 } = await useAsyncData('session-details', () => authService.getSessionDetails());
 
 const error = ref<string | null>(null);

@@ -12,14 +12,14 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "nuxt": "npm:nuxt-nightly@latest",
     "@nuxt/kit": "npm:@nuxt/kit-nightly@latest",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@tailwindcss/typography": "^0.5.15",
     "@tauri-apps/api": "^2.1.1",
-    "@tiptap/pm": "^2.9.1",
-    "@tiptap/starter-kit": "^2.9.1",
-    "@tiptap/vue-3": "^2.9.1",
-    "nuxt": "npm:nuxt-nightly@latest",
+    "@tiptap/pm": "^2.10.0",
+    "@tiptap/starter-kit": "^2.10.0",
+    "@tiptap/vue-3": "^2.10.0",
     "nuxt-time": "1.0.1",
     "tw-colors": "^3.3.2",
     "vue": "^3.5.13",
