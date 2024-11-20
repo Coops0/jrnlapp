@@ -46,6 +46,14 @@ const editor = useEditor({
   },
 });
 
+onMounted(() => {
+  try {
+    editor.value?.commands?.focus();
+  } catch {
+    /* empty */
+  }
+});
+
 onUnmounted(() => {
   try {
     editor.value?.destroy();

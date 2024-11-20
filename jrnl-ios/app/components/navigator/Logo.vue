@@ -14,7 +14,7 @@
       <div class="flex flex-col justify-items-center items-center gap-2">
         <span
             :id="logoId"
-            class="fixed p-8 bottom-3 left-4 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
+            class="fixed p-6 bottom-3 left-3 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
             :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
             @mousedown="onPressLogo"
@@ -43,9 +43,11 @@
                   :class="{
                   'bg-colors-primary-800/20': route.name === item.name,
                   'scale-[1.02]': hoveringName === item.name,
+                  'opacity-50': item.disabled
                 }"
                   :data-name="item.name"
                   :data-path="item.path"
+                  @click="() => goTo(item.path, item.disabled)"
               >
                 <div
                     class="flex items-center justify-center px-4 py-3 cursor-pointer rounded-lg transition-all duration-150 ease-out"
@@ -54,7 +56,6 @@
                     'bg-colors-primary-800/20': hoveringName === item.name,
                     'hover:bg-colors-primary-800/20 group-hover:bg-colors-primary-800/20': isToggled
                   }"
-                    @click="() => goTo(item.path)"
                 >
                   <span
                       class="text-base font-medium text-colors-primary-200 transition-colors duration-150"
@@ -82,8 +83,7 @@ import { useOnline } from '~/composables/util/online.util.composable';
 const route = useRoute();
 const logoId = useId();
 
-const { jwt } = useAuth();
-const { isOnline } = useOnline();
+const { isOnline, isConnected } = useOnline();
 
 const menuItems = computed(() => {
   const items: { name: string; path: string; disabled?: boolean; }[] = [
@@ -92,7 +92,7 @@ const menuItems = computed(() => {
     { name: 'theme', path: '/theme' }
   ];
 
-  if (jwt.value) {
+  if (isConnected.value) {
     // groups disabled for now
     items.push({ name: 'logout', path: '/logout', disabled: !isOnline.value });
   } else {
@@ -120,6 +120,9 @@ const tryCancel = (e: TouchEvent | MouseEvent) => {
 };
 
 function onPressLogo(e: TouchEvent | MouseEvent) {
+  // try to clear any full page errors before showing menu
+  clearError();
+
   tryCancel(e);
 
   if (isToggled.value) {
@@ -269,7 +272,11 @@ onUnmounted(() => {
   document.removeEventListener('touchmove', handleDocumentHoldMove);
 });
 
-const goTo = async (path: string) => {
+const goTo = async (path: string, disabled?: boolean) => {
+  if (disabled === true) {
+    return;
+  }
+
   isToggled.value = false;
   isHolding.value = false;
   hoveringName.value = null;

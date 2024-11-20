@@ -3,6 +3,7 @@ import type { EntryService } from '~/services/entry.service';
 import { getTomorrow, isSameDay, parseServerDate } from '~/util/index.util';
 import { useDebouncedFn } from '~/composables/util/debounced-fn.util.composable';
 import type { LocalBackendService } from '~/services/local-backend.service';
+import { useOnline } from '~/composables/util/online.util.composable';
 
 export const BLANK_ENTRY = (): Entry => ({
     text: '',
@@ -16,8 +17,9 @@ export const BLANK_ENTRY = (): Entry => ({
 export const useTodayEntry = (
     entry: Ref<Entry>,
     localBackendService: LocalBackendService,
-    entryService: EntryService | null,
+    entryService: EntryService,
 ) => {
+    const { isConnected } = useOnline();
     const lastSavedEntry = ref<Entry | null>(null);
     const lastSaved = ref(new Date(1900, 1, 1));
 
@@ -28,7 +30,7 @@ export const useTodayEntry = (
     const updateTomorrowIntervalId = ref<NodeJS.Timeout | null>(null);
 
     const unsavedChanges = computed<boolean>(() => {
-        if (!lastSavedEntry.value) {
+        if (!lastSavedEntry.value || !isConnected.value) {
             return false;
         }
 
@@ -45,7 +47,7 @@ export const useTodayEntry = (
         }
 
         try {
-            if (entryService) {
+            if (isConnected.value) {
                 entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
                 entry.value.saved = true;
             }
@@ -59,8 +61,9 @@ export const useTodayEntry = (
 
     const { debounced: saveDebounced } = useDebouncedFn(() => saveNow());
 
+    // with debounced
     async function save() {
-        if (!entryService) {
+        if (!isConnected.value) {
             await saveNow();
         } else if (!lastSavedEntry.value || unsavedChanges.value) {
             saveDebounced();
@@ -69,22 +72,10 @@ export const useTodayEntry = (
 
     watch(entry, save, { deep: true });
 
-    const onTomorrow = async () => {
-        if (unsavedChanges.value) {
-            await saveNow();
-        }
-
-        await localBackendService.saveEntry(entry.value);
-
-        entry.value = BLANK_ENTRY();
-        tomorrow.value = getTomorrow();
-        lastSavedEntry.value = null;
-    };
-
     const status = ref<string>('pending');
 
     async function fetchToday() {
-        if (!entryService) {
+        if (!isConnected.value) {
             return;
         }
 
@@ -126,9 +117,19 @@ export const useTodayEntry = (
     onMounted(() => {
         // if day changes as we are writing, then reset too
         updateTomorrowIntervalId.value = setInterval(async () => {
-            if (isSameDay(tomorrow.value)) {
-                await onTomorrow();
+            if (!isSameDay(tomorrow.value)) {
+                return;
             }
+
+            if (unsavedChanges.value) {
+                await saveNow();
+            }
+
+            await localBackendService.saveEntry(entry.value);
+
+            entry.value = BLANK_ENTRY();
+            tomorrow.value = getTomorrow();
+            lastSavedEntry.value = null;
         }, 1000);
 
         if (status.value === 'success') {
@@ -176,7 +177,7 @@ export const useTodayEntry = (
         saveConflict,
         handleSaveConflict,
 
-        forceSave: saveNow,
+        saveNow,
         unsavedChanges
     };
 };

@@ -3,19 +3,27 @@
     <div class="w-full max-w-md">
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
         <div class="space-y-6">
-          <div class="flex flex-col items-center gap-3">
-            <LoginGoogleButton class="w-full h-[40px]" @click="startGoogleLogin"/>
-            <LoginAppleButton class="w-full h-[40px]" @click="startAppleLogin"/>
-          </div>
-
-          <div
-              v-if="error"
-              class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700 text-center"
-          >
+          <div v-if="sessionError">
             <div class="text-red-400">
-              <span class="text-lg">login failed</span>
+              <span class="text-lg">an error occurred while connecting to jrnl servers</span>
             </div>
-            <p class="text-colors-text-300 mt-2">{{ error }}</p>
+            <p class="text-colors-text-300 mt-2">{{ sessionError }}</p>
+          </div>
+          <div v-else>
+            <div class="flex flex-col items-center gap-3">
+              <LoginGoogleButton class="w-full h-[40px]" @click="startGoogleLogin"/>
+              <LoginAppleButton class="w-full h-[40px]" @click="startAppleLogin"/>
+            </div>
+
+            <div
+                v-if="error"
+                class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700 text-center"
+            >
+              <div class="text-red-400">
+                <span class="text-lg">login failed</span>
+              </div>
+              <p class="text-colors-text-300 mt-2">{{ error }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -39,7 +47,10 @@ const userService = new UserService($localApi);
 const { jwt } = useAuth();
 const { user, hasRefreshedRemotely } = useUser(userService);
 
-const { data: sessionDetails } = await useAsyncData('session-details', () => authService.getSessionDetails());
+const {
+  data: sessionDetails,
+  error: sessionError
+} = await useAsyncData('session-details', () => authService.getSessionDetails());
 
 const error = ref<string | null>(null);
 

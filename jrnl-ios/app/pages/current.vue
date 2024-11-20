@@ -63,7 +63,7 @@ const {
   lastSavedEntry,
   saveConflict,
   handleSaveConflict,
-  forceSave,
+  saveNow,
   unsavedChanges
 } = useTodayEntry(entry, localBackendService, entryService);
 
@@ -73,7 +73,7 @@ const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 
 onErrorCaptured(() => {
   try {
-    forceSave();
+    saveNow();
   } catch {
     /* empty */
   }

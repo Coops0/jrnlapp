@@ -1,8 +1,10 @@
 import type { UserService } from '~/services/user.service';
 import { useUser } from '~/composables/user.composable';
 import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
+import { useOnline } from '~/composables/util/online.util.composable';
 
 export const useTheme = (userService: UserService | null) => {
+    const { isConnected } = useOnline();
     const { user, hasRefreshedRemotely } = useUser(userService);
 
     const theme = useLocalStorage<string>('theme', () => user.value?.theme || 'lunar_placeholder');
@@ -32,9 +34,12 @@ export const useTheme = (userService: UserService | null) => {
         }
 
         theme.value = name;
-        if (userService) {
+        if (isConnected.value && userService) {
             await userService!.updateMe({ theme: theme.value });
-            user.value!.theme = name;
+        }
+
+        if (user.value) {
+            user.value.theme = name;
         }
     }
 

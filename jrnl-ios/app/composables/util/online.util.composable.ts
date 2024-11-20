@@ -1,4 +1,5 @@
 export const useOnline = () => {
+    const { jwt } = useAuth();
     const isOnline = ref(navigator.onLine);
 
     const updateOnlineStatus = () => {
@@ -15,5 +16,7 @@ export const useOnline = () => {
         window.removeEventListener('offline', updateOnlineStatus);
     });
 
-    return { isOnline };
+    const isConnected = computed(() => jwt.value && isOnline.value);
+
+    return { isOnline, isConnected };
 };

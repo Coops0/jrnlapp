@@ -33,7 +33,6 @@ import { EntryService } from '~/services/entry.service';
 import { ratingLerp } from '~/util/index.util';
 import { LocalBackendService } from '~/services/local-backend.service';
 
-const { jwt } = useAuth();
 const { theme } = useTheme(null);
 
 const { $localApi } = useNuxtApp();
@@ -42,9 +41,7 @@ const localBackendService = new LocalBackendService();
 
 const {
   loadMore,
-  loadLocalEntries,
   entries,
   hasMore
-} = useEntries(localBackendService, jwt.value ? entryService : null);
-loadLocalEntries();
+} = useEntries(localBackendService, entryService);
 </script>

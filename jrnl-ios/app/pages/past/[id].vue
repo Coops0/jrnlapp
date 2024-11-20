@@ -7,7 +7,7 @@
           :theme
       />
     </div>
-    <div v-else-if="!hasTriedFetch" class="space-y-8">
+    <div v-else-if="fetchStatus !== 'error'" class="space-y-8">
       <EntryView
           :entry="{
             emotion_scale: 5,
@@ -41,32 +41,36 @@ const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 const localBackendService = new LocalBackendService();
 
-const { jwt } = useAuth();
 const { theme } = useTheme(null);
-const {isOnline} = useOnline();
+const { isConnected } = useOnline();
 
 const entry = ref<Entry | null>(null);
 
-const hasTriedFetch = ref(false);
+const fetchStatus = ref<'success' | 'error' | null>(null);
 
 async function fetchEntry() {
   entry.value = await localBackendService.getEntry(id as string);
 
-  if (!jwt.value || !isOnline.value) {
+  if (!isConnected.value) {
     return;
   }
 
   try {
     entry.value = await entryService.getEntry(id as string);
     await localBackendService.saveEntry({ ...entry.value!, saved: true });
+    fetchStatus.value = 'success';
   } catch {
-    /* empty */
-  } finally {
-    hasTriedFetch.value = true;
+    fetchStatus.value = 'error';
   }
 }
 
 fetchEntry();
+
+watch(isConnected, async o => {
+  if (o && fetchStatus.value !== 'success') {
+    await fetchEntry();
+  }
+});
 
 const parsedDate = computed(() => entry.value ? parseServerDate(entry.value.date) : null as never);
 </script>

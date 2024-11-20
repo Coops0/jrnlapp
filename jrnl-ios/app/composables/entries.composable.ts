@@ -2,10 +2,13 @@ import type { EntryService } from '~/services/entry.service';
 import { isSameDay, parseServerDate } from '~/util/index.util';
 import type { LocalBackendService } from '~/services/local-backend.service';
 import type { Entry } from '~/types/entry.type';
+import { useOnline } from '~/composables/util/online.util.composable';
 
 type EntryWithDate = Omit<Entry, 'date'> & { date: Date };
 
-export const useEntries = (localBackendService: LocalBackendService, entryService: EntryService | null) => {
+export const useEntries = (localBackendService: LocalBackendService, entryService: EntryService) => {
+    const { isConnected } = useOnline();
+
     const nextCursor = ref<string | null>(null);
     const cursor = ref<string | null>(null);
     const hasMore = ref(false);
@@ -17,12 +20,8 @@ export const useEntries = (localBackendService: LocalBackendService, entryServic
         entries.value = localEntries.map(e => ({ ...e, date: parseServerDate(e.date) }));
     };
 
-    watch(cursor, async c => {
-        if (!entryService) {
-            return;
-        }
-
-        const paginator = await entryService.getEntriesPaginated(c || undefined, 50);
+    async function loadRemoteEntries() {
+        const paginator = await entryService.getEntriesPaginated(cursor.value || undefined, 50);
         const newEntries: EntryWithDate[] = [...(entries.value ?? [])];
 
         for (const entry of (paginator?.items ?? [])) {
@@ -38,18 +37,31 @@ export const useEntries = (localBackendService: LocalBackendService, entryServic
         entries.value = newEntries.filter(e => !isSameDay(e.date));
         nextCursor.value = paginator?.next_cursor ?? null;
         hasMore.value = !!paginator?.has_more;
+    }
+
+    watch(isConnected, async () => {
+        if (isConnected.value) {
+            try {
+                await loadRemoteEntries();
+                return;
+            } catch {
+                /* empty */
+            }
+        }
+
+        await loadLocalEntries();
     }, { immediate: true });
 
-    const loadMore = () => {
+    const loadMore = async () => {
         if (hasMore.value && nextCursor.value) {
             cursor.value = nextCursor.value;
+            await loadRemoteEntries();
         }
     };
 
     return {
         loadMore,
         entries,
-        loadLocalEntries,
         hasMore
     };
 };
