@@ -41,8 +41,7 @@ async fn load_entries() -> JrnlIosResult<Vec<Entry>> {
 async fn save_entry(entry: Entry) -> Result<(), JrnlIosError> {
     let mut entries = load_entries().await?;
 
-    let existing_index = entries.iter().position(|e| e.id == entry.id);
-    if existing_index {
+    if let Some(existing_index) = entries.iter().position(|e| e.id == entry.id) {
         entries[existing_index] = entry;
     } else {
         entries.insert(0, entry);

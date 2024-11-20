@@ -1,7 +1,6 @@
 use crate::impl_service;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-use sqlx::postgres::PgQueryResult;
 use sqlx::{Error, FromRow, PgPool};
 use uuid::Uuid;
 
