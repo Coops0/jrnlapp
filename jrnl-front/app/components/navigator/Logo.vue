@@ -82,7 +82,7 @@ const logoId = useId();
 
 const menuItems = [
   { name: 'current', path: '/current' },
-  { name: 'groups', path: '/groups' },
+  // { name: 'groups', path: '/groups' },
   { name: 'past', path: '/past' },
   { name: 'theme', path: '/theme' },
   { name: 'logout', path: '/logout' }

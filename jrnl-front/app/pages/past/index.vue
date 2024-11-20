@@ -12,10 +12,7 @@
       </div>
     </div>
 
-    <div v-else-if="error" class="p-4 rounded-lg justify-center">
-      <p class="text-colors-accent-400">unable to load entries ~ {{ error }}</p>
-      <FormButton variant="secondary" size="md" @click="refresh">try again</FormButton>
-    </div>
+    <ErrorDisplay v-if="error" :error="error" @retry="refresh" />
 
     <div v-else-if="paginator" class="space-y-4">
       <div v-if="paginator.items.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -49,6 +46,7 @@
 import { EntryService, type StrippedEntry } from '~/services/entry.service';
 import { isSameDay, parseServerDate, ratingLerp } from '~/util/index.util';
 import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
+import ErrorDisplay from '~/components/ErrorDisplay.vue';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);

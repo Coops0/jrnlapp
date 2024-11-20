@@ -1,9 +1,9 @@
 <template>
   <div class="flex items-center gap-1.5">
     <h5
-        v-if="show"
         class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer flex items-center gap-1.5"
         @click="toggle"
+        :class="{ 'opacity-0': !show }"
     >
       <span v-if="savedJustNow">last saved: just now</span>
       <span v-else-if="isUnsaved">last saved: ...</span>
@@ -11,15 +11,9 @@
       <span v-else>last saved: <NuxtTime :datetime="lastSaved" relative/></span>
 
       <span
-          v-if="unsavedChanges || isUnsaved"
+          v-if="unsavedChangesBuffered || isUnsaved"
           class="inline-block w-1.5 h-1.5 rounded-full bg-colors-accent-400"
       />
-    </h5>
-    <h5
-        v-else
-        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer px-4 flex items-center gap-1.5"
-        @click="toggle"
-    >🎛️
     </h5>
   </div>
 </template>
@@ -28,11 +22,13 @@
 import type { Entry } from '~/types/entry.type';
 
 const props = defineProps<{
-  lastSaved: Date
-  lastSavedEntry: Entry | null
-  entry: Entry | null
-  unsavedChanges: boolean | null
+  lastSaved: Date;
+  lastSavedEntry: Entry | null;
+  entry: Entry | null;
+  unsavedChanges: boolean | null;
 }>();
+
+const unsavedChangesBuffered = ref(false);
 
 const show = useCookie('show-last-saved', {
   default: () => true,
@@ -47,12 +43,6 @@ const toggle = () => {
 };
 
 const timeCheckInterval = ref<NodeJS.Timeout | null>(null);
-
-onUnmounted(() => {
-  if (timeCheckInterval.value) {
-    clearInterval(timeCheckInterval.value);
-  }
-});
 
 function check(): number {
   if (!props.entry || !props.lastSavedEntry) {
@@ -86,9 +76,20 @@ function checkAndUpdate() {
   }
 }
 
-watch(() => props.entry, () => checkAndUpdate(), { deep: true });
+watch(() => props.entry, checkAndUpdate, { deep: true });
 
 onMounted(() => {
-  timeCheckInterval.value = setInterval(() => checkAndUpdate(), 250);
+  // don't want indicator to show up immediately
+  setTimeout(() => {
+    timeCheckInterval.value = setInterval(checkAndUpdate, 250);
+  }, 500);
+
+  unsavedChangesBuffered.value = !!props.unsavedChanges;
+});
+
+onUnmounted(() => {
+  if (timeCheckInterval.value) {
+    clearInterval(timeCheckInterval.value);
+  }
 });
 </script>

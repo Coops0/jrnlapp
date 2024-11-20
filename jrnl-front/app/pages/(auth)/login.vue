@@ -15,13 +15,7 @@
             />
           </div>
 
-          <div v-if="error"
-               class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm border border-colors-primary-700">
-            <div class="text-red-400 mb-4">
-              <span class="text-lg">login failed</span>
-            </div>
-            <p class="text-colors-text-300 mb-6">{{ error }}</p>
-          </div>
+          <ErrorDisplay v-if="error" :error="error"/>
         </div>
       </div>
     </div>
@@ -31,6 +25,8 @@
 <script lang="ts" setup>
 import { AuthService, type ServerResponse } from '~/services/auth.service';
 import { UserService } from '~/services/user.service';
+import { watchErrorAndThrow } from '~/util/watch-error-and-throw.util';
+import ErrorDisplay from '~/components/ErrorDisplay.vue';
 
 const { public: { appleClientId, googleClientId } } = useRuntimeConfig();
 const { $localApi } = useNuxtApp();
@@ -43,7 +39,11 @@ const userService = new UserService($localApi);
 const { jwt } = useAuth();
 const { user, hasRefreshedRemotely } = useUser(userService);
 
-const { data: sessionDetails } = await useAsyncData('session-details', () => authService.getSessionDetails());
+const {
+  data: sessionDetails,
+  error: sessionError
+} = await useAsyncData('session-details', () => authService.getSessionDetails());
+watchErrorAndThrow(sessionError);
 
 const error = ref<string | null>(null);
 
