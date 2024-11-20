@@ -40,6 +40,7 @@ async fn encrypt_active_entries_except_today(
     let encrypted_entries = match spawn_blocking(move || -> anyhow::Result<_> {
         let encrypted_entries = entries
             .into_iter()
+            .filter(|entry| !entry.ephemeral)
             .map(|entry| ActiveEntry::encrypt(&entry, &master_key))
             .collect::<anyhow::Result<Vec<_>>>()
             .map_err(JrnlError::EntryEncryptionFailed)?;
@@ -191,6 +192,7 @@ async fn put_local_mobile_entries(
             text: entry.text,
             // this should never get hit
             expiry: Utc::now() + Duration::days(30),
+            ephemeral: false,
         })
         .collect::<Vec<_>>();
 

@@ -4,9 +4,9 @@ use aes_gcm::{
     AeadCore,
     Aes256Gcm,
     Key,
-    KeyInit
+    KeyInit,
 };
-use anyhow::anyhow;
+use anyhow::{anyhow, bail};
 use chrono::NaiveDate;
 use serde::Serialize;
 use sqlx::FromRow;
@@ -20,10 +20,16 @@ pub struct ActiveEntry {
     pub emotion_scale: f32,
     pub text: Option<String>,
     pub expiry: chrono::DateTime<chrono::Utc>,
+    #[serde(default)]
+    pub ephemeral: bool,
 }
 
 impl ActiveEntry {
     pub fn encrypt(&self, master_key: &Key<Aes256Gcm>) -> anyhow::Result<EncryptedEntry> {
+        if self.ephemeral {
+            bail!("cannot encrypt ephemeral entry");
+        }
+
         let master_cipher = Aes256Gcm::new(master_key);
 
         let key = Aes256Gcm::generate_key(OsRng);

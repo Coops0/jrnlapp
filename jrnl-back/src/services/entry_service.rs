@@ -181,6 +181,7 @@ impl EntryService {
         let encrypted_entries = spawn_blocking(move || -> Vec<EncryptedEntry> {
             entries
                 .into_iter()
+                .filter(|entry| !entry.ephemeral)
                 .filter_map(|entry| ActiveEntry::encrypt(&entry, &master_key).ok())
                 .collect::<Vec<_>>()
         })
@@ -218,27 +219,30 @@ pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> an
             continue;
         }
 
-        let encrypted_entries = match spawn_blocking(move || -> anyhow::Result<_> {
+        let encrypted_entries = spawn_blocking(move || {
             entries
                 .into_iter()
+                .filter(|entry| !entry.ephemeral)
                 .map(|entry| ActiveEntry::encrypt(&entry, &master_key))
-                .collect::<anyhow::Result<Vec<_>>>()
+                .collect::<Vec<anyhow::Result<_>>>()
         })
-            .await? {
-            Ok(entries) => entries,
-            Err(why) => {
-                transaction.rollback().await?;
-                panic!("failed to encrypt entries in daily task {why:?}");
-            }
-        };
+            .await?;
 
         for entry in encrypted_entries {
+            let entry = match entry {
+                Ok(entry) => entry,
+                Err(why) => {
+                    warn!("failed to encrypt entry in daily task {why:?}");
+                    continue;
+                }
+            };
+
             let Err(why) = EntryService::create_encrypted_entry_query(&entry)
                 .execute(&mut *transaction)
                 .await else { continue; };
 
             transaction.rollback().await?;
-            panic!("failed to insert encrypted entry in daily task {why:?}");
+            warn!("failed to insert encrypted entry in daily task {why:?}");
         }
 
         transaction.commit().await?;
