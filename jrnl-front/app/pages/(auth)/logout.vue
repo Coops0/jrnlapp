@@ -12,12 +12,12 @@ const userService = new UserService($localApi);
 const { logout } = useAuth();
 const { user } = useUser(userService);
 
-onMounted(async () => {
+onMounted(() => {
   logout();
   user.value = null;
   useCookie('theme-cache').value = null;
   useCookie('entry-today').value = null;
 
-  await navigateTo('/');
+  navigateTo('/');
 });
 </script>

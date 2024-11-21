@@ -41,7 +41,7 @@ const { user, hasRefreshedRemotely } = useUser(userService);
 const {
   data: sessionDetails,
   error: sessionError
-} = await useAsyncData('session-details', () => authService.getSessionDetails());
+} = useAsyncData('session-details', () => authService.getSessionDetails());
 watchErrorAndThrow(sessionError);
 
 const error = ref<string | null>(null);

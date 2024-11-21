@@ -9,7 +9,8 @@
 
     <div class="top-2 left-0 right-0 z-[2] mb-2">
       <div class="flex justify-between items-center mx-auto text-sm">
-        <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry" :unsaved-changes="unsavedChanges" :entry/>
+        <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry"
+                             :unsaved-changes="unsavedChanges" :entry/>
         <TodayEntryTimeUntilTomorrow :tomorrow/>
       </div>
     </div>
@@ -26,7 +27,6 @@
                 v-model="entry.emotion_scale"
                 :max="10"
                 :min="0"
-                :rating-lerp="ratingLerpBind"
                 :step="0.1"
             />
           </div>
@@ -38,13 +38,10 @@
 
 <script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
-import { ratingLerp } from '~/util/index.util';
 import type { Entry } from '~/types/entry.type';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
-
-const { theme } = useTheme(null);
 
 const entryCookie = useCookie<Entry>('entry-today', {
   maxAge: 60 * 60 * 24
@@ -61,13 +58,11 @@ const {
   forceSave,
   unsavedChanges
 } = useTodayEntry(entryService, entryCookie);
-
-const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 beginFetch();
 
-onBeforeUnmount(async () => {
+onBeforeUnmount(() => {
   if (unsavedChanges.value) {
-    await forceSave();
+    forceSave();
   }
 });
 </script>

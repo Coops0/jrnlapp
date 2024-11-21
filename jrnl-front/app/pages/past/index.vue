@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <ErrorDisplay v-if="error" :error="error" @retry="refresh" />
+    <ErrorDisplay v-if="error" :error="error" @clear-error="refresh" />
 
     <div v-else-if="paginator" class="space-y-4">
       <div v-if="paginator.items.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">

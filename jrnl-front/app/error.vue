@@ -1,5 +1,5 @@
 <template>
-  <ErrorDisplay class="size-full" :error="error" :clear-error="clear">
+  <ErrorDisplay class="size-full" :error="error" @clear-error="clear">
     <FormButton size="md" variant="secondary" full @click="clearCookiesAndRefresh">
       logout & refresh
     </FormButton>

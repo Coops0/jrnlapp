@@ -64,7 +64,7 @@
               class="p-6 rounded-lg bg-colors-primary-800/40 backdrop-blur-md hover:bg-colors-primary-800/100 transition-all ease-out">
             <div class="text-colors-accent-400 mb-3">emotional rating</div>
             <p class="text-colors-primary-300 text-sm">use a slider, that's it.</p>
-            <FormSlider :max="10" :min="1" :step="0.1" :rating-lerp="() => 'white'" :model-value="5"/>
+            <FormSlider :max="10" :min="1" :step="0.1" :model-value="5"/>
           </div>
         </div>
       </div>

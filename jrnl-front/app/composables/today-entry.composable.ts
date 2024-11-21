@@ -86,7 +86,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         execute: fetchToday
     } = useLazyAsyncData('today-entry-fetch', () => entryService.getToday(), {
         immediate: false,
-        async transform(today) {
+        transform(today) {
             lastSavedEntry.value = today && { ...today };
 
             if (today === null) {

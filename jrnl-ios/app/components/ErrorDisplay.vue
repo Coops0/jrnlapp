@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts" setup>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const props = defineProps<{ error: any }>();
 const emit = defineEmits<{ clearError: [] }>();
 

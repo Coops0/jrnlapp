@@ -4,7 +4,7 @@
       <div
           :style="{
              width: percentage + '%',
-             backgroundColor: ratingLerp(modelValue ?? 0)
+             backgroundColor: ratingLerp(modelValue ?? 0, theme)
         }"
           class="absolute h-full transition-all ease-out duration-100"
       />
@@ -27,13 +27,16 @@
 </template>
 
 <script lang="ts" setup>
+import { ratingLerp } from '~/util/index.util';
+
+const { theme } = useTheme(null);
+
 const value = defineModel<number>({ default: 0 });
 
 const props = defineProps<{
   min?: number;
   max?: number;
   step?: number;
-  ratingLerp: (value: number) => string;
 }>();
 
 const percentage = computed(() => {
