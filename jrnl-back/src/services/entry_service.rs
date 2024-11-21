@@ -127,6 +127,7 @@ impl EntryService {
         user: &User,
         emotion_scale: f32,
         text: Option<String>,
+        ephemeral: bool,
     ) -> Result<ActiveEntry, Error> {
         let expiry = user.current_date_time_by_timezone() + chrono::Duration::days(1);
         let expiry_midnight = expiry.with_hour(0)
@@ -138,9 +139,9 @@ impl EntryService {
         sqlx::query_as(
             // language=postgresql
             "
-                INSERT INTO active_entries (author, date, emotion_scale, text, expiry) VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO active_entries (author, date, emotion_scale, text, expiry) VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (author, date)
-                DO UPDATE SET emotion_scale = $3, text = $4
+                DO UPDATE SET emotion_scale = $3, text = $4, ephemeral = $6
                 RETURNING *
             ",
         )
@@ -149,6 +150,7 @@ impl EntryService {
             .bind(emotion_scale)
             .bind(text)
             .bind(expiry_midnight)
+            .bind(ephemeral)
             .fetch_one(&self.0)
             .await
     }

@@ -134,6 +134,8 @@ struct UpdateEntryPayload {
     emotion_scale: f32,
     #[serde(default, deserialize_with = "sanitize_html_string")]
     text: Option<String>,
+    #[serde(default)]
+    ephemeral: bool
 }
 
 #[allow(clippy::unnecessary_wraps)]
@@ -159,7 +161,7 @@ async fn update_today_entry(
     JsonExtractor(payload): JsonExtractor<UpdateEntryPayload>,
 ) -> JrnlResult<Json<ActiveEntry>> {
     entry_service
-        .update_or_create_daily_entry(&user, payload.emotion_scale, payload.text)
+        .update_or_create_daily_entry(&user, payload.emotion_scale, payload.text, payload.ephemeral)
         .await
         .map(Json)
         .map_err(Into::into)
