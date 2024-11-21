@@ -6,7 +6,3 @@
     </template>
   </NuxtErrorBoundary>
 </template>
-
-<script setup lang="ts">
-import ErrorDisplay from '~/components/ErrorDisplay.vue';
-</script>

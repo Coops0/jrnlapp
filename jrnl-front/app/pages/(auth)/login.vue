@@ -15,7 +15,7 @@
             />
           </div>
 
-          <ErrorDisplay v-if="error" :error="error" @clear-error="() => alert('/')"/>
+          <ErrorDisplay v-if="error" :error="error"/>
         </div>
       </div>
     </div>

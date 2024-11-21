@@ -49,7 +49,7 @@ export const useTodayEntry = (
 
         try {
             if (isConnected.value) {
-                entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+                entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text!, entry.value.ephemeral);
                 entry.value.saved = true;
             }
         } catch (e) {
