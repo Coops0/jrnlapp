@@ -9,7 +9,7 @@ export const useTheme = (userService: UserService | null) => {
 
     const theme = useLocalStorage<string>('theme', () => user.value?.theme || 'lunar_placeholder');
 
-    watch(theme, async t => {
+    watch(theme, t => {
         document.body.setAttribute('data-theme', t);
     }, { immediate: true });
 

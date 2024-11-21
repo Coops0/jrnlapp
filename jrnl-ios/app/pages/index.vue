@@ -3,5 +3,5 @@
 </template>
 
 <script setup lang="ts">
-await navigateTo('/current');
+navigateTo('/current');
 </script>

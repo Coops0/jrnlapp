@@ -10,4 +10,6 @@ pub struct Entry {
     #[serde(default)]
     pub saved: bool,
     pub id: String,
+    #[serde(default)]
+    pub ephemeral: bool,
 }

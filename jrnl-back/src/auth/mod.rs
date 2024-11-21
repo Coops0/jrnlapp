@@ -21,15 +21,5 @@ pub async fn clean_expired_sessions(pool: PgPool) {
         if let Err(why) = delete_temp_sessions_future.await {
             error!("Failed to clean expired temp sessions: {}", why);
         }
-
-        let delete_mobile_oneshots_future = sqlx::query(
-            // language=postgresql
-            "DELETE FROM mobile_nonce_oneshots WHERE expiry < NOW()",
-        )
-            .execute(&pool);
-
-        if let Err(why) = delete_mobile_oneshots_future.await {
-            error!("Failed to clean expired mobile oneshots: {}", why);
-        }
     }
 }

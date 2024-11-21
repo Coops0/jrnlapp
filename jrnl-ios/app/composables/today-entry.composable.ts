@@ -11,7 +11,8 @@ export const BLANK_ENTRY = (): Entry => ({
     date: new Date().toString(),
     id: crypto.randomUUID(),
     author: '',
-    saved: false
+    saved: false,
+    ephemeral: false
 });
 
 export const useTodayEntry = (
@@ -51,6 +52,8 @@ export const useTodayEntry = (
                 entry.value = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
                 entry.value.saved = true;
             }
+        } catch (e) {
+            console.error('error saving entry', e);
         } finally {
             await localBackendService.saveEntry(entry.value);
         }
@@ -70,7 +73,7 @@ export const useTodayEntry = (
         }
     }
 
-    watch(entry, save, { deep: true });
+    watch(entry, () => save(), { deep: true });
 
     const status = ref<string>('pending');
 

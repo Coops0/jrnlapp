@@ -25,6 +25,7 @@ use tokio::{
     task::spawn_blocking,
     time::interval,
 };
+use tracing::warn;
 use uuid::Uuid;
 
 pub struct EntryService(PgPool);
@@ -200,6 +201,7 @@ impl EntryService {
     }
 }
 
+// FIXME this needs to be done in a safer way
 pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> anyhow::Result<()> {
     let mut ticker = interval(Duration::from_secs(60 * 5));
 
@@ -237,12 +239,11 @@ pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> an
                 }
             };
 
-            let Err(why) = EntryService::create_encrypted_entry_query(&entry)
+            if let Err(why) = EntryService::create_encrypted_entry_query(&entry)
                 .execute(&mut *transaction)
-                .await else { continue; };
-
-            transaction.rollback().await?;
-            warn!("failed to insert encrypted entry in daily task {why:?}");
+                .await {
+                warn!("failed to insert encrypted entry in daily task {why:?}");
+            }
         }
 
         transaction.commit().await?;

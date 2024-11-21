@@ -1,5 +1,5 @@
 <template>
-  <ErrorDisplay class="size-full" :error="error" :clear-error="clear" />
+  <ErrorDisplay class="size-full" :error="error" @clear-error="clear" />
 </template>
 
 <script setup lang="ts">

@@ -5,4 +5,5 @@ export interface Entry {
     emotion_scale: number; // 0-10
     date: string;
     saved: boolean;
+    ephemeral: boolean;
 }

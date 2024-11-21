@@ -39,17 +39,13 @@ export const useEntries = (localBackendService: LocalBackendService, entryServic
         hasMore.value = !!paginator?.has_more;
     }
 
-    watch(isConnected, async () => {
+    watch(isConnected, () => {
         if (isConnected.value) {
-            try {
-                await loadRemoteEntries();
-                return;
-            } catch {
-                /* empty */
-            }
+            loadRemoteEntries()
+                .catch(() => loadLocalEntries());
+        } else {
+            void loadLocalEntries();
         }
-
-        await loadLocalEntries();
     }, { immediate: true });
 
     const loadMore = async () => {

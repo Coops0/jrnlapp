@@ -5,19 +5,16 @@
       <span v-else>an error occurred</span>
     </div>
 
-    <FormButton v-if="clearError" size="md" variant="secondary" full @click="clearError">
+    <FormButton v-if="clearError" size="md" variant="secondary" full @click="emit('clearError')">
       ok
     </FormButton>
-    <slot />
+    <slot/>
   </div>
 </template>
 
 <script lang="ts" setup>
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const props = defineProps<{
-  error: any;
-  clearError?: () => void;
-}>();
+const props = defineProps<{ error: any }>();
+const emit = defineEmits<{ clearError: [] }>();
 
 interface ApiError {
   code: string;

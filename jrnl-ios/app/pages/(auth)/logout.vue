@@ -12,13 +12,13 @@ const userService = new UserService($localApi);
 const { logout } = useAuth();
 const { user } = useUser(userService);
 
-onMounted(async () => {
+onMounted(() => {
   logout();
   user.value = null;
   localStorage.removeItem('jwt');
   localStorage.removeItem('user');
   localStorage.removeItem('theme');
 
-  await navigateTo('/');
+  navigateTo('/');
 });
 </script>

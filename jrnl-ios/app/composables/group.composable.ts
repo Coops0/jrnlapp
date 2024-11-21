@@ -33,7 +33,8 @@ export const useGroup = (
                     ?.sort((a, b) => b.day.getTime() - a.day.getTime());
             },
             watch: [before]
-        });
+        }
+    );
 
     return {
         groupInfoError,

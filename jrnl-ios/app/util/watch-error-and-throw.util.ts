@@ -1,5 +1,5 @@
 export const watchErrorAndThrow = (error: Ref<Error | undefined>) => {
-    watch(error, (value) => {
+    watch(error, value => {
         if (value) {
             throw value;
         }

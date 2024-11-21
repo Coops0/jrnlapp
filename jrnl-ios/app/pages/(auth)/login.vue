@@ -3,7 +3,7 @@
     <div class="w-full max-w-md">
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
         <div class="space-y-6">
-         <ErrorDisplay v-if="sessionError" :error="sessionError" :clear-error="refresh"/>
+         <ErrorDisplay v-if="sessionError" :error="sessionError" @clear-error="refresh"/>
           <div v-else>
             <div class="flex flex-col items-center gap-3">
               <LoginGoogleButton class="w-full h-[40px]" @click="startGoogleLogin"/>
@@ -38,7 +38,7 @@ const {
   data: sessionDetails,
   error: sessionError,
   refresh
-} = await useAsyncData('session-details', () => authService.getSessionDetails());
+} = useAsyncData('session-details', () => authService.getSessionDetails());
 
 const error = ref<string | null>(null);
 

@@ -15,7 +15,8 @@
             date: new Date().toString(),
             text: 'loading...',
             id: '',
-            saved: false
+            saved: false,
+            ephemeral: false
           }"
           :parsed-date="new Date()"
           :theme
@@ -66,9 +67,9 @@ async function fetchEntry() {
 
 fetchEntry();
 
-watch(isConnected, async o => {
+watch(isConnected, o => {
   if (o && fetchStatus.value !== 'success') {
-    await fetchEntry();
+    fetchEntry();
   }
 });
 

@@ -31,7 +31,6 @@
                 v-model="entry.emotion_scale"
                 :max="10"
                 :min="0"
-                :rating-lerp="ratingLerpBind"
                 :step="0.1"
             />
           </div>
@@ -43,7 +42,6 @@
 
 <script lang="ts" setup>
 import { EntryService } from '~/services/entry.service';
-import { ratingLerp } from '~/util/index.util';
 import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 import { LocalBackendService } from '~/services/local-backend.service';
 import { BLANK_ENTRY, useTodayEntry } from '~/composables/today-entry.composable';
@@ -51,8 +49,6 @@ import { BLANK_ENTRY, useTodayEntry } from '~/composables/today-entry.composable
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 const localBackendService = new LocalBackendService();
-
-const { theme } = useTheme(null);
 
 const entry = useLocalStorage('entry-today', BLANK_ENTRY);
 
@@ -68,8 +64,6 @@ const {
 } = useTodayEntry(entry, localBackendService, entryService);
 
 fetchToday();
-
-const ratingLerpBind = (value: number) => ratingLerp(value, theme.value);
 
 onErrorCaptured(() => {
   try {

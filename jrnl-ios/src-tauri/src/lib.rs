@@ -30,16 +30,27 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-async fn load_entries() -> JrnlIosResult<Vec<Entry>> {
-    let tokio_file_handle = tokio::fs::File::open("entries.mpk").await?;
+async fn load_entries() -> Option<Vec<Entry>> {
+    let tokio_file_handle = tokio::fs::OpenOptions::new()
+        .read(true)
+        .truncate(false)
+        .create(true)
+        .open("entries.mpk")
+        .await
+        .ok()?;
+
     let std_file_handle = tokio_file_handle.into_std().await;
 
-    rmp_serde::decode::from_read(std_file_handle).map_err(Into::into)
+    rmp_serde::decode::from_read(std_file_handle).ok()
 }
 
 #[tauri::command]
 async fn save_entry(entry: Entry) -> Result<(), JrnlIosError> {
-    let mut entries = load_entries().await?;
+    if entry.ephemeral {
+        return Ok(());
+    }
+
+    let mut entries = load_entries().await.unwrap_or_default();
 
     if let Some(existing_index) = entries.iter().position(|e| e.id == entry.id) {
         entries[existing_index] = entry;
@@ -49,7 +60,13 @@ async fn save_entry(entry: Entry) -> Result<(), JrnlIosError> {
 
     entries.sort_by(|a, b| b.date.cmp(&a.date));
 
-    let tokio_file_handle = tokio::fs::File::create("entries.mpk").await?;
+    let tokio_file_handle = tokio::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open("entries.mpk")
+        .await?;
+
     let mut std_file_handle = tokio_file_handle.into_std().await;
 
     rmp_serde::encode::write(&mut std_file_handle, &entries)
@@ -59,13 +76,14 @@ async fn save_entry(entry: Entry) -> Result<(), JrnlIosError> {
 #[tauri::command]
 async fn get_entry(id: String) -> JrnlIosResult<Option<Entry>> {
     Ok(
-        load_entries().await?
+        load_entries().await
+            .unwrap_or_default()
             .into_iter()
             .find(|entry| entry.id == id)
     )
 }
 
 #[tauri::command]
-async fn get_entries() -> JrnlIosResult<Vec<Entry>> {
-    load_entries().await
+async fn get_entries() -> Vec<Entry> {
+    load_entries().await.unwrap_or_default()
 }
