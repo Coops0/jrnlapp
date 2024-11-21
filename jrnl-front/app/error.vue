@@ -1,5 +1,5 @@
 <template>
-  <ErrorDisplay class="size-full" :error="error" @clear-error="clear">
+  <ErrorDisplay :error="error" @clear-error="clear">
     <FormButton size="md" variant="secondary" full @click="clearCookiesAndRefresh">
       logout & refresh
     </FormButton>
@@ -8,6 +8,9 @@
 
 <script setup lang="ts">
 import type { NuxtError } from '#app';
+import { useAllMeta } from '~/util/all-meta.util';
+
+useAllMeta();
 
 const props = defineProps<{ error: NuxtError }>();
 
@@ -30,11 +33,3 @@ function clearCookiesAndRefresh() {
 
 const clear = () => clearError({ redirect: '/' });
 </script>
-
-<style>
-/* noinspection CssUnusedSymbol */
-body, html, #__nuxt {
-  width: 100%;
-  height: 100%
-}
-</style>

@@ -8,7 +8,8 @@ const BLANK_ENTRY = (): Entry => ({
     emotion_scale: 5,
     date: new Date().toString(),
     author: '',
-    id: ''
+    id: '',
+    ephemeral: false
 });
 
 export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Entry>) => {
@@ -73,7 +74,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             return;
         }
 
-        const entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text);
+        const entryResponse = await entryService.putToday(entry.value.emotion_scale, entry.value.text!, entry.value.ephemeral);
 
         lastSavedEntry.value = { ...entry.value };
 

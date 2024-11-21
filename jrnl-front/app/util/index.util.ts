@@ -8,10 +8,16 @@ export function getTomorrow(): Date {
     return tomorrow;
 }
 
-export const isSameDay = (a: Date, b: Date = new Date()) =>
-    a.getDate() === b.getDate() &&
-    a.getMonth() === b.getMonth() &&
-    a.getFullYear() === b.getFullYear();
+export const isSameDay = (a: Date, b: Date = new Date()) => {
+    if (!a) {
+        return false;
+    }
+
+
+    return a.getDate() === b.getDate() &&
+        a.getMonth() === b.getMonth() &&
+        a.getFullYear() === b.getFullYear();
+};
 
 const THEME_GRADIENTS: Record<string, [string, string]> = Object.fromEntries(
     Object.entries(themes)

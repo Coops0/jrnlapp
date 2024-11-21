@@ -29,7 +29,7 @@ export class EntryService {
         return this.api('/entries/today');
     }
 
-    async putToday(emotion_scale: number, text?: string): Promise<Entry> {
-        return this.api('/entries/today', { method: 'PUT', body: { emotion_scale, text } });
+    async putToday(emotion_scale: number, text: string, ephemeral: boolean): Promise<Entry> {
+        return this.api('/entries/today', { method: 'PUT', body: { emotion_scale, text, ephemeral } });
     }
 }

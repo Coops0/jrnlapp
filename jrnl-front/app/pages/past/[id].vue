@@ -7,7 +7,8 @@
             author: '',
             date: new Date().toString(),
             text: 'loading...',
-            id: ''
+            id: '',
+            ephemeral: false
           }"
           :parsed-date="new Date()"
           :theme
