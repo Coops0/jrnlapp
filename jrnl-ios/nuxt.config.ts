@@ -4,6 +4,9 @@ export default defineNuxtConfig({
     future: {
         compatibilityVersion: 4,
     },
+    extends: [
+        '../jrnl-nuxt-shared-layer'
+    ],
     compatibilityDate: '2024-04-03',
     modules: [
         '@nuxtjs/tailwindcss',
@@ -12,8 +15,6 @@ export default defineNuxtConfig({
     ],
     runtimeConfig: {
         public: {
-            // overridden with NUXT_PUBLIC_API_BASE
-            // apiBase: 'http://localhost:4000',
             // apiBase: 'https://my.jrnl.fm',
             apiBase: process.env.TAURI_DEV_HOST ? 'http://' + process.env.TAURI_DEV_HOST + ':4000' : 'http://localhost:4000',
             appleClientId: 'fm.jrnl.oauth-signin',
@@ -23,7 +24,6 @@ export default defineNuxtConfig({
 
     devServer: {
         host: process.env.TAURI_DEV_HOST || 'localhost'
-        // host: process.env.TAURI_DEV_HOST || '0.0.0.0'
     },
     vite: {
         clearScreen: false,
@@ -38,11 +38,8 @@ export default defineNuxtConfig({
             noExternal: true
         }
     },
-    experimental: {
-        asyncContext: true
-    },
     hooks: {
-        'vite:extend': function ({config}) {
+        'vite:extend': function ({ config }) {
             if (config.server && config.server.hmr && config.server.hmr !== true) {
                 config.server.hmr.protocol = 'ws';
                 config.server.hmr.host = process.env.TAURI_DEV_HOST || 'localhost';

@@ -12,9 +12,6 @@
 </template>
 
 <script lang="ts" setup>
-import { UserService } from '~/services/user.service';
-import { themes } from '~/assets/themes';
-
 const { $localApi } = useNuxtApp();
 const userService = new UserService($localApi);
 

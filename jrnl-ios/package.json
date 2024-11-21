@@ -14,16 +14,10 @@
   "dependencies": {
     "nuxt": "npm:nuxt-nightly@latest",
     "@nuxt/kit": "npm:@nuxt/kit-nightly@latest",
-    "@nuxtjs/tailwindcss": "^6.12.2",
-    "@tailwindcss/typography": "^0.5.15",
     "@tauri-apps/api": "^2.1.1",
-    "@tiptap/pm": "^2.10.0",
-    "@tiptap/starter-kit": "^2.10.0",
-    "@tiptap/vue-3": "^2.10.0",
-    "nuxt-time": "1.0.1",
-    "tw-colors": "^3.3.2",
     "vue": "^3.5.13",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "jrnl-nuxt-shared-layer": "link:../jrnl-nuxt-shared-layer"
   },
   "devDependencies": {
     "@nuxt/eslint": "^0.6.2",
@@ -31,5 +25,5 @@
     "tauri-plugin-sign-in-with-apple-api": "^1.0.2",
     "typescript": "^5.6.3"
   },
-  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf"
+  "packageManager": "pnpm@9.7.0"
 }
