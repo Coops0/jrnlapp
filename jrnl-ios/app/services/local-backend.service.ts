@@ -1,5 +1,5 @@
-import type { Entry } from '~/types/entry.type';
 import { invoke } from '@tauri-apps/api/core';
+import type { Entry } from '#shared/types/entry.type';
 
 export class LocalBackendService {
     async saveEntry(entry: Entry): Promise<void> {

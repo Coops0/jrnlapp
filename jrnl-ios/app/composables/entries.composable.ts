@@ -1,7 +1,4 @@
-import type { EntryService } from '~/services/entry.service';
-import { isSameDay, parseServerDate } from '~/util/index.util';
 import type { LocalBackendService } from '~/services/local-backend.service';
-import type { Entry } from '~/types/entry.type';
 import { useOnline } from '~/composables/util/online.util.composable';
 
 type EntryWithDate = Omit<Entry, 'date'> & { date: Date };

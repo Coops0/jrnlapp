@@ -1,13 +1,15 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'url';
+
 export default defineNuxtConfig({
     ssr: false,
     future: {
         compatibilityVersion: 4,
     },
-    extends: [
-        '../jrnl-nuxt-shared-layer'
-    ],
     compatibilityDate: '2024-04-03',
+    alias: {
+      '#shared': fileURLToPath(new URL('../jrnl-front-shared', import.meta.url))
+    },
     modules: [
         '@nuxtjs/tailwindcss',
         '@nuxt/eslint',

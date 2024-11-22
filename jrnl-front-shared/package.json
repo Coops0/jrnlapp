@@ -1,0 +1,14 @@
+{
+  "name": "jrnl-front-shared",
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "nuxt": "npm:nuxt-nightly@latest",
+    "@tiptap/pm": "^2.10.0",
+    "@tiptap/starter-kit": "^2.10.0",
+    "@tiptap/vue-3": "^2.10.0",
+    "nuxt-time": "1.0.1",
+    "tw-colors": "^3.3.2"
+  },
+  "packageManager": "pnpm@9.7.0"
+}
