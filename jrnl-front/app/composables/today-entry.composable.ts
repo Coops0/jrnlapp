@@ -19,6 +19,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
     const lastSaved = ref(new Date(1900, 1, 1));
 
     const tomorrow = ref(getTomorrow());
+    const showDayTransition = ref(false);
 
     const saveConflict = ref<[Entry, Entry] | null>(null);
 
@@ -147,8 +148,12 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
             console.debug('tripped daily reset');
             tomorrow.value = getTomorrow();
 
-            entry.value = BLANK_ENTRY();
-            storage.value = BLANK_ENTRY();
+            showDayTransition.value = true;
+
+            setTimeout(() => {
+                entry.value = BLANK_ENTRY();
+                storage.value = BLANK_ENTRY();
+            }, 3000);
         }, 1000);
     });
 
@@ -191,6 +196,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         handleSaveConflict,
 
         forceSave: saveNow,
-        unsavedChanges
+        unsavedChanges,
+        showDayTransition
     };
 };

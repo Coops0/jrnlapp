@@ -1,5 +1,10 @@
 <template>
   <div class="flex flex-col relative flex-grow px-2 md:px-4 lg:px-10 max-w-full">
+    <TodayEntryNewDayAnimation
+        :show="showDayTransition"
+        @transition-complete="handleTransitionComplete"
+    />
+
     <LazyTodayEntrySaveConflictModal
         v-if="saveConflict"
         :server="saveConflict[0]"
@@ -64,7 +69,8 @@ const {
   saveConflict,
   handleSaveConflict,
   saveNow,
-  unsavedChanges
+  unsavedChanges,
+  showDayTransition
 } = useTodayEntry(entry, localBackendService, entryService);
 
 fetchToday();
@@ -76,4 +82,8 @@ onErrorCaptured(() => {
     /* empty */
   }
 });
+
+const handleTransitionComplete = () => {
+  showDayTransition.value = false;
+};
 </script>

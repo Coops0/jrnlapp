@@ -25,6 +25,7 @@ export const useTodayEntry = (
     const lastSaved = ref(new Date(1900, 1, 1));
 
     const tomorrow = ref(getTomorrow());
+    const showDayTransition = ref(false);
 
     const saveConflict = ref<[Entry, Entry] | null>(null);
 
@@ -130,9 +131,14 @@ export const useTodayEntry = (
 
             await localBackendService.saveEntry(entry.value);
 
-            entry.value = BLANK_ENTRY();
             tomorrow.value = getTomorrow();
-            lastSavedEntry.value = null;
+
+            showDayTransition.value = true;
+
+            setTimeout(() => {
+                entry.value = BLANK_ENTRY();
+                lastSavedEntry.value = null;
+            }, 3000);
         }, 1000);
 
         if (status.value === 'success') {
@@ -181,6 +187,7 @@ export const useTodayEntry = (
         handleSaveConflict,
 
         saveNow,
-        unsavedChanges
+        unsavedChanges,
+        showDayTransition
     };
 };
