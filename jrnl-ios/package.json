@@ -30,6 +30,5 @@
     "tauri-plugin-google-signin-api": "file:../tauri-plugin-google-signin",
     "tauri-plugin-sign-in-with-apple-api": "^1.0.2",
     "typescript": "^5.7.2"
-  },
-  "packageManager": "pnpm@9.7.0"
+  }
 }
