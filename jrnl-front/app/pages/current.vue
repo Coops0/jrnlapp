@@ -19,8 +19,12 @@
 
     <div class="top-2 left-0 right-0 z-[2] mb-2">
       <div class="flex justify-between items-center mx-auto text-sm">
-        <TodayEntryLastSaved :last-saved="lastSaved" :last-saved-entry="lastSavedEntry"
-                             :unsaved-changes="unsavedChanges" :entry/>
+        <TodayEntryLastSaved
+            :last-saved="lastSaved"
+            :last-saved-entry="lastSavedEntry"
+            :unsaved-changes="unsavedChanges"
+            :entry
+        />
         <TodayEntryTimeUntilTomorrow :tomorrow/>
       </div>
     </div>

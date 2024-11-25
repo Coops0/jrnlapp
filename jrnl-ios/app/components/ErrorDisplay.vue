@@ -6,7 +6,7 @@
     </div>
 
     <div class="flex flex-row gap-2">
-      <FormButton v-if="clearError" size="md" variant="secondary" full @click="emit('clearError')">
+      <FormButton size="md" variant="secondary" full @click="emit('clear-error')">
         ok
       </FormButton>
       <slot/>
@@ -15,8 +15,9 @@
 </template>
 
 <script lang="ts" setup>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const props = defineProps<{ error: any }>();
-const emit = defineEmits<{ clearError: [] }>();
+const emit = defineEmits<{ 'clear-error': [] }>();
 
 interface ApiError {
   code: string;

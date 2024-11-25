@@ -2,10 +2,9 @@
   <div class="flex flex-col w-full h-full bg-colors-primary-900 overflow-hidden">
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -inset-[10px] opacity-50">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-colors-accent-400/20 rounded-full blur-3xl animate-pulse"/>
         <div
-            class="absolute top-1/4 left-1/4 w-96 h-96 bg-colors-accent-400/20 rounded-full blur-3xl animate-pulse"></div>
-        <div
-            class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-colors-secondary-600/20 rounded-full blur-3xl animate-pulse delay-700"></div>
+            class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-colors-secondary-600/20 rounded-full blur-3xl animate-pulse delay-700"/>
       </div>
     </div>
 
@@ -14,11 +13,11 @@
         <div class="space-y-8 text-center">
           <div class="space-y-4">
             <div class="flex items-center justify-center space-x-3">
-              <div class="w-3 h-3 rounded-full bg-colors-accent-400 animate-pulse"></div>
+              <div class="w-3 h-3 rounded-full bg-colors-accent-400 animate-pulse"/>
               <h1 class="text-7xl sm:text-9xl font-extralight tracking-tight text-colors-primary-100">
                 jrnl.fm
               </h1>
-              <div class="w-3 h-3 rounded-full bg-colors-secondary-600 animate-pulse delay-300"></div>
+              <div class="w-3 h-3 rounded-full bg-colors-secondary-600 animate-pulse delay-300"/>
             </div>
             <p class="text-xl sm:text-2xl text-colors-primary-300 font-light tracking-wide">
               one day at a time
@@ -32,9 +31,9 @@
             >
               <span
                   class="relative z-10 block px-5 py-5 overflow-hidden font-medium leading-tight text-colors-primary-100 transition-colors duration-300 ease-out border-2 border-colors-primary-200 rounded-lg group-hover:text-colors-primary-900">
-                <span class="absolute inset-0 w-full h-full px-5 py-3 rounded-lg bg-colors-primary-800"></span>
+                <span class="absolute inset-0 w-full h-full px-5 py-3 rounded-lg bg-colors-primary-800"/>
                 <span
-                    class="absolute left-0 w-full h-48 transition-all duration-300 origin-top-right -rotate-90 -translate-x-full translate-y-16 bg-colors-primary-200 group-hover:-rotate-180 ease"></span>
+                    class="absolute left-0 w-full h-48 transition-all duration-300 origin-top-right -rotate-90 -translate-x-full translate-y-16 bg-colors-primary-200 group-hover:-rotate-180 ease"/>
                 <span class="relative flex items-center justify-center">
                  {{ !!jwt ? 'open your journal' : 'login' }}
                   <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -43,7 +42,7 @@
                 </span>
               </span>
               <span
-                  class="absolute bottom-0 right-0 w-full h-12 -mb-1.5 -mr-1.5 transition-all duration-200 ease-linear bg-colors-primary-200 rounded-lg group-hover:mb-0 group-hover:mr-0"></span>
+                  class="absolute bottom-0 right-0 w-full h-12 -mb-1.5 -mr-1.5 transition-all duration-200 ease-linear bg-colors-primary-200 rounded-lg group-hover:mb-0 group-hover:mr-0"/>
             </NuxtLink>
           </div>
         </div>

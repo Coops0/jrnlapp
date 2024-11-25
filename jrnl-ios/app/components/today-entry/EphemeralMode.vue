@@ -1,12 +1,18 @@
 <template>
   <div class="relative group">
     <button
-        @click="toggleEphemeral"
         class="fixed top-2 right-2 p-2 rounded-lg transition-colors duration-300 hover:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
         :class="ephemeral ? 'text-colors-accent-400 bg-colors-primary-500/30' : 'text-colors-primary-200'"
+        @click="toggleEphemeral"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2">
+      <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+      >
         <circle cx="12" cy="12" r="10"/>
         <path d="M12 8v4"/>
         <path d="M12 16h.01"/>
@@ -23,9 +29,11 @@
     </div>
 
     <div v-if="showPulse" class="fixed inset-0 pointer-events-none">
-      <div v-for="(blotch, i) in blotches" :key="i"
-           class="absolute bg-colors-accent-400/10 rounded-full transition-all duration-1000"
-           :style="{
+      <div
+          v-for="(blotch, i) in blotches"
+          :key="i"
+          class="absolute bg-colors-accent-400/10 rounded-full transition-all duration-1000"
+          :style="{
           width: `${blotch.size}px`,
           height: `${blotch.size}px`,
           left: `${blotch.x}%`,

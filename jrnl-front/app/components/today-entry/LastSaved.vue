@@ -2,8 +2,8 @@
   <div class="flex items-center gap-1.5">
     <h5
         class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer flex items-center gap-1.5"
-        @click="toggle"
         :class="{ 'opacity-0': !show }"
+        @click="toggle"
     >
       <span v-if="savedJustNow">last saved: just now</span>
       <span v-else-if="isUnsaved">last saved: ...</span>
