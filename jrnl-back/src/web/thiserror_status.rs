@@ -1,9 +1,9 @@
 use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned};
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
-use syn::token::Comma;
-use syn::{parse_macro_input, Data, DeriveInput, LitInt, Meta, Path, Variant};
+use syn::{
+    parse_macro_input, punctuated::Punctuated, spanned::Spanned, token::Comma, Data, DeriveInput,
+    LitInt, Meta, Path, Variant,
+};
 
 // stripped version of https://docs.rs/axum_thiserror/0.1.0/src/axum_thiserror/lib.rs.html#1-119
 #[proc_macro_derive(ErrorStatus, attributes(status))]
@@ -31,7 +31,7 @@ pub fn derive_error_status(input: proc_macro::TokenStream) -> proc_macro::TokenS
             }
         }
     })
-        .into()
+    .into()
 }
 
 fn impl_enum_variant(variant: &Variant) -> TokenStream {

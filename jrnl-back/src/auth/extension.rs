@@ -1,15 +1,11 @@
 use crate::{
-    services::user_service::UserService,
-    schemas::user::User,
-    error::JrnlError,
     auth::jwt::{decode_user_jwt, Claims},
-    AppState
+    error::JrnlError,
+    schemas::user::User,
+    services::user_service::UserService,
+    AppState,
 };
-use axum::{
-    extract::FromRequestParts,
-    async_trait,
-    http::request::Parts
-};
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 use chrono::Utc;
 
 #[async_trait]

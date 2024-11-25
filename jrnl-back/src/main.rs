@@ -13,9 +13,15 @@ use axum::{
     middleware::from_extractor_with_state,
     Router,
 };
-use controllers::{auth_controller::auth_controller, entry_controller::entries_controller, group_controller::groups_controller, user_controller::users_controller};
+use controllers::{
+    auth_controller::auth_controller, entry_controller::entries_controller,
+    group_controller::groups_controller, user_controller::users_controller,
+};
 use services::entry_service::encrypt_old_entries;
-use sqlx::{postgres::{PgConnectOptions, PgPoolOptions}, PgPool};
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    PgPool,
+};
 use std::{env, time::Duration};
 use tokio::{join, task};
 use tower::ServiceBuilder;
@@ -79,7 +85,7 @@ async fn main() -> anyhow::Result<()> {
                     CorsLayer::new()
                         .allow_origin(AllowOrigin::list([
                             env::var("FRONTEND_URL")?.parse()?,
-                            "tauri://localhost".parse()?
+                            "tauri://localhost".parse()?,
                         ]))
                         .allow_methods(AllowMethods::mirror_request())
                         .allow_headers(AllowHeaders::list([AUTHORIZATION, CONTENT_TYPE]))

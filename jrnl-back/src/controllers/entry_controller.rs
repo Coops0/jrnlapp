@@ -19,7 +19,10 @@ use uuid::Uuid;
 
 pub fn entries_controller() -> Router<AppState> {
     Router::new()
-        .route("/", get(get_trimmed_entries_paginated).put(put_local_mobile_entries))
+        .route(
+            "/",
+            get(get_trimmed_entries_paginated).put(put_local_mobile_entries),
+        )
         .route("/:id", get(get_entry))
         .route("/today", get(get_today_entry).put(update_today_entry))
 }
@@ -46,7 +49,9 @@ async fn encrypt_active_entries_except_today(
             .map_err(JrnlError::EntryEncryptionFailed)?;
 
         Ok(encrypted_entries)
-    }).await? {
+    })
+    .await?
+    {
         Ok(entries) => entries,
         Err(e) => {
             error!("Failed to encrypt entries: {:?}", e);
@@ -58,7 +63,10 @@ async fn encrypt_active_entries_except_today(
     for entry in encrypted_entries {
         let Err(why) = EntryService::create_encrypted_entry_query(&entry)
             .execute(&mut *transaction)
-            .await else { continue; };
+            .await
+        else {
+            continue;
+        };
 
         error!("Failed to insert encrypted entry: {:?}", why);
         transaction.rollback().await?;
@@ -97,7 +105,11 @@ async fn get_trimmed_entries_paginated(
         _ => None,
     };
 
-    Ok(Json(CursorPaginatedResponse { items: entries, next_cursor, has_more }))
+    Ok(Json(CursorPaginatedResponse {
+        items: entries,
+        next_cursor,
+        has_more,
+    }))
 }
 
 async fn get_entry(
@@ -135,7 +147,7 @@ struct UpdateEntryPayload {
     #[serde(default, deserialize_with = "sanitize_html_string")]
     text: Option<String>,
     #[serde(default)]
-    ephemeral: bool
+    ephemeral: bool,
 }
 
 #[allow(clippy::unnecessary_wraps)]
@@ -161,7 +173,12 @@ async fn update_today_entry(
     JsonExtractor(payload): JsonExtractor<UpdateEntryPayload>,
 ) -> JrnlResult<Json<ActiveEntry>> {
     entry_service
-        .update_or_create_daily_entry(&user, payload.emotion_scale, payload.text, payload.ephemeral)
+        .update_or_create_daily_entry(
+            &user,
+            payload.emotion_scale,
+            payload.text,
+            payload.ephemeral,
+        )
         .await
         .map(Json)
         .map_err(Into::into)

@@ -16,7 +16,7 @@ pub async fn clean_expired_sessions(pool: PgPool) {
             // language=postgresql
             "DELETE FROM temp_auth_sessions WHERE expiry < NOW()",
         )
-            .execute(&pool);
+        .execute(&pool);
 
         if let Err(why) = delete_temp_sessions_future.await {
             error!("Failed to clean expired temp sessions: {}", why);

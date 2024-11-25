@@ -1,10 +1,7 @@
 use crate::schemas::entry::EncryptedEntry;
 use aes_gcm::{
     aead::{Aead, OsRng},
-    AeadCore,
-    Aes256Gcm,
-    Key,
-    KeyInit,
+    AeadCore, Aes256Gcm, Key, KeyInit,
 };
 use anyhow::{anyhow, bail};
 use chrono::NaiveDate;

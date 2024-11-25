@@ -1,10 +1,7 @@
 use anyhow::Context;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use reqwest::get;
-use serde::{
-    de::DeserializeOwned,
-    Deserialize,
-};
+use serde::{de::DeserializeOwned, Deserialize};
 use std::env;
 use uuid::Uuid;
 
@@ -20,12 +17,14 @@ struct JWKPublicKey {
     e: String,
 }
 
-async fn verify_token<Claims: DeserializeOwned>(url: &str, token: &str, issuer: &[&str], audience: &[&str]) -> anyhow::Result<Claims> {
+async fn verify_token<Claims: DeserializeOwned>(
+    url: &str,
+    token: &str,
+    issuer: &[&str],
+    audience: &[&str],
+) -> anyhow::Result<Claims> {
     // FIXME: cache these keys and use their headers to determine when to refresh
-    let keys_response = get(url)
-        .await?
-        .json::<JwtPublicKeys>()
-        .await?;
+    let keys_response = get(url).await?.json::<JwtPublicKeys>().await?;
 
     let header = jsonwebtoken::decode_header(token)?;
     let kid = header.kid.context("missing kid")?;
@@ -60,20 +59,27 @@ pub struct StrippedGoogleVerificationClaims {
     pub name: Option<String>,
 }
 
-pub async fn verify_google_credential(credential: &str, nonce: &Uuid) -> anyhow::Result<StrippedGoogleVerificationClaims> {
+pub async fn verify_google_credential(
+    credential: &str,
+    nonce: &Uuid,
+) -> anyhow::Result<StrippedGoogleVerificationClaims> {
     let claims = verify_token::<GoogleIdTokenClaims>(
         "https://www.googleapis.com/oauth2/v3/certs",
         credential,
         &["https://accounts.google.com", "accounts.google.com"],
         &[&env::var("GOOGLE_CLIENT_ID")?],
-    ).await?;
+    )
+    .await?;
 
     if claims.nonce != nonce.to_string() {
         anyhow::bail!("nonce mismatch");
     }
 
     let name = claims.name.or(claims.given_name);
-    Ok(StrippedGoogleVerificationClaims { sub: claims.sub, name })
+    Ok(StrippedGoogleVerificationClaims {
+        sub: claims.sub,
+        name,
+    })
 }
 
 #[derive(Deserialize)]
@@ -111,7 +117,8 @@ pub async fn verify_apple_id_token(id_token: &str, nonce: &Uuid) -> anyhow::Resu
         id_token,
         &["https://appleid.apple.com"],
         &[&env::var("APPLE_CLIENT_ID")?],
-    ).await?;
+    )
+    .await?;
 
     if claims.nonce != Some(nonce.to_string()) {
         anyhow::bail!("nonce mismatch");

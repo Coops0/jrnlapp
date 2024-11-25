@@ -1,30 +1,15 @@
-use crate::error::JrnlResult;
 use crate::{
+    error::JrnlResult,
     impl_service,
-    schemas::{
-        active_entry::ActiveEntry,
-        entry::EncryptedEntry,
-        user::User,
-    },
+    schemas::{active_entry::ActiveEntry, entry::EncryptedEntry, user::User},
     web::cursor::Cursor,
 };
 use aes_gcm::{Aes256Gcm, Key};
 use chrono::{NaiveDate, Timelike};
 use serde::Serialize;
-use sqlx::{
-    postgres::PgArguments,
-    query::Query,
-    Error,
-    FromRow,
-    PgPool,
-    Postgres,
-    Transaction,
-};
+use sqlx::{postgres::PgArguments, query::Query, Error, FromRow, PgPool, Postgres, Transaction};
 use std::time::Duration;
-use tokio::{
-    task::spawn_blocking,
-    time::interval,
-};
+use tokio::{task::spawn_blocking, time::interval};
 use tracing::warn;
 use uuid::Uuid;
 
@@ -46,7 +31,10 @@ pub struct DayDataRow {
 }
 
 impl EntryService {
-    pub async fn create_entry_migration_transaction_without_today(&self, user: &User) -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
+    pub async fn create_entry_migration_transaction_without_today(
+        &self,
+        user: &User,
+    ) -> Result<(Transaction<'_, Postgres>, Vec<ActiveEntry>), Error> {
         let mut transaction = self.0.begin().await?;
         let entries = sqlx::query_as::<_, ActiveEntry>(
             // language=postgresql
@@ -92,34 +80,41 @@ impl EntryService {
                 LIMIT $4
             ",
         )
-            .bind(user.id)
-            .bind(cursor.date)
-            .bind(cursor.id)
-            .bind(limit + 1)
-            .fetch_all(&self.0)
-            .await
+        .bind(user.id)
+        .bind(cursor.date)
+        .bind(cursor.id)
+        .bind(limit + 1)
+        .fetch_all(&self.0)
+        .await
     }
 
-    pub async fn get_entry_maybe(&self, user: &User, id: &Uuid) -> Result<Option<EncryptedEntry>, Error> {
+    pub async fn get_entry_maybe(
+        &self,
+        user: &User,
+        id: &Uuid,
+    ) -> Result<Option<EncryptedEntry>, Error> {
         sqlx::query_as(
             // language=postgresql
             "SELECT * FROM entries WHERE author = $1 AND id = $2 LIMIT 1",
         )
-            .bind(user.id)
-            .bind(id)
-            .fetch_optional(&self.0)
-            .await
+        .bind(user.id)
+        .bind(id)
+        .fetch_optional(&self.0)
+        .await
     }
 
-    pub async fn get_user_daily_entry_maybe(&self, user: &User) -> Result<Option<ActiveEntry>, Error> {
+    pub async fn get_user_daily_entry_maybe(
+        &self,
+        user: &User,
+    ) -> Result<Option<ActiveEntry>, Error> {
         sqlx::query_as(
             // language=postgresql
             "SELECT * FROM active_entries WHERE author = $1 AND date = $2 LIMIT 1",
         )
-            .bind(user.id)
-            .bind(user.current_date_by_timezone())
-            .fetch_optional(&self.0)
-            .await
+        .bind(user.id)
+        .bind(user.current_date_by_timezone())
+        .fetch_optional(&self.0)
+        .await
     }
 
     pub async fn update_or_create_daily_entry(
@@ -130,7 +125,8 @@ impl EntryService {
         ephemeral: bool,
     ) -> Result<ActiveEntry, Error> {
         let expiry = user.current_date_time_by_timezone() + chrono::Duration::days(1);
-        let expiry_midnight = expiry.with_hour(0)
+        let expiry_midnight = expiry
+            .with_hour(0)
             .and_then(|d| d.with_minute(0))
             .and_then(|d| d.with_second(0))
             .unwrap_or(expiry)
@@ -172,15 +168,19 @@ impl EntryService {
                 LIMIT 500
         ",
         )
-            .bind(group_member_ids)
-            .bind(start_date)
-            .bind(before_date)
-            .fetch_all(&self.0)
-            .await
+        .bind(group_member_ids)
+        .bind(start_date)
+        .bind(before_date)
+        .fetch_all(&self.0)
+        .await
     }
 
     // will ignore any individual errors
-    pub async fn insert_many_entries(&self, entries: Vec<ActiveEntry>, master_key: Key<Aes256Gcm>) -> JrnlResult<()> {
+    pub async fn insert_many_entries(
+        &self,
+        entries: Vec<ActiveEntry>,
+        master_key: Key<Aes256Gcm>,
+    ) -> JrnlResult<()> {
         let encrypted_entries = spawn_blocking(move || -> Vec<EncryptedEntry> {
             entries
                 .into_iter()
@@ -188,8 +188,8 @@ impl EntryService {
                 .filter_map(|entry| ActiveEntry::encrypt(&entry, &master_key).ok())
                 .collect::<Vec<_>>()
         })
-            .await
-            .map_err(Into::<anyhow::Error>::into)?;
+        .await
+        .map_err(Into::<anyhow::Error>::into)?;
 
         let mut transaction = self.0.begin().await?;
 
@@ -216,8 +216,8 @@ pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> an
             // language=postgresql
             "DELETE FROM active_entries WHERE expiry < timezone('utc', now()) RETURNING *",
         )
-            .fetch_all(&mut *transaction)
-            .await?;
+        .fetch_all(&mut *transaction)
+        .await?;
 
         if entries.is_empty() {
             continue;
@@ -230,7 +230,7 @@ pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> an
                 .map(|entry| ActiveEntry::encrypt(&entry, &master_key))
                 .collect::<Vec<anyhow::Result<_>>>()
         })
-            .await?;
+        .await?;
 
         for entry in encrypted_entries {
             let entry = match entry {
@@ -243,7 +243,8 @@ pub async fn encrypt_old_entries(pool: PgPool, master_key: Key<Aes256Gcm>) -> an
 
             if let Err(why) = EntryService::create_encrypted_entry_query(&entry)
                 .execute(&mut *transaction)
-                .await {
+                .await
+            {
                 warn!("failed to insert encrypted entry in daily task {why:?}");
             }
         }

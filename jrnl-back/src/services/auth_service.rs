@@ -24,8 +24,8 @@ impl AuthService {
                 RETURNING *
             ",
         )
-            .fetch_one(&self.0)
-            .await
+        .fetch_one(&self.0)
+        .await
     }
 
     pub async fn delete_and_fetch_nonce(&self, csrf: &Uuid) -> Result<Uuid, Error> {
@@ -37,9 +37,9 @@ impl AuthService {
                 RETURNING nonce
             ",
         )
-            .bind(csrf)
-            .fetch_one(&self.0)
-            .await
-            .map(|(nonce, )| nonce)
+        .bind(csrf)
+        .fetch_one(&self.0)
+        .await
+        .map(|(nonce,)| nonce)
     }
 }

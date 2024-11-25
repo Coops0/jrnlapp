@@ -1,7 +1,8 @@
-use axum::async_trait;
-use axum::extract::rejection::JsonRejection;
-use axum::extract::{FromRequest, Request};
-use axum::http::StatusCode;
+use axum::{
+    async_trait,
+    extract::{rejection::JsonRejection, FromRequest, Request},
+    http::StatusCode,
+};
 use thiserror::Error;
 use thiserror_status::ErrorStatus;
 
@@ -119,7 +120,7 @@ pub struct JsonExtractor<T>(pub T);
 #[async_trait]
 impl<S: Send + Sync, T> FromRequest<S> for JsonExtractor<T>
 where
-    axum::Json<T>: FromRequest<S, Rejection=JsonRejection>,
+    axum::Json<T>: FromRequest<S, Rejection = JsonRejection>,
 {
     type Rejection = JrnlError;
 
@@ -129,7 +130,7 @@ where
         let req = Request::from_parts(parts, body);
         match axum::Json::<T>::from_request(req, state).await {
             Ok(value) => Ok(Self(value.0)),
-            Err(why) => Err(JrnlError::BadRequestSyntax(why))
+            Err(why) => Err(JrnlError::BadRequestSyntax(why)),
         }
     }
 }

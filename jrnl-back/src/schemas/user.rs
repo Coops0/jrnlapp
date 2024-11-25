@@ -18,7 +18,7 @@ impl User {
     pub fn timezone(&self) -> Tz {
         self.timezone.parse().unwrap_or(chrono_tz::UTC)
     }
-    
+
     pub fn current_date_time_by_timezone(&self) -> DateTime<Tz> {
         Utc::now().with_timezone(&self.timezone())
     }

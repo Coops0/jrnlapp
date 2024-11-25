@@ -47,7 +47,11 @@ async fn update_self_user(
     JsonExtractor(payload): JsonExtractor<UpdateSelfPayload>,
 ) -> JrnlResult<Json<User>> {
     user_service
-        .update_user(&user, &payload.theme, &payload.tz.as_ref().map(Tz::to_string))
+        .update_user(
+            &user,
+            &payload.theme,
+            &payload.tz.as_ref().map(Tz::to_string),
+        )
         .await
         .map(Json)
         .map_err(Into::into)

@@ -1,7 +1,4 @@
-use crate::{
-    impl_service,
-    schemas::user::User
-};
+use crate::{impl_service, schemas::user::User};
 use sqlx::{Error, PgPool};
 use uuid::Uuid;
 
@@ -11,7 +8,7 @@ impl_service!(UserService);
 impl UserService {
     pub async fn create_or_get_user(
         &self,
-        name: &str,
+        name: Option<&str>,
         google_subject: &Option<String>,
         apple_subject: &Option<String>,
     ) -> Result<User, Error> {
@@ -24,11 +21,11 @@ impl UserService {
                 RETURNING *
             ",
         )
-            .bind(name)
-            .bind(google_subject)
-            .bind(apple_subject)
-            .fetch_one(&self.0)
-            .await
+        .bind(name)
+        .bind(google_subject)
+        .bind(apple_subject)
+        .fetch_one(&self.0)
+        .await
     }
 
     pub async fn update_user(
@@ -46,11 +43,11 @@ impl UserService {
                 WHERE id = $3 RETURNING *
             ",
         )
-            .bind(tz)
-            .bind(theme)
-            .bind(user.id)
-            .fetch_one(&self.0)
-            .await
+        .bind(tz)
+        .bind(theme)
+        .bind(user.id)
+        .fetch_one(&self.0)
+        .await
     }
 
     pub async fn get_user_by_id(&self, id: &Uuid) -> Result<User, Error> {
@@ -58,8 +55,8 @@ impl UserService {
             // language=postgresql
             "SELECT * FROM users WHERE id = $1 LIMIT 1",
         )
-            .bind(id)
-            .fetch_one(&self.0)
-            .await
+        .bind(id)
+        .fetch_one(&self.0)
+        .await
     }
 }
