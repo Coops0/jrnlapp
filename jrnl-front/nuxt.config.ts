@@ -31,7 +31,7 @@ export default defineNuxtConfig({
             googleClientId: '909343102938-jr9m7fcgajq7r6op9phtq392juhikune.apps.googleusercontent.com'
         },
     },
-    vite: false && process.env.NODE_ENV === 'production' ? {
+    vite: process.env.NODE_ENV === 'production' ? {
         esbuild: {
             drop: ['debugger', 'console'],
             // pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
