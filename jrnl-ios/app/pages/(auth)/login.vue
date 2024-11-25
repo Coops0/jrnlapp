@@ -3,11 +3,13 @@
     <div class="w-full max-w-md">
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
         <div class="space-y-6">
-         <ErrorDisplay v-if="sessionError" :error="sessionError" @clear-error="refresh"/>
+          <ErrorDisplay v-if="sessionError" :error="sessionError" @clear-error="refresh"/>
           <div v-else>
             <div class="flex flex-col items-center gap-3">
-              <LoginGoogleButton class="w-full h-[40px]" @click="startGoogleLogin"/>
-              <LoginAppleButton class="w-full h-[40px]" @click="startAppleLogin"/>
+              <LoginGoogleButton @click="startGoogleLogin"/>
+              <div class="h-14">
+                <LoginAppleButton @click="startAppleLogin" />
+              </div>
             </div>
 
             <ErrorDisplay v-if="error" :error="error"/>

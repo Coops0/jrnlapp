@@ -1,16 +1,10 @@
 <template>
-  <div
-      class="apple-button-main-container"
-      role="button" tabindex="0" aria-label="Continue with Apple">
-    <div
-        style=" padding-right: 8%; padding-left: 8%; position: absolute; box-sizing: border-box; width: 100%; height: 100%;">
-      <svg
-          xmlns="http://www.w3.org/2000/svg" style="pointer-events: none; overflow: visible;" width="100%"
-          height="100%">
+  <div class="apple-button-main-container" role="button" tabindex="0" aria-label="Continue with Apple">
+    <div class="absolute inset-0 px-[8%]">
+      <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none overflow-visible w-full h-full">
         <g>
-          <svg
-              xmlns="http://www.w3.org/2000/svg" style="overflow: visible;" width="100%" height="50%" y="25%"
-              viewBox="0 -11 123.6875 14" fill="#fff">
+          <svg xmlns="http://www.w3.org/2000/svg" class="overflow-visible w-full" height="50%" y="25%"
+               viewBox="0 -11 123.6875 14" fill="#fff">
             <text font-size="12px" textLength="123.6875" font-family="applied-button-font-0" direction="ltr">
               <!-- eslint-disable-next-line -->
                Continue with Apple
@@ -19,18 +13,16 @@
         </g>
       </svg>
     </div>
-    <div style=" padding: 1px; width: 100%; height: 100%; box-sizing: border-box;">
-      <svg xmlns="http://www.w3.org/2000/svg" style=" overflow: visible;" width="100%" height="100%">
-        <rect
-            width="100%" height="100%" ry="15%" fill="#000" stroke="black" stroke-width="1"
-            stroke-linecap="round"/>
+    <div class="absolute inset-0 p-px">
+      <svg xmlns="http://www.w3.org/2000/svg" class="overflow-visible w-full h-full">
+        <rect width="100%" height="100%" rx="12" fill="#000"/>
       </svg>
     </div>
   </div>
 </template>
 
 <style>
-/*noinspection CssInvalidPropertyValue*/
+/* noinspection CssInvalidPropertyValue */
 .apple-button-main-container {
   font-synthesis: none;
   -moz-font-feature-settings: kern;
@@ -42,7 +34,7 @@
   min-width: 130px;
   max-width: 375px;
   min-height: 30px;
-  max-height: 64px;
+  max-height: 56px;
   position: relative;
   letter-spacing: initial;
 }
