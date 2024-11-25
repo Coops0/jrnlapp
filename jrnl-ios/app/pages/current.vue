@@ -31,7 +31,7 @@
       <ComponentErrorBoundary>
         <TodayEntryTextEditor
             v-model="entry.text"
-            :initial="null"
+            :initial="entry.text"
             class="flex-grow h-full w-full"
         />
         <div class="flex-grow mt-auto px-4 py-3">

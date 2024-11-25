@@ -1,6 +1,6 @@
 <template>
   <ErrorDisplay :error="error" @clear-error="clear">
-    <FormButton size="md" variant="secondary" full @click="clearCookiesAndRefresh">
+    <FormButton size="md" variant="secondary" full @click="clearLocalStorageAndRefresh">
       logout & refresh app
     </FormButton>
   </ErrorDisplay>
@@ -18,11 +18,11 @@ onMounted(() => {
   console.debug(props.error.stack);
 });
 
-function clearCookiesAndRefresh() {
-  useCookie('theme-cache').value = null;
-  useCookie('jwt').value = null;
-  useCookie('cached-user').value = null;
-  useCookie('entry-today').value = null;
+function clearLocalStorageAndRefresh() {
+  localStorage.removeItem('theme-cache');
+  localStorage.removeItem('jwt');
+  localStorage.removeItem('cached-user');
+  localStorage.removeItem('entry-today');
 
 
   clearNuxtData();

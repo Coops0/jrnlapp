@@ -20,6 +20,8 @@
 
 <script setup lang="ts">
 import type { Entry } from '~/types/entry.type';
+import { useOnline } from '~/composables/util/online.util.composable';
+import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 
 const props = defineProps<{
   lastSaved: Date;
@@ -28,12 +30,11 @@ const props = defineProps<{
   unsavedChanges: boolean | null;
 }>();
 
+const { isConnected } = useOnline();
+
 const unsavedChangesBuffered = ref(false);
 
-const show = useCookie('show-last-saved', {
-  default: () => true,
-  maxAge: 60 * 60 * 24 * 365
-});
+const show = useLocalStorage('show-last-saved', () => isConnected.value);
 
 const isUnsaved = ref(false);
 const savedJustNow = ref(false);

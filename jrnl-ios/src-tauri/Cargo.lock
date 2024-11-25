@@ -1675,6 +1675,7 @@ dependencies = [
  "chrono",
  "rmp-serde",
  "serde",
+ "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-fs",

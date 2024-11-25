@@ -1,20 +1,18 @@
 <template>
   <div class="text-right">
     <h3
-        v-if="show"
-        class="text-colors-primary-300 hover:text-colors-primary-200 cursor-pointer text-sm"
+        class="text-colors-primary-300 hover:text-colors-primary-200 cursor-pointer text-sm transition-opacity duration-200"
+        :class="{ 'opacity-0': !show }"
         @click="toggle"
     >
       day ends in
       <NuxtTime :datetime="tomorrow" relative/>
     </h3>
-    <h3
-        v-else
-        class="text-colors-primary-500 hover:text-colors-primary-300 cursor-pointer text-sm px-4"
+    <div
+        class="cursor-pointer justify-end w-1/4 border-b-2 border-solid border-colors-primary-400 opacity-60 transition-opacity duration-200"
+        :class="{ 'opacity-0': show }"
         @click="toggle"
-    >
-      ☀️
-    </h3>
+    />
   </div>
 </template>
 
