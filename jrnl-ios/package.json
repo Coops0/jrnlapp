@@ -12,24 +12,24 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "nuxt": "npm:nuxt-nightly@latest",
     "@nuxt/kit": "npm:@nuxt/kit-nightly@latest",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@tailwindcss/typography": "^0.5.15",
     "@tauri-apps/api": "^2.1.1",
-    "@tiptap/pm": "^2.10.0",
-    "@tiptap/starter-kit": "^2.10.0",
-    "@tiptap/vue-3": "^2.10.0",
+    "@tiptap/pm": "^2.10.2",
+    "@tiptap/starter-kit": "^2.10.2",
+    "@tiptap/vue-3": "^2.10.2",
+    "nuxt": "npm:nuxt-nightly@latest",
     "nuxt-time": "1.0.1",
     "tw-colors": "^3.3.2",
     "vue": "^3.5.13",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^0.6.2",
+    "@nuxt/eslint": "^0.7.1",
     "tauri-plugin-google-signin-api": "file:../tauri-plugin-google-signin",
     "tauri-plugin-sign-in-with-apple-api": "^1.0.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "packageManager": "pnpm@9.7.0"
 }
