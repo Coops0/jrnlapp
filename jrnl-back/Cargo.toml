@@ -10,7 +10,7 @@ axum = { version = "0.7.9", features = ["json"] }
 tower-http = { version = "0.6.2", features = ["cors", "timeout"] }
 tower = "0.5.1"
 
-sqlx = { version = "0.8.2", features = ["runtime-tokio", "tls-native-tls", "postgres", "migrate", "chrono", "uuid"] }
+sqlx = { version = "0.8.2", default-features = false, features = ["any", "json", "macros", "migrate", "runtime-tokio", "runtime-tokio-rustls", "postgres", "migrate", "chrono", "uuid"] }
 uuid = { version = "1.11.0", features = ["v4", "serde", "fast-rng", "macro-diagnostics"] }
 
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
@@ -21,7 +21,7 @@ chrono-tz = "0.10.0"
 
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
-reqwest = { version = "0.12.9", features = ["json"] }
+reqwest = { version = "0.12.9", default-features = false, features = ["charset", "http2", "json", "rustls-tls"] }
 
 anyhow = "1.0.93"
 thiserror = "2.0.3"
@@ -45,6 +45,7 @@ path = "src/web/thiserror_status.rs"
 [[bin]]
 name = "app"
 path = "src/main.rs"
+
 
 [lints.clippy]
 all = "warn"

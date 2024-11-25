@@ -1,6 +1,6 @@
 # Use the official Bun image for the initial stages
 # See all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:canary as base
+FROM oven/bun:canary AS base
 WORKDIR /usr/src/app
 
 # Install dependencies into a temp directory
