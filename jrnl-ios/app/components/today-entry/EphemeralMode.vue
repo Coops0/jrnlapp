@@ -1,7 +1,7 @@
 <template>
   <div class="relative group">
     <button
-        class="fixed top-2 right-2 p-2 rounded-lg transition-colors duration-300 hover:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
+        class="fixed top-6 right-2 p-2 rounded-lg transition-colors duration-300 hover:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
         :class="ephemeral ? 'text-colors-accent-400 bg-colors-primary-500/30' : 'text-colors-primary-200'"
         @click="toggleEphemeral"
     >
@@ -83,7 +83,7 @@ const createBlotches = () => {
 
 const toggleEphemeral = () => {
   ephemeral.value = !ephemeral.value;
-  if (showPulse.value) {
+  if (showPulse.value || !ephemeral.value) {
     return;
   }
 

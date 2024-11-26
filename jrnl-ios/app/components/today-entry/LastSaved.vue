@@ -1,8 +1,8 @@
 <template>
-  <div class="flex items-center gap-1.5">
+  <div class="relative">
     <h5
-        class="text-colors-primary-400/80 hover:text-colors-primary-400 transition-opacity cursor-pointer flex items-center gap-1.5"
-        :class="{ 'opacity-0': !show }"
+        class="text-colors-primary-400/80 hover:text-colors-primary-400 cursor-pointer flex items-center gap-1.5 transition-all duration-200 ease-in-out"
+        :class="show ? 'opacity-100' : 'opacity-0'"
         @click="toggle"
     >
       <span v-if="savedJustNow">last saved: just now</span>
@@ -15,6 +15,13 @@
           class="inline-block w-1.5 h-1.5 rounded-full bg-colors-accent-400"
       />
     </h5>
+
+    <div
+        class="absolute top-0 left-0 right-0 bottom-0 origin-left cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-[transform,opacity] duration-300"
+        style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1)"
+        :class="show ? 'opacity-0' : 'opacity-100 scale-x-50'"
+        @click="toggle"
+    />
   </div>
 </template>
 
