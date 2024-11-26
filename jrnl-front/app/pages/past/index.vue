@@ -3,16 +3,19 @@
     <div v-if="status === 'pending'">
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <EntriesListPastEntry
-            id=""
+            v-for="i in 20"
+
+            :key="i"
+            :id="i.toString()"
             :color="ratingLerp(5, theme)"
             :date="new Date()"
-            disabled
+            loading
             :rating="5"
         />
       </div>
     </div>
 
-    <ErrorDisplay v-if="error" :error="error" @clear-error="refresh" />
+    <ErrorDisplay v-if="error" :error="error" @clear-error="refresh"/>
 
     <div v-else-if="paginator" class="space-y-4">
       <div v-if="paginator.items.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
