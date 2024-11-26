@@ -1,39 +1,39 @@
 <template>
-  <div class="relative group">
-    <button
-        class="fixed top-6 right-2 p-2 rounded-lg transition-colors duration-300 hover:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
-        :class="ephemeral ? 'text-colors-accent-400 bg-colors-primary-500/30' : 'text-colors-primary-200'"
-        @click="toggleEphemeral"
-    >
-      <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
+  <div>
+    <TodayEntryEphemeralDialog v-model="shouldShowDialog" @confirm="handleConfirmation" :tomorrow/>
+    <div class="relative group">
+      <button
+          class="fixed top-2 right-2 p-2 rounded-lg transition-colors duration-300 hover:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
+          :class="ephemeral ? 'text-colors-accent-400 bg-colors-primary-500/30' : 'text-colors-primary-200'"
+          @click="handleButtonClick"
       >
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 8v4"/>
-        <path d="M12 16h.01"/>
-      </svg>
-    </button>
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4"/>
+          <path d="M12 16h.01"/>
+        </svg>
+      </button>
 
-    <div
-        class="fixed top-4 right-12 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none">
-      <div class="bg-colors-primary-800/90 text-colors-primary-100 px-4 py-2 rounded-lg max-w-xs text-sm">
-        {{
-          ephemeral ? 'ephemeral ON ~ will delete after today' : 'ephemeral OFF'
-        }}
-      </div>
-    </div>
-
-    <div v-if="showPulse" class="fixed inset-0 pointer-events-none">
       <div
-          v-for="(blotch, i) in blotches"
-          :key="i"
-          class="absolute bg-colors-accent-400/10 rounded-full transition-all duration-1000"
-          :style="{
+          class="fixed top-4 right-12 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none">
+        <div class="bg-colors-primary-800/90 text-colors-primary-100 px-4 py-2 rounded-lg max-w-xs text-sm">
+          {{ ephemeral ? 'on' : 'off' }}
+        </div>
+      </div>
+
+      <div v-if="showPulse" class="fixed inset-0 pointer-events-none">
+        <div
+            v-for="(blotch, i) in blotches"
+            :key="i"
+            class="absolute bg-colors-accent-400/10 rounded-full transition-all duration-1000"
+            :style="{
           width: `${blotch.size}px`,
           height: `${blotch.size}px`,
           left: `${blotch.x}%`,
@@ -42,13 +42,17 @@
           opacity: blotch.opacity,
           transitionDuration: `${blotch.duration}ms`
         }"
-      />
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 const ephemeral = defineModel<boolean>({ required: true, default: false });
+defineProps<{ tomorrow: Date }>();
+
+const shouldShowDialog = ref(false);
 
 const showPulse = ref(false);
 const blotches = ref<Array<{
@@ -81,9 +85,11 @@ const createBlotches = () => {
 };
 
 
-const toggleEphemeral = () => {
-  ephemeral.value = !ephemeral.value;
-  if (showPulse.value || !ephemeral.value) {
+const handleConfirmation = () => {
+  shouldShowDialog.value = false;
+
+  ephemeral.value = true;
+  if (showPulse.value) {
     return;
   }
 
@@ -93,5 +99,13 @@ const toggleEphemeral = () => {
   setTimeout(() => {
     showPulse.value = false;
   }, 2600);
+};
+
+const handleButtonClick = () => {
+  if (ephemeral.value) {
+    ephemeral.value = false;
+  } else {
+    shouldShowDialog.value = true;
+  }
 };
 </script>

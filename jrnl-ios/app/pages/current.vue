@@ -14,6 +14,7 @@
 
     <TodayEntryEphemeralMode
         v-model="entry.ephemeral"
+        :tomorrow
         class="absolute top-2 right-2"
     />
     <div class="z-[2] mb-2 mt-4">
