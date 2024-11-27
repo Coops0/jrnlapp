@@ -1,9 +1,10 @@
 <template>
-  <div class="apple-button-main-container" role="button" tabindex="0" aria-label="Continue with Apple">
-    <div class="absolute inset-0 px-[8%]">
-      <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none overflow-visible w-full h-full">
+  <div class="apple-button-main-container size-full relative" role="button" tabindex="0"
+       aria-label="Continue with Apple">
+    <div class="absolute px-[8%] box-border size-full">
+      <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none overflow-visible" width="100%" height="100%">
         <g>
-          <svg xmlns="http://www.w3.org/2000/svg" class="overflow-visible w-full" height="50%" y="25%"
+          <svg xmlns="http://www.w3.org/2000/svg" class="overflow-visible" width="100%" height="50%" y="25%"
                viewBox="0 -11 123.6875 14" fill="#fff">
             <text font-size="12px" textLength="123.6875" font-family="applied-button-font-0" direction="ltr">
               <!-- eslint-disable-next-line -->
@@ -13,9 +14,9 @@
         </g>
       </svg>
     </div>
-    <div class="absolute inset-0 p-px">
-      <svg xmlns="http://www.w3.org/2000/svg" class="overflow-visible w-full h-full">
-        <rect width="100%" height="100%" rx="12" fill="#000"/>
+    <div class="size-full p-px box-border">
+      <svg xmlns="http://www.w3.org/2000/svg" class="overflow-visible" width="100%" height="100%">
+        <rect width="100%" height="100%" ry="15%" fill="#000" stroke="black" stroke-width="1" stroke-linecap="round"/>
       </svg>
     </div>
   </div>
@@ -29,13 +30,10 @@
   font-feature-settings: kern;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  width: 100%;
-  height: 100%;
   min-width: 130px;
   max-width: 375px;
   min-height: 30px;
   max-height: 56px;
-  position: relative;
   letter-spacing: initial;
 }
 

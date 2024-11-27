@@ -1,6 +1,6 @@
 <template>
   <button
-      class="flex items-center justify-center gap-3 w-full bg-colors-primary-800 hover:bg-colors-primary-700 text-colors-primary-100 rounded-xl px-6 h-14 transition-colors duration-200"
+      class="flex gap-1 items-center justify-center w-full bg-colors-primary-800 hover:bg-colors-primary-700 text-colors-primary-100 rounded-xl h-14 transition-colors duration-200"
   >
     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
       <path
@@ -20,6 +20,6 @@
           d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
       />
     </svg>
-    <span class="text-sm font-medium">Continue with Google</span>
+    <span class="text-xl font-semibold">Continue with Google</span>
   </button>
 </template>
