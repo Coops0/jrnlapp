@@ -3,7 +3,12 @@
     <div class="w-full max-w-md flex flex-col gap-3">
       <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm">
         <div class="space-y-6 transition-all">
-          <div class="flex flex-col items-center gap-3">
+          <div v-if="status === 'pending'">
+            <div class="flex items-center justify-center">
+              <div class="w-8 h-8 border-2 border-colors-primary-800 rounded-full border-t-[2px] animate-spin"/>
+            </div>
+          </div>
+          <div v-else-if="status === 'success'" class="flex flex-col items-center gap-3">
             <div id="google-button-signin"/>
 
             <div
@@ -13,6 +18,13 @@
                 data-type="continue"
                 class="w-full h-[40px]"
             />
+          </div>
+          <div v-else-if="sessionError">
+            <div class="text-red-500 text-center">
+              <p>failed to generate session details</p>
+              <p>please try again later</p>
+              <span class="text-xs">{{ sessionError }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -42,8 +54,9 @@ const { user, hasRefreshedRemotely } = useUser(userService);
 
 const {
   data: sessionDetails,
-  error: sessionError
-} = useAsyncData('session-details', () => authService.getSessionDetails());
+  error: sessionError,
+  status
+} = useLazyAsyncData('session-details', () => authService.getSessionDetails());
 watchErrorAndThrow(sessionError);
 
 const error = ref<string | null>(null);
@@ -186,5 +199,5 @@ async function handleServerResponse(response: ServerResponse) {
 
 const clearSignInError = () => {
   error.value = null;
-}
+};
 </script>
