@@ -44,6 +44,14 @@ const parsedError = computed<string>(() => {
   }
 
   try {
+    if (typeof props.error?.value === 'string') {
+      return props.error.value;
+    }
+  } catch {
+    /* empty */
+  }
+
+  try {
     if (props.error.value?.cause?.message) {
       return props.error.value.cause.message;
     }

@@ -141,12 +141,12 @@ impl EntryService {
                 RETURNING *
             ",
         )
-            .bind(user.id)
-            .bind(user.current_date_by_timezone())
-            .bind(emotion_scale)
-            .bind(text)
-            .bind(expiry_midnight)
-            .bind(ephemeral)
+            .bind(user.id) // $1
+            .bind(user.current_date_by_timezone()) // $2
+            .bind(emotion_scale) // $3
+            .bind(text) // $4
+            .bind(expiry_midnight) // $5
+            .bind(ephemeral) // $6
             .fetch_one(&self.0)
             .await
     }

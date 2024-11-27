@@ -8,7 +8,7 @@ import { useOnline } from '~/composables/util/online.util.composable';
 export const BLANK_ENTRY = (): Entry => ({
     text: '',
     emotion_scale: 5,
-    date: new Date().toString(),
+    date: new Date().toLocaleDateString(),
     id: crypto.randomUUID(),
     author: '',
     saved: false,

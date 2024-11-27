@@ -11,6 +11,7 @@
     "store:allow-load",
     "http:default",
     "fs:default",
+    "fs:allow-app-write",
     "sign-in-with-apple:default",
     "google-signin:default"
   ]
