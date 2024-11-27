@@ -21,7 +21,7 @@
             :unsaved-changes="unsavedChanges"
             :entry
         />
-        
+
         <div class="flex flex-row gap-2 justify-center items-center">
           <TodayEntryTimeUntilTomorrow :tomorrow/>
           <TodayEntryEphemeralMode v-model="entry.ephemeral" :tomorrow/>
