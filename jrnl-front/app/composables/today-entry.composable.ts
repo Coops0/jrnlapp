@@ -6,7 +6,7 @@ import type { CookieRef } from '#app';
 const BLANK_ENTRY = (): Entry => ({
     text: '',
     emotion_scale: 5,
-    date: new Date().toString(),
+    date: new Date().toLocaleDateString(),
     author: '',
     id: '',
     ephemeral: false

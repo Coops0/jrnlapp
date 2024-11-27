@@ -1,8 +1,8 @@
 <template>
-  <div class="size-full flex-grow flex items-center justify-center place-self-center p-6">
-    <div class="w-full max-w-md">
-      <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm lg:scale-125">
-        <div class="space-y-6">
+  <div class="size-full flex-grow flex items-center justify-center place-self-center p-6 relative">
+    <div class="w-full max-w-md flex flex-col gap-3">
+      <div class="bg-colors-primary-800/50 rounded-xl p-8 backdrop-blur-sm">
+        <div class="space-y-6 transition-all">
           <div class="flex flex-col items-center gap-3">
             <div id="google-button-signin"/>
 
@@ -14,9 +14,11 @@
                 class="w-full h-[40px]"
             />
           </div>
-
-          <ErrorDisplay v-if="error" :error="error"/>
         </div>
+      </div>
+      <div v-if="error"
+           class="bg-colors-primary-800/50 rounded-xl py-6 px-8 backdrop-blur-sm absolute left-0 right-0 top-2/3 mt-3 w-fit mx-auto">
+        <ErrorDisplay :error="error" @clear-error="clearSignInError"/>
       </div>
     </div>
   </div>
@@ -180,5 +182,9 @@ async function handleServerResponse(response: ServerResponse) {
   }
 
   await navigateTo('/current');
+}
+
+const clearSignInError = () => {
+  error.value = null;
 }
 </script>

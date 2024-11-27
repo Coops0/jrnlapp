@@ -17,7 +17,7 @@
     </h5>
 
     <div
-        class="absolute top-0 left-0 right-0 bottom-0 origin-left rounded-lg cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-[transform,opacity] duration-300"
+        class="absolute top-0 left-0 right-0 bottom-0 origin-left rounded-lg cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-all duration-300 hover:bg-opacity-60"
         style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1)"
         :class="show ? 'opacity-0' : 'opacity-100 scale-x-50'"
         @click="toggle"

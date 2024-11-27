@@ -12,11 +12,6 @@
         @resolve="handleSaveConflict"
     />
 
-    <TodayEntryEphemeralMode
-        v-model="entry.ephemeral"
-        :tomorrow
-        class="absolute top-2 right-2"
-    />
 
     <div class="top-2 left-0 right-0 z-[2] mb-2">
       <div class="flex justify-between items-center mx-auto text-sm">
@@ -26,7 +21,11 @@
             :unsaved-changes="unsavedChanges"
             :entry
         />
-        <TodayEntryTimeUntilTomorrow :tomorrow/>
+        
+        <div class="flex flex-row gap-2 justify-center items-center">
+          <TodayEntryTimeUntilTomorrow :tomorrow/>
+          <TodayEntryEphemeralMode v-model="entry.ephemeral" :tomorrow/>
+        </div>
       </div>
     </div>
     <div class="flex flex-col flex-grow">
