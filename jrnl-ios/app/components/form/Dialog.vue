@@ -7,8 +7,10 @@
       leave-from-class="opacity-100 scale-100"
       leave-to-class="opacity-0 scale-95"
   >
-    <div v-if="isOpen"
-         class="fixed inset-0 bg-colors-primary-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-30">
+    <div
+        v-if="isOpen"
+        class="fixed inset-0 bg-colors-primary-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-40"
+    >
       <div
           class="bg-colors-primary-900 rounded-xl w-full max-w-md shadow-xl border border-colors-primary-800 relative"
           @click.stop

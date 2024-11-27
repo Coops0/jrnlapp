@@ -1,8 +1,8 @@
 <template>
   <div class="relative">
     <h5
-        class="text-colors-primary-400/80 hover:text-colors-primary-400 cursor-pointer flex items-center gap-1.5 transition-all duration-200 ease-in-out"
-        :class="show ? 'opacity-100' : 'opacity-0'"
+        class="text-colors-primary-400/80 hover:text-colors-primary-400 cursor-pointer flex items-center gap-1.5 transition-all duration-200 ease-in-out text-xs"
+        :class="show ? 'opacity-100' : 'opacity-0 invisible'"
         @click="toggle"
     >
       <span v-if="savedJustNow">last saved: just now</span>
@@ -17,7 +17,7 @@
     </h5>
 
     <div
-        class="absolute top-0 left-0 right-0 bottom-0 origin-left rounded-lg cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-[transform,opacity] duration-300"
+        class="absolute top-0 left-0 right-0 bottom-0 origin-left rounded-md cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-all duration-300 active:bg-opacity-60"
         style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1)"
         :class="show ? 'opacity-0' : 'opacity-100 scale-x-50'"
         @click="toggle"

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <TodayEntryEphemeralDialog v-model="shouldShowDialog" @confirm="handleConfirmation" :tomorrow/>
-    <div class="relative group">
+    <TodayEntryEphemeralDialog v-model="shouldShowDialog" :tomorrow @confirm="handleConfirmation"/>
+    <div class="relative">
       <button
-          class="fixed top-2 right-2 p-2 rounded-lg transition-colors duration-300 hover:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
+          class="p-2 rounded-lg transition-colors duration-300 active:bg-colors-primary-600/20 focus:outline-none flex items-center gap-2"
           :class="ephemeral ? 'text-colors-accent-400 bg-colors-primary-500/30' : 'text-colors-primary-200'"
           @click="handleButtonClick"
       >
@@ -20,13 +20,6 @@
           <path d="M12 16h.01"/>
         </svg>
       </button>
-
-      <div
-          class="fixed top-4 right-12 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none">
-        <div class="bg-colors-primary-800/90 text-colors-primary-100 px-4 py-2 rounded-lg max-w-xs text-sm">
-          {{ ephemeral ? 'on' : 'off' }}
-        </div>
-      </div>
 
       <div v-if="showPulse" class="fixed inset-0 pointer-events-none">
         <div
