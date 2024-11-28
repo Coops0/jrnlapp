@@ -11,7 +11,14 @@
     "store:allow-load",
     "http:default",
     "fs:default",
-    "fs:allow-app-write",
+    "fs:create-app-specific-dirs",
+    "fs:read-app-specific-dirs-recursive",
+    "fs:allow-appcache-meta",
+    "fs:allow-appcache-meta-recursive",
+    "fs:allow-appcache-read",
+    "fs:allow-appcache-read-recursive",
+    "fs:allow-appcache-write",
+    "fs:allow-appcache-write-recursive",
     "sign-in-with-apple:default",
     "google-signin:default"
   ]

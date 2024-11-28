@@ -10,7 +10,7 @@ mod dto;
 mod error;
 
 fn resolve_entries_path(app_handle: &AppHandle) -> tauri::Result<PathBuf> {
-    app_handle.path().app_data_dir().map(|mut path| {
+    app_handle.path().app_cache_dir().map(|mut path| {
         path.push("entries.mpk");
         path
     })
@@ -39,6 +39,15 @@ pub fn run() {
 }
 
 async fn load_entries(entries_path: &PathBuf) -> Option<Vec<Entry>> {
+    let _ = tokio::fs::DirBuilder::new()
+        .recursive(true)
+        .create(
+            entries_path
+                .parent()
+                .expect("failed to get entries path parent"),
+        )
+        .await;
+
     let tokio_file_handle = tokio::fs::OpenOptions::new()
         .read(true)
         .truncate(false)
