@@ -2,3 +2,4 @@
 .sqlx
 .idea
 .DS_STORE
+.env

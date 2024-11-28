@@ -32,9 +32,9 @@ rand = "0.8.5"
 ammonia = "4.0.0"
 base64 = "0.22.1"
 
-proc-macro2 = "1.0.89"
+proc-macro2 = "1.0.92"
 quote = "1.0.37"
-syn = "2.0.87"
+syn = "2.0.89"
 aes-gcm = "0.10.3"
 
 [lib]
