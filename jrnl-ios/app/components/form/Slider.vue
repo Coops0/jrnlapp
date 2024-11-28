@@ -1,18 +1,18 @@
 <template>
-  <div class="relative w-full h-12 flex items-center">
-    <div class="absolute h-[2px] w-full bg-colors-primary-700/50 rounded-full overflow-hidden">
+  <div class="relative w-full h-16 flex items-center">
+    <div class="absolute h-2 w-full bg-colors-primary-700/50 rounded-full overflow-hidden">
       <div
           :style="{
              width: percentage + '%',
-             backgroundColor: ratingLerp( modelValue ?? 0, theme)
+             backgroundColor: ratingLerp(modelValue ?? 0, theme)
         }"
-          class="absolute h-full transition-all ease-out duration-100"
+          class="absolute h-full transition-all ease-out duration-75"
       />
     </div>
 
     <div
-        :style="{ left: 'calc(' + percentage + '% - 8px)' }"
-        class="absolute w-4 h-4 rounded-full bg-colors-primary-200 hover:bg-colors-primary-100 transition-colors shadow-sm pointer-events-none"
+        :style="{ left: 'calc(' + percentage + '% - 12px)' }"
+        class="absolute w-5 h-5 bg-opacity-80 transition-all duration-75 rounded-full bg-colors-primary-200 hover:bg-colors-primary-100 shadow-md pointer-events-none touch-none"
     />
 
     <input
@@ -20,7 +20,7 @@
         :max="max"
         :min="min"
         :step="step"
-        class="absolute w-full h-full opacity-0 cursor-pointer py-8"
+        class="absolute w-full h-16 opacity-0 cursor-pointer touch-none tap-highlight-none"
         type="range"
     >
   </div>

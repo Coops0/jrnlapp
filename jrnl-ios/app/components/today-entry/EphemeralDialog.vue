@@ -7,7 +7,7 @@
     <div class="space-y-4">
       <div class="text-xl font-medium text-colors-primary-100 mb-2">enable ephemeral mode?</div>
       <div class="text-colors-primary-300 space-y-2">
-        <p>this entry will automatically be deleted</p>
+        <p>this entry will not save, and will be gone forever</p>
         <div class="bg-colors-primary-700/50 p-3 rounded-lg text-colors-accent-400 font-medium">
           <NuxtTime :datetime="tomorrow" relative/>
         </div>
