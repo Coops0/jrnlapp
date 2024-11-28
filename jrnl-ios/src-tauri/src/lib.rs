@@ -26,7 +26,9 @@ pub fn run() {
         .plugin(tauri_plugin_google_signin::init())
         .setup(|app| {
             let scope = app.fs_scope();
-            scope.allow_file(resolve_entries_path(app.handle()).expect("failed to resolve entries path"));
+            scope.allow_file(
+                resolve_entries_path(app.handle()).expect("failed to resolve entries path"),
+            );
 
             Ok(())
         })
