@@ -39,7 +39,7 @@ const editor = useEditor({
   autofocus: true,
   onUpdate({ editor: e }) {
     const t = e.getHTML();
-    if (t.length > 7500) {
+    if (t.length > 10000) {
       alert('too long... reduce to avoid loss of data');
     }
     emit('update:modelValue', e.getHTML());
