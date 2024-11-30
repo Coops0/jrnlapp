@@ -13,7 +13,7 @@ tower = "0.5.1"
 sqlx = { version = "0.8.2", default-features = false, features = ["any", "json", "macros", "migrate", "runtime-tokio", "runtime-tokio-rustls", "postgres", "migrate", "chrono", "uuid"] }
 uuid = { version = "1.11.0", features = ["v4", "serde", "fast-rng", "macro-diagnostics"] }
 
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 tracing = "0.1.41"
 
 chrono = { version = "0.4.38", features = ["serde"] }
@@ -34,7 +34,7 @@ base64 = "0.22.1"
 
 proc-macro2 = "1.0.92"
 quote = "1.0.37"
-syn = "2.0.89"
+syn = "2.0.90"
 aes-gcm = "0.10.3"
 
 [lib]
