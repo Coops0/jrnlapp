@@ -5,7 +5,6 @@
       @mousedown="startDragging"
       @touchstart="startDragging"
   >
-    <!-- Track -->
     <div
         class="absolute h-2 w-full rounded-full overflow-hidden"
         :class="[
@@ -13,7 +12,6 @@
           !isDragging && 'transition-colors duration-200'
         ]"
     >
-      <!-- Fill -->
       <div
           :style="{
             width: percentage + '%',
@@ -23,8 +21,6 @@
           class="absolute h-full transform-gpu will-change-[width]"
       />
     </div>
-
-    <!-- Thumb -->
     <div
         :style="{
           left: `calc(${percentage}% - 12px)`,
@@ -34,7 +30,6 @@
         :class="!isDragging && 'transition-all duration-200 ease-out'"
         class="absolute w-5 h-5 rounded-full shadow-md pointer-events-none touch-none transform-gpu will-change-[left,transform]"
     />
-
     <input
         ref="inputRef"
         v-model.number="value"
