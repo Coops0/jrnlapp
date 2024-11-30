@@ -11,8 +11,9 @@ useAllMeta();
 </script>
 
 <style>
-body, html, #__nuxt {
-  height: 100vh;
-  width: 100vw;
+html, body, #__nuxt {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 </style>

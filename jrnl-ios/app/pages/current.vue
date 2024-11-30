@@ -12,7 +12,7 @@
         @resolve="handleSaveConflict"
     />
 
-    <div class="z-[2] mb-2 mt-6">
+    <div class="z-[2] mb-2 mt-4">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryLastSaved
             :last-saved="lastSaved"
@@ -34,7 +34,7 @@
             :initial="entry.text"
             class="flex-grow h-full w-full"
         />
-        <div class="flex-grow mt-auto px-4 py-3 mb-4">
+        <div class="flex-grow mt-auto px-4 py-3">
           <div class="space-y-2 mx-auto">
             <FormSlider
                 v-model="entry.emotion_scale"
