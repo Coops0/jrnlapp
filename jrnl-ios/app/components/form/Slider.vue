@@ -7,15 +7,19 @@
   >
     <!-- Track -->
     <div
-        class="absolute h-2 w-full rounded-full overflow-hidden transition-colors duration-75"
-        :class="isDragging ? 'bg-colors-primary-600/50' : 'bg-colors-primary-700/50'"
+        class="absolute h-2 w-full rounded-full overflow-hidden"
+        :class="[
+          isDragging ? 'bg-colors-primary-600/50' : 'bg-colors-primary-700/50',
+          !isDragging && 'transition-colors duration-200'
+        ]"
     >
       <!-- Fill -->
       <div
           :style="{
-          width: percentage + '%',
-          backgroundColor: ratingLerp(modelValue ?? 0, theme)
-        }"
+            width: percentage + '%',
+            backgroundColor: ratingLerp(modelValue ?? 0, theme)
+          }"
+          :class="!isDragging && 'transition-all duration-200 ease-out'"
           class="absolute h-full transform-gpu will-change-[width]"
       />
     </div>
@@ -24,9 +28,11 @@
     <div
         :style="{
           left: `calc(${percentage}% - 12px)`,
-          backgroundColor: ratingLerp(modelValue ?? 0, theme)
+          backgroundColor: ratingLerp(modelValue ?? 0, theme),
+          transform: isDragging ? 'scale(1.1)' : 'scale(1)'
         }"
-        class="absolute w-5 h-5 rounded-full shadow-md pointer-events-none touch-none transform-gpu will-change-[left]"
+        :class="!isDragging && 'transition-all duration-200 ease-out'"
+        class="absolute w-5 h-5 rounded-full shadow-md pointer-events-none touch-none transform-gpu will-change-[left,transform]"
     />
 
     <input
