@@ -25,7 +25,7 @@
         <div
             v-for="(blotch, i) in blotches"
             :key="i"
-            class="absolute bg-colors-accent-400/10 rounded-full transition-all duration-1000"
+            class="absolute bg-colors-accent-400/10 rounded-full transition-all duration-1000 z-10"
             :style="{
           width: `${blotch.size}px`,
           height: `${blotch.size}px`,
@@ -86,8 +86,8 @@ const handleConfirmation = () => {
     return;
   }
 
-  createBlotches();
   showPulse.value = true;
+  createBlotches();
 
   setTimeout(() => {
     showPulse.value = false;

@@ -12,8 +12,12 @@ useAllMeta();
 
 <style>
 html, body, #__nuxt {
+  max-height: 100vh;
   height: 100%;
   width: 100%;
-  overflow: hidden;
+}
+
+body {
+  margin-top: env(safe-area-inset-top);
 }
 </style>
