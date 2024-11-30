@@ -25,6 +25,10 @@ interface ApiError {
   status: number;
 }
 
+onMounted(() => {
+  console.error(props.error);
+});
+
 const parsedError = computed<string>(() => {
   try {
     if (typeof props.error === 'string') {
@@ -54,6 +58,14 @@ const parsedError = computed<string>(() => {
   try {
     if (props.error.value?.cause?.message) {
       return props.error.value.cause.message;
+    }
+  } catch {
+    /* empty */
+  }
+
+  try {
+    if(props.error.value?.message) {
+      return props.error.value.message;
     }
   } catch {
     /* empty */

@@ -67,6 +67,12 @@ export const useTodayEntry = (
 
     // with debounced
     async function save() {
+        try {
+            localStorage.setItem('entry-today', JSON.stringify(entry.value));
+        } catch {
+            /* empty */
+        }
+
         if (!isConnected.value) {
             await saveNow();
         } else if (!lastSavedEntry.value || unsavedChanges.value) {

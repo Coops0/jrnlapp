@@ -1,7 +1,11 @@
-export const useLocalStorage = <T>(name: string, defaultValue?: () => T) => {
+export const useLocalStorage = <T>(
+    name: string,
+    defaultValue: () => T,
+    parseFromStorage: (value: string) => T = JSON.parse
+) => {
     const fetch = () => {
         const item = localStorage.getItem(name);
-        return item ? JSON.parse(item) : defaultValue?.();
+        return item ? parseFromStorage(item) : defaultValue?.();
     };
 
     const value = useState<T>(name, fetch);

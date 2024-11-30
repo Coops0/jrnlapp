@@ -54,12 +54,36 @@ import { EntryService } from '~/services/entry.service';
 import { useLocalStorage } from '~/composables/util/local-storage.util.composable';
 import { LocalBackendService } from '~/services/local-backend.service';
 import { BLANK_ENTRY, useTodayEntry } from '~/composables/today-entry.composable';
+import { isSameDay, parseServerDate } from '~/util/index.util';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
 const localBackendService = new LocalBackendService();
 
-const entry = useLocalStorage('entry-today', BLANK_ENTRY);
+const entry = useLocalStorage(
+    'entry-today',
+    BLANK_ENTRY,
+    value => {
+      let parsed;
+      try {
+        parsed = JSON.parse(value);
+      } catch {
+        return BLANK_ENTRY();
+      }
+
+      if (!isSameDay(parseServerDate(parsed.date))) {
+        return BLANK_ENTRY();
+      }
+
+      return parsed;
+    }
+);
+
+onMounted(() => {
+  if (!isSameDay(parseServerDate(entry.value.date))) {
+    entry.value = BLANK_ENTRY();
+  }
+});
 
 const {
   fetchToday,
