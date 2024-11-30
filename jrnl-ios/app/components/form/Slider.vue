@@ -1,18 +1,21 @@
 <template>
-  <div class="relative w-full h-16 flex items-center">
+  <div class="relative w-full h-16 flex items-center select-none">
     <div class="absolute h-2 w-full bg-colors-primary-700/50 rounded-full overflow-hidden">
       <div
           :style="{
              width: percentage + '%',
              backgroundColor: ratingLerp(modelValue ?? 0, theme)
         }"
-          class="absolute h-full transition-all ease-out duration-75"
+          class="absolute h-full transition-all ease-out duration-0"
       />
     </div>
 
     <div
-        :style="{ left: 'calc(' + percentage + '% - 12px)' }"
-        class="absolute w-5 h-5 bg-opacity-80 transition-all duration-75 rounded-full bg-colors-primary-200 hover:bg-colors-primary-100 shadow-md pointer-events-none touch-none"
+        class="absolute w-5 h-5 transition-all duration-0 rounded-full bg-colors-primary-200 hover:bg-colors-primary-100 shadow-md pointer-events-none touch-none"
+        :style="{
+            left: `calc(${percentage}% - 12px)`,
+            backgroundColor: ratingLerp(modelValue ?? 0, theme)
+        }"
     />
 
     <input
