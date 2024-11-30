@@ -64,7 +64,7 @@ const parsedError = computed<string>(() => {
   }
 
   try {
-    if(props.error.value?.message) {
+    if (props.error.value?.message) {
       return props.error.value.message;
     }
   } catch {

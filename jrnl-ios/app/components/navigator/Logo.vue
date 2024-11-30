@@ -14,7 +14,7 @@
       <div class="flex flex-col justify-items-center items-center gap-2">
         <span
             :id="logoId"
-            class="fixed p-3 bottom-0 left-3 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
+            class="fixed p-4 bottom-8 left-4 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-10"
             :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
             @mousedown="onPressLogo"
@@ -33,7 +33,7 @@
         >
           <div
               v-if="isToggled || isHolding"
-              class="fixed left-4 bottom-16 w-[calc(100%-2rem)] z-10 backdrop-blur-xl bg-colors-primary-950/90 rounded-xl shadow-xl shadow-colors-primary-950/20 border border-colors-primary-800/20 overflow-hidden"
+              class="fixed left-4 bottom-16 w-[calc(100%-2rem)] z-20 backdrop-blur-xl bg-colors-primary-950/90 rounded-xl shadow-xl shadow-colors-primary-950/20 border border-colors-primary-800/20 overflow-hidden"
           >
             <div class="grid grid-cols-2 gap-2 p-2">
               <div
