@@ -24,6 +24,20 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_sign_in_with_apple::init())
         .plugin(tauri_plugin_google_signin::init())
+        .on_page_load(|window, payload| {
+            window
+                .eval(
+                    r#"
+                    try {
+                        const theme = JSON.parse(localStorage.getItem('theme'));
+                        if (theme) {
+                            document.documentElement.setAttribute('data-theme', theme);
+                        }
+                    } catch {}
+            "#,
+                )
+                .expect("failed to execute javascript theme script");
+        })
         .setup(|app| {
             let scope = app.fs_scope();
             scope.allow_file(

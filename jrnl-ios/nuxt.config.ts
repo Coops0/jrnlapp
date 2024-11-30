@@ -12,8 +12,6 @@ export default defineNuxtConfig({
     ],
     runtimeConfig: {
         public: {
-            // overridden with NUXT_PUBLIC_API_BASE
-            // apiBase: 'http://localhost:4000',
             // apiBase: 'https://my.jrnl.fm',
             apiBase: process.env.TAURI_DEV_HOST ? 'http://' + process.env.TAURI_DEV_HOST + ':4000' : 'http://localhost:4000',
             appleClientId: 'fm.jrnl.oauth-signin',

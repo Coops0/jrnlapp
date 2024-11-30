@@ -7,6 +7,7 @@
 <script lang="ts" setup>
 import { useAllMeta } from '~/util/all-meta.util';
 
+void useTheme(null);
 useAllMeta();
 </script>
 
