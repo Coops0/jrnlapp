@@ -54,8 +54,9 @@ function handleGlobalKeydown(event: KeyboardEvent) {
   if (event.metaKey || event.ctrlKey || event.altKey || event.key.length > 1) {
     return;
   }
-  
+
   event.preventDefault();
+
   editor.value?.commands?.focus?.();
   editor.value?.options?.element?.dispatchEvent(new KeyboardEvent('keydown', {
     key: event.key,

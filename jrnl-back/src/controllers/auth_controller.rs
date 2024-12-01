@@ -64,7 +64,7 @@ async fn google_callback(
             .map_err(GoogleAuthenticationError::CodeExchangeFailed)?;
 
     let user = user_service
-        .create_or_get_user(name.as_deref(), &Some(sub), &None)
+        .create_or_get_user(name.as_deref(), Some(&sub), None)
         .await?;
     let token = jwt::encode_user_jwt(user.id)?;
 
@@ -88,7 +88,7 @@ async fn apple_callback(
     let name = payload.user.map(|user| user.name.first_name);
 
     let user = user_service
-        .create_or_get_user(name.as_deref(), &None, &Some(subject))
+        .create_or_get_user(name.as_deref(), None, Some(&subject))
         .await?;
     let jwt = jwt::encode_user_jwt(user.id)?;
 

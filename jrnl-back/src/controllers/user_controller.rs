@@ -25,6 +25,12 @@ struct UpdateSelfPayload {
 
     #[serde(default, deserialize_with = "deserialize_empty_string")]
     theme: Option<String>,
+    
+    #[serde(default)]
+    has_had_tour: Option<bool>,
+    
+    #[serde(default)]
+    has_seen_app_push: Option<bool>,
 }
 
 fn deserialize_tz<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<Tz>, D::Error> {
@@ -49,8 +55,10 @@ async fn update_self_user(
     user_service
         .update_user(
             &user,
-            &payload.theme,
-            &payload.tz.as_ref().map(Tz::to_string),
+            payload.theme.as_deref(),
+            payload.tz.as_ref().map(Tz::to_string).as_deref(),
+            payload.has_had_tour,
+            payload.has_seen_app_push
         )
         .await
         .map(Json)

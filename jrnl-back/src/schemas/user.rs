@@ -12,6 +12,8 @@ pub struct User {
     pub apple_subject: Option<String>,
     pub theme: Option<String>,
     pub timezone: String,
+    pub has_had_tour: bool,
+    pub has_seen_app_push: bool
 }
 
 impl User {

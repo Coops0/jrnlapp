@@ -9,8 +9,8 @@ impl UserService {
     pub async fn create_or_get_user(
         &self,
         name: Option<&str>,
-        google_subject: &Option<String>,
-        apple_subject: &Option<String>,
+        google_subject: Option<&str>,
+        apple_subject: Option<&str>,
     ) -> Result<User, Error> {
         sqlx::query_as(
             // language=postgresql
@@ -31,21 +31,27 @@ impl UserService {
     pub async fn update_user(
         &self,
         user: &User,
-        theme: &Option<String>,
-        tz: &Option<String>,
+        theme: Option<&str>,
+        tz: Option<&str>,
+        has_had_tour: Option<bool>,
+        has_seen_app_push: Option<bool>,
     ) -> Result<User, Error> {
         sqlx::query_as(
             // language=postgresql
             "
                 UPDATE users SET
                 timezone = COALESCE($1, timezone),
-                theme = COALESCE($2, theme)
+                theme = COALESCE($2, theme),
+                has_had_tour = COALESCE($3, has_had_tour),
+                has_seen_app_push = COALESCE($4, has_seen_app_push)
                 WHERE id = $3 RETURNING *
             ",
         )
         .bind(tz)
         .bind(theme)
         .bind(user.id)
+        .bind(has_had_tour)
+        .bind(has_seen_app_push)
         .fetch_one(&self.0)
         .await
     }
