@@ -11,7 +11,7 @@
         :local="saveConflict[1]"
         @resolve="handleSaveConflict"
     />
-    
+
     <div class="top-2 left-0 right-0 z-[2] mb-2 select-none">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryLastSaved

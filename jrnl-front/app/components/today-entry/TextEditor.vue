@@ -46,12 +46,39 @@ const editor = useEditor({
   },
 });
 
+function handleGlobalKeydown(event: KeyboardEvent) {
+  if (editor.value?.isFocused) {
+    return;
+  }
+
+  if (event.metaKey || event.ctrlKey || event.altKey || event.key.length > 1) {
+    return;
+  }
+  
+  event.preventDefault();
+  editor.value?.commands?.focus?.();
+  editor.value?.options?.element?.dispatchEvent(new KeyboardEvent('keydown', {
+    key: event.key,
+    code: event.code,
+    ctrlKey: event.ctrlKey,
+    metaKey: event.metaKey,
+    altKey: event.altKey,
+    shiftKey: event.shiftKey,
+  }));
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleGlobalKeydown);
+});
+
 onUnmounted(() => {
   try {
     editor.value?.destroy();
   } catch {
     /* empty */
   }
+
+  document.removeEventListener('keydown', handleGlobalKeydown);
 });
 </script>
 
