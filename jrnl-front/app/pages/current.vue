@@ -11,9 +11,8 @@
         :local="saveConflict[1]"
         @resolve="handleSaveConflict"
     />
-
-
-    <div class="top-2 left-0 right-0 z-[2] mb-2">
+    
+    <div class="top-2 left-0 right-0 z-[2] mb-2 select-none">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryLastSaved
             :last-saved="lastSaved"
@@ -35,7 +34,7 @@
             :initial="entryCookie?.text"
             class="flex-grow h-full w-full"
         />
-        <div class="flex-grow mt-auto px-4 py-3">
+        <div class="flex-grow mt-auto px-4 py-3 select-none">
           <div class="space-y-2 mx-auto">
             <FormSlider
                 v-model="entry.emotion_scale"

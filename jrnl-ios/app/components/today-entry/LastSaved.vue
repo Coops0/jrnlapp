@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative transition-opacity" :class="isConnected ? 'opacity-100' : 'opacity-100'">
     <h5
         class="text-colors-primary-400/80 hover:text-colors-primary-400 cursor-pointer flex items-center gap-1.5 transition-all duration-200 ease-in-out text-xs"
         :class="show ? 'opacity-100' : 'opacity-0 invisible'"
@@ -17,9 +17,9 @@
     </h5>
 
     <div
-        class="absolute top-0 left-0 right-0 bottom-0 origin-left rounded-md cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-all duration-300 active:bg-opacity-60"
+        class="absolute w-16 h-5 top-0 left-0 right-0 bottom-0 origin-left rounded-md cursor-pointer bg-opacity-30 bg-colors-primary-400 transition-all duration-300 hover:bg-opacity-60"
         style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1)"
-        :class="show ? 'opacity-0' : 'opacity-100 scale-x-50'"
+        :class="show ? 'opacity-0 scale-x-0' : 'opacity-100'"
         @click="toggle"
     />
   </div>
@@ -41,7 +41,7 @@ const { isConnected } = useOnline();
 
 const unsavedChangesBuffered = ref(false);
 
-const show = useLocalStorage('show-last-saved', () => isConnected.value);
+const show = useLocalStorage('show-last-saved', () => true);
 
 const isUnsaved = ref(false);
 const savedJustNow = ref(false);
