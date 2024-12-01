@@ -2,7 +2,7 @@ use crate::dto::Entry;
 use crate::error::{JrnlIosError, JrnlIosResult};
 use anyhow::Context;
 use std::path::PathBuf;
-use tauri::{AppHandle, Manager, Runtime};
+use tauri::{AppHandle, Manager};
 use tauri_plugin_fs::FsExt;
 
 mod context;
@@ -24,20 +24,18 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_sign_in_with_apple::init())
         .plugin(tauri_plugin_google_signin::init())
-        .on_page_load(|window, payload| {
-            window
-                .eval(
-                    r#"
+        .append_invoke_initialization_script(
+            r#"
                     try {
                         const theme = JSON.parse(localStorage.getItem('theme'));
                         if (theme) {
                             document.documentElement.setAttribute('data-theme', theme);
                         }
-                    } catch {}
+                    } catch (e) {
+                        console.error('theme inject script: failed to parse theme', e);
+                    }
             "#,
-                )
-                .expect("failed to execute javascript theme script");
-        })
+        )
         .setup(|app| {
             let scope = app.fs_scope();
             scope.allow_file(
