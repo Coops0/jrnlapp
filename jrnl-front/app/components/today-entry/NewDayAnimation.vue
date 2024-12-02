@@ -16,7 +16,7 @@
         >
           <div
               v-if="messageVisible"
-              class="mt-8 text-2xl font-medium text-colors-primary-200"
+              class="mt-8 text-2xl font-medium text-colors-primary-200 z-[51]"
           >
             <Transition name="message-swap" mode="out-in">
               <div v-if="!messageTransition" key="locked">

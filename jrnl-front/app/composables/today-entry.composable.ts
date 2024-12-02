@@ -130,6 +130,7 @@ export const useTodayEntry = (entryService: EntryService, storage: CookieRef<Ent
         if (!isSameDay(parseServerDate(storage.value.date))) {
             console.debug('resetting local entry, different day', storage.value, parseServerDate(storage.value.date));
             storage.value = BLANK_ENTRY();
+            entry.value = storage.value;
             return;
         }
 

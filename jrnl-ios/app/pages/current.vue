@@ -81,6 +81,7 @@ const entry = useLocalStorage(
       }
 
       if (!isSameDay(parseServerDate(parsed.date))) {
+        console.debug('local storage entry is from different day, resetting');
         return BLANK_ENTRY();
       }
 

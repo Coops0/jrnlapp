@@ -66,7 +66,7 @@ const userService = new UserService($localApi);
 const { user } = useUser(userService);
 
 const entryCookie = useCookie<Entry>('entry-today', {
-  maxAge: 60 * 60 * 24
+  maxAge: 60 * 60 * 24 * 30
 });
 
 const {

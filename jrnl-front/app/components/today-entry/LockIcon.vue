@@ -1,5 +1,5 @@
 <template>
-  <div class="relative perspective-lock">
+  <div class="relative perspective-lock blur-md">
     <div
         :class="{ 'animate-lock-enter': !messageTransition }"
         class="relative"
