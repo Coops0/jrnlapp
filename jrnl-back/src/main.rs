@@ -15,7 +15,7 @@ use axum::{
 };
 use controllers::{
     auth_controller::auth_controller, entry_controller::entries_controller,
-    group_controller::groups_controller, user_controller::users_controller,
+    user_controller::users_controller,
 };
 use services::entry_service::encrypt_old_entries;
 use sqlx::{
@@ -76,7 +76,7 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .nest("/user", users_controller())
         .nest("/entries", entries_controller())
-        .nest("/groups", groups_controller())
+        // .nest("/groups", groups_controller())
         .layer(from_extractor_with_state::<User, AppState>(state.clone()))
         .nest("/auth", auth_controller())
         .layer(

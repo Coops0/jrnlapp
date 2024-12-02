@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::{
     error::{DatabaseError, JrnlError, JrnlResult, JsonExtractor},
     schemas::{group::Group, user::User},
