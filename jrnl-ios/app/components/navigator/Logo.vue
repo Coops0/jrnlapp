@@ -280,6 +280,12 @@ const goTo = async (path: string, disabled?: boolean) => {
   isHolding.value = false;
   hoveringName.value = null;
 
+  try {
+    await clearError();
+  } catch {
+    /* empty */
+  }
+
   if (path === '/theme') {
     showThemeSelector.value = true;
   } else {

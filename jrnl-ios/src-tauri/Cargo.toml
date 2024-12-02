@@ -21,8 +21,8 @@ tauri-build = { version = "2.0.3", features = [] }
 tauri = { version = "2.1.1", features = [] }
 
 tauri-plugin-store = "2.1.0"
-tauri-plugin-http = "2.0.3"
-tauri-plugin-fs = "2.0.3"
+tauri-plugin-http = "2.0.4"
+tauri-plugin-fs = "2.1.0"
 tauri-plugin-sign-in-with-apple = "1.0.2"
 tauri-plugin-google-signin = { path = "../../tauri-plugin-google-signin" }
 

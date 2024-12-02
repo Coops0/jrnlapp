@@ -14,7 +14,7 @@
       <div class="flex flex-col md:flex-row justify-items-center items-center gap-2">
         <span
             id="jrnl-logo"
-            class="fixed md:static bottom-4 left-4 md:bottom-auto text-xl md:!text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
+            class="fixed md:static bottom-4 left-4 md:bottom-auto text-xl md:!text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer"
             :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
             @mousedown="onPressLogo"
@@ -258,6 +258,12 @@ const goTo = async (path: string) => {
   isToggled.value = false;
   isHolding.value = false;
   hoveringName.value = null;
+
+  try {
+    await clearError();
+  } catch {
+    /* empty */
+  }
 
   if (path === '/theme') {
     showThemeSelector.value = true;
