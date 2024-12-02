@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col relative flex-grow px-2 md:px-4 lg:px-10 max-w-full">
-    <TodayEntryNewDayAnimation
+    <LazyTodayEntryNewDayAnimation
         :show="showDayTransition"
         @transition-complete="handleTransitionComplete"
     />

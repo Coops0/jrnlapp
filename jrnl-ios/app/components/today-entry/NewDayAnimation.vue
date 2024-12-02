@@ -2,23 +2,13 @@
   <Transition
       appear
       @after-enter="startMessageTransition"
-      @after-leave="$emit('transition-complete')"
+      @after-leave="() => emit('transition-complete')"
   >
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-colors-primary-950/90 backdrop-blur-sm transition-all duration-1000" />
+      <div class="absolute inset-0 bg-colors-primary-950/90 backdrop-blur-sm transition-all duration-1000"/>
 
       <div class="relative flex flex-col items-center">
-        <div
-            :class="{ 'animate-lock-enter': !messageTransition }"
-            class="relative perspective-lock"
-        >
-          <div class="relative">
-            <div class="absolute top-1/2 -translate-y-full left-1/2 -translate-x-1/2 w-8 h-16 border-4 border-b-0 border-colors-accent-400 rounded-t-2xl" />
-            <div class="w-24 h-24 border-4 border-colors-accent-400 rounded-full flex items-center justify-center">
-              <div class="w-12 h-12 border-4 border-colors-accent-400 rounded-full transform translate-y-1/4" />
-            </div>
-          </div>
-        </div>
+        <TodayEntryLockIcon :message-transition="messageTransition" />
 
         <Transition
             name="message"
@@ -74,33 +64,6 @@ watch(() => props.show, s => {
 
 <!--suppress CssUnusedSymbol -->
 <style>
-.perspective-lock {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-}
-
-.animate-lock-enter {
-  animation: lock-enter 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes lock-enter {
-  0% {
-    transform: scale(0.5) rotateY(-180deg);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.1) rotateY(0);
-    opacity: 1;
-  }
-  75% {
-    transform: scale(0.95) rotateY(0);
-  }
-  100% {
-    transform: scale(1) rotateY(0);
-    opacity: 1;
-  }
-}
-
 .message-enter-active,
 .message-leave-active {
   transition: opacity 0.5s ease, transform 0.5s ease;
