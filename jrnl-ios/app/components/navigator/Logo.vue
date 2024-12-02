@@ -13,7 +13,7 @@
     >
       <div class="flex flex-col justify-items-center items-center gap-2">
         <span
-            :id="logoId"
+            id="jrnl-logo"
             class="fixed p-4 bottom-3 left-4 text-xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-10"
             :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
@@ -81,7 +81,6 @@
 import { useOnline } from '~/composables/util/online.util.composable';
 
 const route = useRoute();
-const logoId = useId();
 
 const { isOnline, isConnected } = useOnline();
 
@@ -226,7 +225,7 @@ function handleDocumentHoldMove(e: MouseEvent | TouchEvent) {
 
 function handleDocumentHoldEnd(e: MouseEvent | TouchEvent) {
   const wasOnLogo = getElementsFromEvent(e)
-      .some(el => el.id === logoId);
+      .some(el => el.id === 'jrnl-logo');
 
   if (!wasOnLogo && !isHolding.value) {
     return;

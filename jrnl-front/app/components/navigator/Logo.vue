@@ -13,8 +13,8 @@
     >
       <div class="flex flex-col md:flex-row justify-items-center items-center gap-2">
         <span
-            :id="logoId"
-            class="fixed md:static bottom-4 left-4 md:bottom-auto md:left-auto text-xl md:text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
+            id="jrnl-logo"
+            class="fixed md:static bottom-4 left-4 md:bottom-auto text-xl md:!text-3xl !leading-normal font-semibold text-colors-primary-100/70 hover:text-colors-primary-300 md:text-colors-primary-100 transition-all duration-150 ease-in-out select-none touch-none cursor-pointer z-20"
             :class="{ 'glow': isToggled || isHolding || route.name === 'current' }"
             draggable="false"
             @mousedown="onPressLogo"
@@ -78,7 +78,6 @@
 
 <script setup lang="ts">
 const route = useRoute();
-const logoId = useId();
 
 const menuItems = [
   { name: 'current', path: '/current' },
@@ -209,7 +208,7 @@ function handleDocumentHoldMove(e: MouseEvent | TouchEvent) {
 
 function handleDocumentHoldEnd(e: MouseEvent | TouchEvent) {
   const wasOnLogo = getElementsFromEvent(e)
-      .some(el => el.id === logoId);
+      .some(el => el.id === 'jrnl-logo');
 
   if (!wasOnLogo && !isHolding.value) {
     return;

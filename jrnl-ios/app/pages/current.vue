@@ -12,9 +12,12 @@
         @resolve="handleSaveConflict"
     />
 
+    <LazyOnboardingTour v-if="tourEnabled"/>
+
     <div class="mb-2 mt-4 select-none">
       <div class="flex justify-between items-center mx-auto text-sm">
         <TodayEntryLastSaved
+            id="last-saved"
             :last-saved="lastSaved"
             :last-saved-entry="lastSavedEntry"
             :unsaved-changes="unsavedChanges"
@@ -22,8 +25,8 @@
         />
 
         <div class="flex flex-row gap-2 justify-center items-center">
-          <TodayEntryTimeUntilTomorrow :tomorrow/>
-          <TodayEntryEphemeralMode v-model="entry.ephemeral" :tomorrow/>
+          <TodayEntryTimeUntilTomorrow id="tomorrow-lock" :tomorrow/>
+          <TodayEntryEphemeralMode id="ephemeral-mode" v-model="entry.ephemeral" :tomorrow/>
         </div>
       </div>
     </div>
@@ -38,6 +41,7 @@
         <div class="flex-grow mt-auto mb-8 px-4 py-3 w-full select-none">
           <div class="space-y-2 mx-auto w-full">
             <FormSlider
+                id="emotion-slider"
                 v-model="entry.emotion_scale"
                 :max="10"
                 :min="0"
@@ -56,10 +60,14 @@ import { useLocalStorage } from '~/composables/util/local-storage.util.composabl
 import { LocalBackendService } from '~/services/local-backend.service';
 import { BLANK_ENTRY, useTodayEntry } from '~/composables/today-entry.composable';
 import { isSameDay, parseServerDate } from '~/util/index.util';
+import { UserService } from '~/services/user.service';
 
 const { $localApi } = useNuxtApp();
 const entryService = new EntryService($localApi);
+const userService = new UserService($localApi);
 const localBackendService = new LocalBackendService();
+
+const { user } = useUser(userService);
 
 const entry = useLocalStorage(
     'entry-today',
@@ -80,9 +88,28 @@ const entry = useLocalStorage(
     }
 );
 
+const tourEnabled = ref(false);
+const hasHadTour = useLocalStorage('has-had-tour', () => user.value?.has_had_tour ?? false);
+
 onMounted(() => {
   if (!isSameDay(parseServerDate(entry.value.date))) {
     entry.value = BLANK_ENTRY();
+  }
+
+  if (hasHadTour.value) {
+    return;
+  }
+
+  hasHadTour.value = true;
+  tourEnabled.value = true;
+  if (!user.value) {
+    return;
+  }
+
+  try {
+    void userService.updateMe({ has_had_tour: true });
+  } catch {
+    /* empty */
   }
 });
 
