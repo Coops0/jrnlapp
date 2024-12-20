@@ -8,3 +8,6 @@ Built with:
 - PostgreSQL
 - Nuxt & Vue
 - Tauri
+
+
+<img width="1485" alt="image" src="https://github.com/user-attachments/assets/32fcf285-db77-43b3-98bd-bbd476023df3" />
